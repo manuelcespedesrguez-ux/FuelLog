@@ -2108,11 +2108,13 @@
     }
 
     // ─── PROFILE ───
-    function setSex(s, btn) {
-      state.sex = s;
-      document.querySelectorAll('#screen-perfil .seg-control:first-of-type .seg-opt').forEach(function (b) { b.classList.remove('active') });
-      btn.classList.add('active');
-      calcHB();
+    function setGender(gender) {
+      // Quita la clase 'active' de todos los botones de género
+      document.querySelectorAll('.gender-btn').forEach(btn => btn.classList.remove('active'));
+      // Añade la clase solo al seleccionado
+      document.getElementById('gender-' + gender).classList.add('active');
+      userProfile.gender = gender;
+      saveProfile();
     }
     function setActivity(v, el) {
       state.activity = v;
@@ -2120,9 +2122,15 @@
       el.classList.add('active');
       calcHB();
     }
-    function setGoal(g, btn) {
-      state.goal = g;
-      calcHB();
+    function setGoal(goal) {
+      // 1. Quitar activo de los botones visuales
+      document.querySelectorAll('.goal-btn').forEach(btn => btn.classList.remove('active'));
+      // 2. Marcar el nuevo
+      document.getElementById('goal-' + goal).classList.add('active');
+      
+      userProfile.goal = goal;
+      calculateMacros(); // Esto debería actualizar las calorías según el objetivo
+      saveProfile();
     }
     function calcHB() {
       var age = parseFloat(document.getElementById('pAge').value);
