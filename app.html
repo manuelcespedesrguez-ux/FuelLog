@@ -2108,13 +2108,25 @@
     }
 
     // ─── PROFILE ───
-    function setGender(gender) {
-      // Quita la clase 'active' de todos los botones de género
-      document.querySelectorAll('.gender-btn').forEach(btn => btn.classList.remove('active'));
-      // Añade la clase solo al seleccionado
-      document.getElementById('gender-' + gender).classList.add('active');
-      userProfile.gender = gender;
-      saveProfile();
+    function setGender(g) {
+      console.log("Cambiando género a:", g);
+      // 1. Actualizar el estado interno
+      if (typeof state !== 'undefined' && state.user) {
+          state.user.gender = g;
+      }
+
+      // 2. Cambiar visualmente los botones
+      // Buscamos todos los botones que estén dentro de un contenedor de género
+      const genderButtons = document.querySelectorAll('.gender-btn, .seg-opt[onclick*="setGender"]');
+      genderButtons.forEach(btn => btn.classList.remove('active'));
+      
+      // 3. Marcar el actual (usamos event.currentTarget para ser precisos)
+      if (event && event.currentTarget) {
+          event.currentTarget.classList.add('active');
+      }
+
+      if (typeof calcHB === 'function') calcHB();
+      saveState(); // Función para guardar en LocalStorage
     }
     function setActivity(v, el) {
       state.activity = v;
@@ -2122,16 +2134,25 @@
       el.classList.add('active');
       calcHB();
     }
-    function setGoal(goal) {
-      // 1. Quitar activo de los botones visuales
-      document.querySelectorAll('.goal-btn').forEach(btn => btn.classList.remove('active'));
-      // 2. Marcar el nuevo
-      document.getElementById('goal-' + goal).classList.add('active');
+    function setGoal(g) {
+    console.log("Cambiando objetivo a:", g);
+      // 1. Actualizar el estado interno
+      if (typeof state !== 'undefined' && state.user) {
+          state.user.goal = g;
+      }
+
+      // 2. Cambiar visualmente los botones
+      const goalButtons = document.querySelectorAll('.goal-btn, .act-opt[onclick*="setGoal"], .seg-opt[onclick*="setGoal"]');
+      goalButtons.forEach(btn => btn.classList.remove('active'));
       
-      userProfile.goal = goal;
-      calculateMacros(); // Esto debería actualizar las calorías según el objetivo
-      saveProfile();
-    }
+      // 3. Marcar el actual
+      if (event && event.currentTarget) {
+          event.currentTarget.classList.add('active');
+      }
+
+      if (typeof calcHB === 'function') calcHB();
+      saveState();
+  }
     function calcHB() {
       var age = parseFloat(document.getElementById('pAge').value);
       var w = parseFloat(document.getElementById('pWeight').value);
