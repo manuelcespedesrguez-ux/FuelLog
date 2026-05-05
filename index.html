@@ -1489,38 +1489,96 @@
             <p class="footer-copy">© 2025 FuelLog · Hecho con ganas en España</p>
         </div>
     </footer>
-    <script>
-        var waitlistCount = 247;
-        function updateCounters() {
-            var h = document.getElementById('hero-count'), b = document.getElementById('bottom-count');
-            if (h) h.textContent = waitlistCount; if (b) b.textContent = waitlistCount;
+
+   <script>
+    var waitlistCount = 247;
+
+    // ── CARGAR EMAILS GUARDADOS LOCALMENTE ──
+    try {
+      var saved = JSON.parse(localStorage.getItem('fl_waitlist') || '[]');
+      waitlistCount = 247 + saved.length;
+      updateCounters();
+    } catch(e) {}
+
+    function updateCounters() {
+      var h = document.getElementById('hero-count');
+      var b = document.getElementById('bottom-count');
+      if (h) h.textContent = waitlistCount;
+      if (b) b.textContent = waitlistCount;
+    }
+
+    function saveEmail(email) {
+      try {
+        var list = JSON.parse(localStorage.getItem('fl_waitlist') || '[]');
+        if (!list.includes(email)) {
+          list.push(email);
+          localStorage.setItem('fl_waitlist', JSON.stringify(list));
         }
-        function isValidEmail(e) { return e && e.includes('@') && e.includes('.') }
-        function joinHero() {
-            var email = document.getElementById('hero-email').value.trim();
-            if (!isValidEmail(email)) {
-                var i = document.getElementById('hero-email');
-                i.style.borderColor = '#ef4444'; i.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.12)'; i.focus();
-                setTimeout(function () { i.style.borderColor = ''; i.style.boxShadow = '' }, 2000); return;
-            }
-            waitlistCount++; updateCounters();
-            document.getElementById('hero-form').style.display = 'none';
-            document.getElementById('hero-success').style.display = 'block';
-        }
-        function joinBottom() {
-            var email = document.getElementById('bottom-email').value.trim();
-            if (!isValidEmail(email)) {
-                var i = document.getElementById('bottom-email');
-                i.style.borderColor = 'rgba(239,68,68,.6)';
-                setTimeout(function () { i.style.borderColor = '' }, 2000); return;
-            }
-            waitlistCount++; updateCounters();
-            document.getElementById('bottom-form').style.display = 'none';
-            document.getElementById('bottom-success').style.display = 'block';
-        }
-        document.getElementById('hero-email').addEventListener('keydown', function (e) { if (e.key === 'Enter') joinHero() });
-        document.getElementById('bottom-email').addEventListener('keydown', function (e) { if (e.key === 'Enter') joinBottom() });
-    </script>
+      } catch(e) {}
+
+      // ── AQUÍ VA TU INTEGRACIÓN CON BREVO ──
+
+      fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+        headers: {
+          'api-key': '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',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          listIds: [3],
+          updateEnabled: true
+     })
+     });
+    }
+
+    function isValidEmail(email) {
+      return email && email.includes('@') && email.includes('.');
+    }
+
+    function joinHero() {
+      var email = document.getElementById('hero-email').value.trim();
+      if (!isValidEmail(email)) {
+        var input = document.getElementById('hero-email');
+        input.style.borderColor = '#ef4444';
+        input.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.12)';
+        input.focus();
+        setTimeout(function() {
+          input.style.borderColor = '';
+          input.style.boxShadow = '';
+        }, 2000);
+        return;
+      }
+      waitlistCount++;
+      updateCounters();
+      saveEmail(email);
+      document.getElementById('hero-form').style.display = 'none';
+      document.getElementById('hero-success').style.display = 'block';
+    }
+
+    function joinBottom() {
+      var email = document.getElementById('bottom-email').value.trim();
+      if (!isValidEmail(email)) {
+        var input = document.getElementById('bottom-email');
+        input.style.borderColor = 'rgba(239,68,68,0.6)';
+        setTimeout(function() { input.style.borderColor = ''; }, 2000);
+        return;
+      }
+      waitlistCount++;
+      updateCounters();
+      saveEmail(email);
+      document.getElementById('bottom-form').style.display = 'none';
+      document.getElementById('bottom-success').style.display = 'block';
+    }
+
+    // Enter key en inputs
+    document.getElementById('hero-email').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') joinHero();
+    });
+    document.getElementById('bottom-email').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') joinBottom();
+    });
+  </script>
 </body>
 
 </html>
