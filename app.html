@@ -11,6 +11,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     *,
     *::before,
@@ -1491,6 +1493,44 @@
     .toast.show {
       transform: translateX(-50%) translateY(0)
     }
+    /* HISTORIAL */
+    .hist-period-tabs { display:flex; gap:4px; margin-bottom:14px; background:var(--gray-100); border-radius:10px; padding:3px; }
+    .hist-period-tab { flex:1; padding:6px; text-align:center; font-size:11px; font-weight:600; border-radius:8px; cursor:pointer; border:none; background:transparent; font-family:var(--font); color:var(--gray-400); transition:all .15s; }
+    .hist-period-tab.active { background:var(--white); color:var(--black); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .hist-stat-row { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:12px; }
+    .hist-stat { background:var(--white); border:1px solid var(--gray-100); border-radius:var(--radius-sm); padding:12px; box-shadow:var(--shadow); }
+    .hist-stat-val { font-size:20px; font-weight:700; font-family:var(--mono); letter-spacing:-.03em; }
+    .hist-stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--gray-400); margin-top:2px; font-weight:600; }
+    .hist-stat-delta { font-size:11px; margin-top:4px; font-weight:500; }
+    .hist-chart-card { background:var(--white); border:1px solid var(--gray-100); border-radius:var(--radius); padding:14px; margin-bottom:12px; box-shadow:var(--shadow); }
+    .hist-chart-title { font-size:12px; font-weight:700; color:var(--gray-800); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+    .hist-chart-subtitle { font-size:10px; color:var(--gray-400); font-weight:400; }
+    .hist-bar-chart { display:flex; align-items:flex-end; gap:3px; height:80px; }
+    .hist-bar-col { flex:1; display:flex; align-items:flex-end; height:100%; }
+    .hist-bar { width:100%; border-radius:3px 3px 0 0; min-height:2px; transition:height .6s ease; cursor:pointer; position:relative; }
+    .hist-bar:hover::after { content:attr(data-tip); position:absolute; bottom:calc(100%+4px); left:50%; transform:translateX(-50%); background:var(--black); color:white; font-size:9px; padding:3px 6px; border-radius:4px; white-space:nowrap; z-index:10; font-family:var(--mono); }
+    .hist-streak { background:linear-gradient(135deg,var(--accent),#8b5cf6); border-radius:var(--radius); padding:14px 16px; color:white; margin-bottom:12px; display:flex; align-items:center; gap:14px; }
+    .hist-streak-num { font-size:40px; font-weight:800; font-family:var(--mono); line-height:1; }
+    .hist-streak-info { flex:1; }
+    .hist-streak-label { font-size:13px; font-weight:600; margin-bottom:2px; }
+    .hist-streak-sub { font-size:11px; opacity:.7; }
+    .hist-day-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--gray-50); }
+    .hist-day-row:last-child { border-bottom:none; }
+    .hist-day-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .hist-day-date { font-size:12px; color:var(--gray-600); width:70px; flex-shrink:0; }
+    .hist-day-bar-track { flex:1; height:5px; background:var(--gray-100); border-radius:3px; overflow:hidden; }
+    .hist-day-bar-fill { height:100%; border-radius:3px; }
+    .hist-day-kcal { font-size:12px; font-weight:600; font-family:var(--mono); color:var(--gray-800); width:60px; text-align:right; }
+    .hist-empty { text-align:center; padding:32px 16px; color:var(--gray-400); }
+    .hist-empty-icon { font-size:40px; margin-bottom:8px; }
+    .hist-empty-text { font-size:13px; }
+
+    /* SCANNER QUAGGA */
+    #quaggaTarget { width:100%; height:100%; position:relative; overflow:hidden; border-radius:14px; }
+    #quaggaTarget video { width:100%; height:100%; object-fit:cover; }
+    #quaggaTarget canvas { position:absolute; top:0; left:0; width:100%; height:100%; }
+    .scan-detect-flash { position:absolute; inset:0; border-radius:14px; background:rgba(99,102,241,.25); animation:flashAnim .3s ease; pointer-events:none; }
+    @keyframes flashAnim { 0%{opacity:1} 100%{opacity:0} }
   </style>
 </head>
 
@@ -1521,6 +1561,7 @@
       <button class="tab active" onclick="showTab('diario',this)">📋 Diario</button>
       <button class="tab" onclick="showTab('scanner',this)">📷 Escáner</button>
       <button class="tab" onclick="showTab('alimentos',this)">🥗 Alimentos</button>
+      <button class="tab" onclick="showTab('historial',this)">📈 Historial</button>
       <button class="tab" onclick="showTab('perfil',this)">👤 Perfil</button>
       <button class="tab" onclick="showTab('semana',this)">📊 Semana</button>
       <button class="tab" onclick="showTab('premium',this)">⭐ Premium</button>
@@ -1603,13 +1644,14 @@
     <!-- SCANNER -->
     <div class="screen" id="screen-scanner">
       <div class="scanner-hero">
-        <div class="scanner-viewfinder">
+        <div class="scanner-viewfinder" id="scannerViewfinder">
           <div class="scanner-corner tl"></div>
           <div class="scanner-corner tr"></div>
           <div class="scanner-corner bl"></div>
           <div class="scanner-corner br"></div>
-          <div class="scanner-line"></div>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5">
+          <div class="scanner-line" id="scannerLine"></div>
+          <div id="quaggaTarget" style="display:none;width:100%;height:100%;position:absolute;inset:0;border-radius:14px;overflow:hidden"></div>
+          <svg id="scannerIcon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5">
             <rect x="3" y="3" width="7" height="7" rx="1" />
             <rect x="14" y="3" width="7" height="7" rx="1" />
             <rect x="3" y="14" width="7" height="7" rx="1" />
@@ -1617,9 +1659,14 @@
           </svg>
         </div>
         <div class="scanner-title">Escanear producto</div>
-        <div class="scanner-sub">Apunta la cámara al código de barras del producto</div>
-        <button class="scanner-btn" onclick="simulateScan()">📷 Simular escaneo</button>
+        <div class="scanner-sub" id="scannerSub">Abre la cámara o introduce el código manualmente</div>
+        <button class="scanner-btn" id="scannerCamBtn" onclick="toggleCamera()">📷 Abrir cámara</button>
       </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input class="form-input" type="text" id="barcodeInput" placeholder="Código de barras (ej: 8410306905238)" style="font-family:var(--mono);font-size:13px">
+        <button class="scanner-btn" style="padding:10px 14px;font-size:12px;white-space:nowrap" onclick="lookupBarcode()">Buscar</button>
+      </div>
+      <div id="scanResultCard" style="display:none;background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)"></div>
       <div class="scan-limit">
         <div class="scan-limit-top"><span class="scan-limit-label">Escaneos este mes</span><span
             class="scan-limit-count" id="scanCount">3 / 10</span></div>
@@ -1754,51 +1801,14 @@
       </div>
     </div>
 
+    <!-- HISTORIAL -->
+    <div class="screen" id="screen-historial">
+      <div id="historialContent"></div>
+    </div>
+
     <!-- PREMIUM -->
     <div class="screen" id="screen-premium">
-      <div class="premium-hero">
-        <div class="premium-badge">★ PREMIUM</div>
-        <div class="premium-price">10€</div>
-        <div class="premium-period">al año · menos de 1€/mes</div>
-        <button class="premium-cta">Activar Premium ahora</button>
-      </div>
-      <div class="premium-feats">
-        <div class="premium-feat">
-          <div class="premium-feat-icon" style="background:var(--green-bg)">♾️</div>
-          <div class="premium-feat-text">
-            <div class="title">Escaneos ilimitados</div>
-            <div class="desc">Sin límite mensual de escaneos de productos</div>
-          </div>
-        </div>
-        <div class="premium-feat">
-          <div class="premium-feat-icon" style="background:var(--accent-bg)">📅</div>
-          <div class="premium-feat-text">
-            <div class="title">Historial sin límite</div>
-            <div class="desc">Accede a todos tus registros para siempre</div>
-          </div>
-        </div>
-        <div class="premium-feat">
-          <div class="premium-feat-icon" style="background:var(--blue-bg)">🔄</div>
-          <div class="premium-feat-text">
-            <div class="title">Sincronización</div>
-            <div class="desc">Tus datos en todos tus dispositivos</div>
-          </div>
-        </div>
-        <div class="premium-feat">
-          <div class="premium-feat-icon" style="background:var(--amber-bg)">📊</div>
-          <div class="premium-feat-text">
-            <div class="title">Estadísticas avanzadas</div>
-            <div class="desc">Tendencias, rachas y análisis detallado</div>
-          </div>
-        </div>
-        <div class="premium-feat">
-          <div class="premium-feat-icon" style="background:var(--red-bg)">🚀</div>
-          <div class="premium-feat-text">
-            <div class="title">Futuras funciones</div>
-            <div class="desc">Acceso anticipado a todo lo que añadamos</div>
-          </div>
-        </div>
-      </div>
+      <div id="premiumContent"></div>
     </div>
 
     <!-- RESEÑAS -->
@@ -1842,7 +1852,8 @@
       meals: { desayuno: [], almuerzo: [], snacks: [], cena: [] },
       allDayData: {}, currentDate: new Date(),
       scansUsed: 3, maxScans: 10, selectedStars: 5,
-      currentMealTarget: null
+      currentMealTarget: null, isPremium: false,
+      histPeriod: 30
     };
 
     // ─── FOOD DB ───
@@ -1879,6 +1890,11 @@
 
     // ─── INIT ───
     function init() {
+      try { state.isPremium = localStorage.getItem('fl_premium') === 'true'; if (state.isPremium) state.maxScans = 9999; } catch(e){}
+      try {
+        var savedScans = localStorage.getItem('fl_scans');
+        if (savedScans) { var s = JSON.parse(savedScans); state.scansUsed = s.used || 0; }
+      } catch(e){}
       updateDateLabel();
       renderMeals();
       renderFoods();
@@ -1886,7 +1902,10 @@
       renderRecentScans();
       renderReviews();
       renderWeek();
+      renderPremium();
       loadProfile();
+      var badge = document.getElementById('planBadge');
+      if (badge && state.isPremium) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
     }
 
     // ─── DATE ───
@@ -1901,7 +1920,6 @@
     }
     function changeDay(dir) {
       var d = new Date(state.currentDate);
-      // save current day data
       var key = state.currentDate.toDateString();
       state.allDayData[key] = JSON.parse(JSON.stringify(state.meals));
       d.setDate(d.getDate() + dir);
@@ -1915,15 +1933,19 @@
 
     // ─── TABS ───
     function showTab(tab, btn) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+      document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
       document.getElementById('screen-' + tab).classList.add('active');
-      var tabs = document.querySelectorAll('.tab');
-      tabs.forEach(t => { if (t.textContent.toLowerCase().includes(tab.substring(0, 3))) t.classList.add('active') });
+      document.querySelectorAll('.tab').forEach(function(t){
+        if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + tab + "'")) t.classList.add('active');
+      });
       if (btn) btn.classList.add('active');
       var showDate = ['diario'];
       document.getElementById('dateNav').style.display = showDate.includes(tab) ? 'flex' : 'none';
       if (tab === 'semana') renderWeek();
+      if (tab === 'premium') renderPremium();
+      if (tab === 'historial') renderHistorial();
+      if (tab === 'scanner') stopQuagga();
     }
 
     // ─── MEALS ───
@@ -1962,6 +1984,7 @@
       });
       updateHeroRing();
       updateMacros();
+      saveDayData();
     }
     function toggleMeal(key) {
       var el = document.getElementById('meal-' + key);
@@ -1970,6 +1993,19 @@
     function removeItem(meal, idx) {
       state.meals[meal].splice(idx, 1);
       renderMeals();
+    }
+    function saveDayData() {
+      var key = state.currentDate.toDateString();
+      state.allDayData[key] = JSON.parse(JSON.stringify(state.meals));
+      try { localStorage.setItem('fl_days', JSON.stringify(state.allDayData)); } catch(e){}
+    }
+    function loadDayData() {
+      try {
+        var saved = JSON.parse(localStorage.getItem('fl_days') || 'null');
+        if (saved) state.allDayData = saved;
+        var key = state.currentDate.toDateString();
+        if (state.allDayData[key]) state.meals = state.allDayData[key];
+      } catch(e){}
     }
 
     // ─── TOTALS ───
@@ -2049,25 +2085,12 @@
     }
 
     // ─── FOODS LIST ───
-    function renderFoods() {
-      var html = '';
-      FOODS.forEach(function (f) {
-        html += '<div class="food-card">';
-        html += '<div class="food-card-emoji">' + f.emoji + '</div>';
-        html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
-        html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
-        html += '<div class="food-card-kcal">' + f.kcal + '</div>';
-        html += '<button class="food-card-add" onclick="openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)">+</button>';
-        html += '</div>';
-      });
-      document.getElementById('foodsList').innerHTML = html;
-    }
+    function renderFoods() { filterFoods(''); }
     function filterFoods(q) {
       var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
       var html = '';
       list.forEach(function (f) {
-        html += '<div class="food-card">';
-        html += '<div class="food-card-emoji">' + f.emoji + '</div>';
+        html += '<div class="food-card"><div class="food-card-emoji">' + f.emoji + '</div>';
         html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
         html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
         html += '<div class="food-card-kcal">' + f.kcal + '</div>';
@@ -2077,14 +2100,15 @@
       document.getElementById('foodsList').innerHTML = html;
     }
 
-    // ─── SCANNER ───
+    // ─── SCANNER PIPS ───
     function renderScanPips() {
+      var max = state.isPremium ? 10 : state.maxScans;
       var html = '';
-      for (var i = 0; i < state.maxScans; i++) {
-        html += '<div class="pip' + (i < state.scansUsed ? ' used' : '') + '"></div>';
+      for (var i = 0; i < max; i++) {
+        html += '<div class="pip' + (i < Math.min(state.scansUsed, max) ? ' used' : '') + '"></div>';
       }
       document.getElementById('scanPips').innerHTML = html;
-      document.getElementById('scanCount').textContent = state.scansUsed + ' / ' + state.maxScans;
+      document.getElementById('scanCount').textContent = state.isPremium ? '∞ ilimitados' : (state.scansUsed + ' / ' + state.maxScans);
     }
     function renderRecentScans() {
       var recent = [FOODS[0], FOODS[6], FOODS[3]];
@@ -2098,35 +2122,157 @@
       });
       document.getElementById('recentScans').innerHTML = html;
     }
-    function simulateScan() {
-      if (state.scansUsed >= state.maxScans) { showToast('⚠️ Límite de escaneos alcanzado. Hazte Premium ⭐'); return; }
-      var f = FOODS[Math.floor(Math.random() * FOODS.length)];
-      state.scansUsed++;
-      renderScanPips();
-      showToast('✅ Escaneado: ' + f.name + ' (' + f.kcal + ' kcal)');
-      setTimeout(function () { openAddModal('almuerzo'); }, 600);
+
+    // ─── QUAGGA SCANNER ───
+    var quaggaRunning = false;
+    var lastDetectedCode = null;
+
+    function toggleCamera() {
+      if (quaggaRunning) { stopQuagga(); return; }
+      if (state.scansUsed >= state.maxScans && !state.isPremium) {
+        showToast('⚠️ Límite alcanzado. Hazte Premium ⭐');
+        return;
+      }
+      if (typeof Quagga === 'undefined') {
+        showToast('⚠️ Escáner no disponible. Usa el código manual.');
+        return;
+      }
+      var target = document.getElementById('quaggaTarget');
+      var icon = document.getElementById('scannerIcon');
+      var line = document.getElementById('scannerLine');
+      target.style.display = 'block';
+      icon.style.display = 'none';
+      if (line) line.style.display = 'none';
+      document.getElementById('scannerCamBtn').textContent = '⏹ Detener cámara';
+      document.getElementById('scannerSub').textContent = 'Apunta al código de barras del producto';
+
+      Quagga.init({
+        inputStream: {
+          name: 'Live',
+          type: 'LiveStream',
+          target: target,
+          constraints: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+        },
+        decoder: {
+          readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader', 'code_128_reader', 'code_39_reader']
+        },
+        locate: true
+      }, function(err) {
+        if (err) {
+          showToast('⚠️ No se pudo acceder a la cámara. Usa el código manual.');
+          target.style.display = 'none';
+          if (icon) icon.style.display = 'block';
+          if (line) line.style.display = 'block';
+          document.getElementById('scannerCamBtn').textContent = '📷 Abrir cámara';
+          return;
+        }
+        Quagga.start();
+        quaggaRunning = true;
+      });
+
+      Quagga.onDetected(function(result) {
+        var code = result.codeResult.code;
+        if (code === lastDetectedCode) return;
+        lastDetectedCode = code;
+        // Flash visual
+        var flash = document.createElement('div');
+        flash.className = 'scan-detect-flash';
+        target.appendChild(flash);
+        setTimeout(function(){ flash.remove(); }, 400);
+        stopQuagga();
+        document.getElementById('barcodeInput').value = code;
+        lookupBarcode();
+      });
+    }
+
+    function stopQuagga() {
+      if (!quaggaRunning) return;
+      try { Quagga.stop(); } catch(e){}
+      quaggaRunning = false;
+      lastDetectedCode = null;
+      var target = document.getElementById('quaggaTarget');
+      var icon = document.getElementById('scannerIcon');
+      var line = document.getElementById('scannerLine');
+      if (target) target.style.display = 'none';
+      if (icon) icon.style.display = 'block';
+      if (line) line.style.display = 'block';
+      var btn = document.getElementById('scannerCamBtn');
+      if (btn) btn.textContent = '📷 Abrir cámara';
+    }
+
+    async function lookupBarcode() {
+      var code = document.getElementById('barcodeInput').value.trim();
+      if (!code) { showToast('Introduce un código de barras'); return; }
+      if (state.scansUsed >= state.maxScans && !state.isPremium) {
+        showToast('⚠️ Límite alcanzado. Hazte Premium ⭐');
+        return;
+      }
+      var resultCard = document.getElementById('scanResultCard');
+      resultCard.style.display = 'block';
+      resultCard.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:10px">🔍 Buscando en Open Food Facts...</div>';
+      try {
+        var res = await fetch('https://world.openfoodfacts.org/api/v0/product/' + code + '.json');
+        var data = await res.json();
+        if (data.status !== 1) {
+          resultCard.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:10px">❌ Producto no encontrado. Prueba otro código.</div>';
+          return;
+        }
+        var p = data.product;
+        var n = p.nutriments || {};
+        var food = {
+          id: Date.now(),
+          name: p.product_name || p.product_name_es || 'Producto ' + code,
+          emoji: '📦',
+          kcal: Math.round(n['energy-kcal_100g'] || (n['energy_100g'] ? n['energy_100g'] / 4.184 : 0)),
+          p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
+          c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
+          f: Math.round((n['fat_100g'] || 0) * 10) / 10
+        };
+        state.scansUsed++;
+        try { localStorage.setItem('fl_scans', JSON.stringify({ used: state.scansUsed, month: new Date().getMonth() })); } catch(e){}
+        renderScanPips();
+        if (!FOODS.find(function(f){ return f.name === food.name; })) FOODS.unshift(food);
+
+        var nutriScore = p.nutriscore_grade ? p.nutriscore_grade.toUpperCase() : null;
+        var nsColors = { A:'#1a9e3f', B:'#8cb84c', C:'#f5c518', D:'#e07b39', E:'#e63946' };
+        var nsHtml = nutriScore ? '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px"><span style="font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em">Nutri-Score</span><span style="background:' + (nsColors[nutriScore]||'#999') + ';color:white;font-weight:800;font-size:14px;padding:2px 10px;border-radius:6px">' + nutriScore + '</span></div>' : '';
+
+        resultCard.innerHTML =
+          '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + food.name + '</div>' +
+          nsHtml +
+          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">' +
+            '<div style="text-align:center;background:var(--accent-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent)">' + food.kcal + '</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">kcal</div></div>' +
+            '<div style="text-align:center;background:var(--green-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:#4ade80">' + food.p + 'g</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">prot</div></div>' +
+            '<div style="text-align:center;background:var(--amber-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--amber)">' + food.c + 'g</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">carbos</div></div>' +
+            '<div style="text-align:center;background:var(--blue-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--blue)">' + food.f + 'g</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">grasas</div></div>' +
+          '</div>' +
+          '<div style="display:flex;gap:8px">' +
+            '<button onclick="addScannedFood(' + food.id + ')" style="flex:1;padding:10px;background:var(--black);border:none;border-radius:10px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Añadir al diario</button>' +
+            '<button onclick="document.getElementById(\'scanResultCard\').style.display=\'none\'" style="padding:10px 14px;background:var(--gray-100);border:none;border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--font)">Cerrar</button>' +
+          '</div>' +
+          ((!state.isPremium && (state.maxScans - state.scansUsed) <= 2 && (state.maxScans - state.scansUsed) > 0) ?
+            '<div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:8px;font-size:11px;color:var(--amber);font-weight:500">Te quedan ' + (state.maxScans - state.scansUsed) + ' escaneos este mes · <span style="cursor:pointer;text-decoration:underline" onclick="showTab(\'premium\',null)">Ver Premium →</span></div>' : '');
+        document.getElementById('barcodeInput').value = '';
+        if (!state.isPremium && state.scansUsed >= state.maxScans) setTimeout(function(){ showTab('premium', null); }, 1500);
+      } catch(e) {
+        resultCard.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:10px">❌ Error de conexión. Comprueba tu internet.</div>';
+      }
+    }
+
+    function addScannedFood(id) {
+      var food = FOODS.find(function(f){ return f.id === id; });
+      if (!food) return;
+      openAddModal('almuerzo');
+      setTimeout(function(){ addFood(food.id); }, 100);
+      document.getElementById('scanResultCard').style.display = 'none';
     }
 
     // ─── PROFILE ───
-    function setGender(g) {
-      console.log("Cambiando género a:", g);
-      // 1. Actualizar el estado interno
-      if (typeof state !== 'undefined' && state.user) {
-          state.user.gender = g;
-      }
-
-      // 2. Cambiar visualmente los botones
-      // Buscamos todos los botones que estén dentro de un contenedor de género
-      const genderButtons = document.querySelectorAll('.gender-btn, .seg-opt[onclick*="setGender"]');
-      genderButtons.forEach(btn => btn.classList.remove('active'));
-      
-      // 3. Marcar el actual (usamos event.currentTarget para ser precisos)
-      if (event && event.currentTarget) {
-          event.currentTarget.classList.add('active');
-      }
-
-      if (typeof calcHB === 'function') calcHB();
-      saveState(); // Función para guardar en LocalStorage
+    function setSex(g, el) {
+      state.sex = g;
+      document.querySelectorAll('.seg-opt[onclick*="setSex"]').forEach(function(b){ b.classList.remove('active'); });
+      if (el) el.classList.add('active');
+      calcHB();
     }
     function setActivity(v, el) {
       state.activity = v;
@@ -2134,25 +2280,12 @@
       el.classList.add('active');
       calcHB();
     }
-    function setGoal(g) {
-    console.log("Cambiando objetivo a:", g);
-      // 1. Actualizar el estado interno
-      if (typeof state !== 'undefined' && state.user) {
-          state.user.goal = g;
-      }
-
-      // 2. Cambiar visualmente los botones
-      const goalButtons = document.querySelectorAll('.goal-btn, .act-opt[onclick*="setGoal"], .seg-opt[onclick*="setGoal"]');
-      goalButtons.forEach(btn => btn.classList.remove('active'));
-      
-      // 3. Marcar el actual
-      if (event && event.currentTarget) {
-          event.currentTarget.classList.add('active');
-      }
-
-      if (typeof calcHB === 'function') calcHB();
-      saveState();
-  }
+    function setGoal(g, el) {
+      state.goal = g;
+      document.querySelectorAll('.seg-opt[onclick*="setGoal"]').forEach(function(b){ b.classList.remove('active'); });
+      if (el) el.classList.add('active');
+      calcHB();
+    }
     function calcHB() {
       var age = parseFloat(document.getElementById('pAge').value);
       var w = parseFloat(document.getElementById('pWeight').value);
@@ -2170,7 +2303,7 @@
       document.getElementById('resProt').textContent = prot + 'g';
       document.getElementById('resCarb').textContent = carb + 'g';
       document.getElementById('resFat').textContent = fat + 'g';
-      state._pending = { kcal, prot, carb, fat };
+      state._pending = { kcal: kcal, prot: prot, carb: carb, fat: fat };
     }
     function saveProfile() {
       if (!state._pending) { showToast('Rellena todos los datos primero'); return; }
@@ -2182,6 +2315,7 @@
       setTimeout(function () { showTab('diario', null); }, 800);
     }
     function loadProfile() {
+      loadDayData();
       try {
         var saved = JSON.parse(localStorage.getItem('fl_profile') || 'null');
         if (saved) {
@@ -2192,6 +2326,133 @@
           calcHB(); updateHeroRing(); updateMacros();
         }
       } catch (e) { }
+    }
+
+    // ─── HISTORIAL ───
+    function getHistorialData(days) {
+      var result = [];
+      var today = new Date();
+      for (var i = days - 1; i >= 0; i--) {
+        var d = new Date(today);
+        d.setDate(today.getDate() - i);
+        var key = d.toDateString();
+        var dayMeals = state.allDayData[key];
+        if (d.toDateString() === state.currentDate.toDateString()) dayMeals = state.meals;
+        var kcal = 0, p = 0, c = 0, f = 0;
+        if (dayMeals) {
+          Object.values(dayMeals).forEach(function(items) {
+            items.forEach(function(item) { kcal += item.kcal; p += item.p; c += item.c; f += item.f; });
+          });
+        }
+        result.push({ date: d, key: key, kcal: Math.round(kcal), p: Math.round(p), c: Math.round(c), f: Math.round(f), hasData: kcal > 0 });
+      }
+      return result;
+    }
+
+    function calcStreak(data) {
+      var streak = 0;
+      for (var i = data.length - 1; i >= 0; i--) {
+        if (data[i].hasData) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    function renderHistorial() {
+      var el = document.getElementById('historialContent');
+      var days = state.histPeriod;
+      var data = getHistorialData(days);
+      var daysWithData = data.filter(function(d){ return d.hasData; });
+      var totalKcal = daysWithData.reduce(function(a,d){ return a+d.kcal; }, 0);
+      var avgKcal = daysWithData.length > 0 ? Math.round(totalKcal / daysWithData.length) : 0;
+      var maxKcal = data.reduce(function(a,d){ return Math.max(a, d.kcal); }, 0) || 2000;
+      var target = state.profile ? state.profile.kcal : 2000;
+      var streak = calcStreak(data);
+      var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+      // Bar chart (last 14 days for readability)
+      var chartData = data.slice(-14);
+      var chartMax = Math.max(target, chartData.reduce(function(a,d){ return Math.max(a,d.kcal); }, 0)) || 2000;
+      var barHtml = chartData.map(function(d) {
+        var pct = d.kcal > 0 ? Math.min(d.kcal / chartMax * 100, 100) : 0;
+        var color = !d.hasData ? 'var(--gray-100)' : d.kcal > target * 1.1 ? '#ef4444' : d.kcal >= target * 0.9 ? '#6366f1' : '#fbbf24';
+        var label = d.date.getDate() + ' ' + months[d.date.getMonth()];
+        return '<div class="hist-bar-col"><div class="hist-bar" style="height:' + Math.max(pct,2) + '%;background:' + color + '" data-tip="' + label + ': ' + (d.kcal||'—') + ' kcal"></div></div>';
+      }).join('');
+
+      // Avg vs prev period comparison
+      var prevData = getHistorialData(days * 2).slice(0, days);
+      var prevDays = prevData.filter(function(d){ return d.hasData; });
+      var prevAvg = prevDays.length > 0 ? Math.round(prevData.reduce(function(a,d){ return a+d.kcal; },0) / prevDays.length) : 0;
+      var deltaKcal = avgKcal - prevAvg;
+      var deltaSign = deltaKcal > 0 ? '+' : '';
+      var deltaColor = deltaKcal > 50 ? 'var(--red)' : deltaKcal < -50 ? 'var(--green)' : 'var(--gray-400)';
+
+      // Days list (last 10)
+      var listData = data.filter(function(d){ return d.hasData; }).slice(-10).reverse();
+      var listHtml = listData.length === 0
+        ? '<div class="hist-empty"><div class="hist-empty-icon">📭</div><div class="hist-empty-text">Aún no hay registros en este periodo.<br>¡Empieza a registrar tus comidas!</div></div>'
+        : listData.map(function(d) {
+            var pct = target > 0 ? Math.min(d.kcal / target * 100, 100) : 50;
+            var color = d.kcal > target * 1.1 ? '#ef4444' : d.kcal >= target * 0.9 ? '#6366f1' : '#fbbf24';
+            var isToday = d.date.toDateString() === new Date().toDateString();
+            var label = isToday ? 'Hoy' : d.date.getDate() + ' ' + months[d.date.getMonth()];
+            return '<div class="hist-day-row"><div class="hist-day-dot" style="background:'+color+'"></div><div class="hist-day-date">'+label+'</div><div class="hist-day-bar-track"><div class="hist-day-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div class="hist-day-kcal">'+d.kcal+' kcal</div></div>';
+          }).join('');
+
+      // Macro totals
+      var totP = daysWithData.reduce(function(a,d){ return a+d.p; },0);
+      var totC = daysWithData.reduce(function(a,d){ return a+d.c; },0);
+      var totF = daysWithData.reduce(function(a,d){ return a+d.f; },0);
+      var totKcalFromMacros = totP*4 + totC*4 + totF*9;
+      var macroDistHtml = totKcalFromMacros > 0 ? [
+        { name:'Proteínas', val:totP, pct:Math.round(totP*4/totKcalFromMacros*100), color:'#4ade80' },
+        { name:'Carbos', val:totC, pct:Math.round(totC*4/totKcalFromMacros*100), color:'#fbbf24' },
+        { name:'Grasas', val:totF, pct:Math.round(totF*9/totKcalFromMacros*100), color:'#818cf8' }
+      ].map(function(m){
+        return '<div class="dist-row"><span class="dist-dot" style="background:'+m.color+'"></span><span class="dist-name">'+m.name+'</span><div class="dist-bar-track"><div class="dist-bar-fill" style="width:'+m.pct+'%;background:'+m.color+';height:100%"></div></div><span class="dist-val">'+m.pct+'%</span></div>';
+      }).join('') : '<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px">Sin datos suficientes</div>';
+
+      el.innerHTML =
+        // Period tabs
+        '<div class="hist-period-tabs">' +
+          [7,14,30].map(function(p){
+            return '<button class="hist-period-tab'+(state.histPeriod===p?' active':'')+'" onclick="state.histPeriod='+p+';renderHistorial()">'+p+' días</button>';
+          }).join('') +
+        '</div>' +
+        // Streak
+        (streak > 0 ?
+          '<div class="hist-streak"><div class="hist-streak-num">'+streak+'</div><div class="hist-streak-info"><div class="hist-streak-label">días de racha 🔥</div><div class="hist-streak-sub">Sigue así, lo estás haciendo muy bien</div></div></div>' :
+          '<div style="background:var(--amber-bg);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--amber);font-weight:500">⚡ Empieza tu racha registrando hoy</div>') +
+        // Stats
+        '<div class="hist-stat-row">' +
+          '<div class="hist-stat"><div class="hist-stat-val">'+( avgKcal || '—')+'</div><div class="hist-stat-lbl">Media kcal/día</div>' +
+            (prevAvg > 0 && avgKcal > 0 ? '<div class="hist-stat-delta" style="color:'+deltaColor+'">'+deltaSign+deltaKcal+' vs periodo anterior</div>' : '') +
+          '</div>' +
+          '<div class="hist-stat"><div class="hist-stat-val">'+daysWithData.length+'/'+days+'</div><div class="hist-stat-lbl">Días registrados</div>' +
+            '<div class="hist-stat-delta" style="color:var(--gray-400)">'+Math.round(daysWithData.length/days*100)+'% adherencia</div>' +
+          '</div>' +
+        '</div>' +
+        // Chart
+        '<div class="hist-chart-card">' +
+          '<div class="hist-chart-title">Calorías diarias <span class="hist-chart-subtitle">últimos 14 días</span></div>' +
+          '<div class="hist-bar-chart">'+barHtml+'</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:10px;color:var(--gray-400)">' +
+            '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#6366f1;display:inline-block"></span>En objetivo</span>' +
+            '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#ef4444;display:inline-block"></span>Exceso</span>' +
+            '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#fbbf24;display:inline-block"></span>Por debajo</span>' +
+          '</div>' +
+        '</div>' +
+        // Macro distribution
+        '<div class="hist-chart-card">' +
+          '<div class="hist-chart-title">Distribución de macros <span class="hist-chart-subtitle">promedio del periodo</span></div>' +
+          macroDistHtml +
+        '</div>' +
+        // Day list
+        '<div class="hist-chart-card">' +
+          '<div class="hist-chart-title">Últimos registros</div>' +
+          listHtml +
+        '</div>';
     }
 
     // ─── WEEK ───
@@ -2238,6 +2499,150 @@
       document.getElementById('weekMacros').innerHTML = mHtml;
     }
 
+    // ─── PREMIUM ───
+    function renderPremium() {
+      var el = document.getElementById('premiumContent');
+      if (!el) return;
+      try { state.isPremium = localStorage.getItem('fl_premium') === 'true'; } catch(e){}
+      if (state.isPremium) {
+        el.innerHTML =
+          '<div class="premium-hero" style="text-align:center">' +
+            '<div style="font-size:48px;margin-bottom:10px">👑</div>' +
+            '<div class="premium-badge">ACTIVO</div>' +
+            '<div style="font-size:20px;font-weight:700;margin:10px 0 4px">Eres usuario Premium</div>' +
+            '<div style="font-size:13px;opacity:.6;margin-bottom:20px">Todas las funciones desbloqueadas</div>' +
+          '</div>' +
+          '<div class="premium-feats">' +
+            ['♾️ Escaneos ilimitados','📅 Historial sin límite','🔄 Sincronización','📊 Estadísticas avanzadas','🚀 Futuras funciones'].map(function(f){
+              return '<div class="premium-feat"><div class="premium-feat-icon" style="background:var(--green-bg)">' + f.split(' ')[0] + '</div><div class="premium-feat-text"><div class="title" style="color:var(--green)">✓ ' + f.split(' ').slice(1).join(' ') + '</div></div></div>';
+            }).join('') +
+          '</div>' +
+          '<button onclick="cancelPremium()" style="width:100%;padding:12px;background:var(--red-bg);border:1px solid var(--red);border-radius:var(--radius);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px">Cancelar suscripción</button>';
+        var badge = document.getElementById('planBadge');
+        if (badge) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
+      } else {
+        el.innerHTML =
+          '<div class="premium-hero">' +
+            '<div class="premium-badge">★ PREMIUM</div>' +
+            '<div class="premium-price">10€</div>' +
+            '<div class="premium-period">al año · menos de 1€/mes</div>' +
+            '<button class="premium-cta" onclick="startPayment()">Activar Premium ahora →</button>' +
+          '</div>' +
+          '<div class="premium-feats">' +
+            [['♾️','var(--green-bg)','Escaneos ilimitados','Sin límite mensual de escaneos'],
+             ['📅','var(--accent-bg)','Historial sin límite','Accede a todos tus registros para siempre'],
+             ['🔄','var(--blue-bg)','Sincronización','Tus datos en todos tus dispositivos'],
+             ['📊','var(--amber-bg)','Estadísticas avanzadas','Tendencias, rachas y análisis detallado'],
+             ['🚀','var(--red-bg)','Futuras funciones','Acceso anticipado a todo lo que añadamos']
+            ].map(function(f){
+              return '<div class="premium-feat"><div class="premium-feat-icon" style="background:' + f[1] + '">' + f[0] + '</div><div class="premium-feat-text"><div class="title">' + f[2] + '</div><div class="desc">' + f[3] + '</div></div></div>';
+            }).join('') +
+          '</div>' +
+          '<div style="background:var(--gray-50);border:1px solid var(--gray-100);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--gray-600);text-align:center">Plan actual: <strong>Gratis</strong> · ' + (state.maxScans - state.scansUsed) + ' escaneos restantes este mes</div>';
+      }
+    }
+
+    // ─── STRIPE PAYMENT ───
+    // Configura tu clave pública de Stripe aquí cuando la tengas:
+    // var stripe = Stripe('pk_live_TU_CLAVE_PUBLICA_AQUI');
+    var STRIPE_CONFIGURED = false; // Cambiar a true cuando Stripe esté listo
+
+    function startPayment() {
+      var modal = document.createElement('div');
+      modal.id = 'payModal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:flex;align-items:flex-end;justify-content:center;max-width:420px;margin:0 auto';
+      modal.innerHTML =
+        '<div style="background:white;border-radius:24px 24px 0 0;padding:24px;width:100%">' +
+          '<div style="width:36px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 20px"></div>' +
+          '<div style="font-size:18px;font-weight:700;margin-bottom:4px">Activar Premium</div>' +
+          '<div style="font-size:13px;color:#6b7280;margin-bottom:20px">10€/año · cancela cuando quieras</div>' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:16px">' +
+            '<div style="font-size:12px;color:#9ca3af;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Resumen</div>' +
+            '<div style="display:flex;justify-content:space-between;font-size:14px"><span>FuelLog Premium · 1 año</span><span style="font-weight:700">10,00 €</span></div>' +
+          '</div>' +
+          (STRIPE_CONFIGURED ?
+            '<div id="stripe-card-element" style="padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;margin-bottom:16px"></div>' +
+            '<div id="stripe-errors" style="color:#ef4444;font-size:12px;margin-bottom:10px;display:none"></div>' :
+            // Formulario simulado mientras Stripe no está configurado
+            '<div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:#92400e">🔧 Modo demo — integra tu clave de Stripe en el código para pagos reales</div>' +
+            '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:16px">' +
+              '<div style="font-size:12px;color:#9ca3af;margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Datos de pago</div>' +
+              '<input placeholder="Número de tarjeta" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;margin-bottom:8px;font-family:var(--font);outline:none" oninput="this.value=this.value.replace(/\\D/g,\'\').replace(/(.{4})/g,\'$1 \').trim().substring(0,19)">' +
+              '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+                '<input placeholder="MM/AA" style="padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:var(--font);outline:none">' +
+                '<input placeholder="CVV" style="padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:var(--font);outline:none">' +
+              '</div>' +
+            '</div>') +
+          '<button id="payBtn" onclick="processPayment(this)" style="width:100%;padding:14px;background:#fbbf24;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);margin-bottom:8px">Pagar 10€ y activar Premium</button>' +
+          '<button onclick="document.getElementById(\'payModal\').remove()" style="width:100%;padding:12px;background:#f3f4f6;border:none;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font)">Cancelar</button>' +
+          '<div style="text-align:center;font-size:11px;color:#9ca3af;margin-top:12px">🔒 Pago seguro · Sin permanencia · Cancela cuando quieras</div>' +
+        '</div>';
+      document.body.appendChild(modal);
+
+      // Si Stripe está configurado, montar el elemento de tarjeta
+      if (STRIPE_CONFIGURED && typeof stripe !== 'undefined') {
+        var elements = stripe.elements();
+        var card = elements.create('card', {
+          style: { base: { fontSize: '14px', fontFamily: 'Sora, sans-serif', color: '#0a0a0a' } }
+        });
+        card.mount('#stripe-card-element');
+        modal._stripeCard = card;
+      }
+    }
+
+    function processPayment(btn) {
+      btn.textContent = 'Procesando...';
+      btn.disabled = true;
+
+      if (STRIPE_CONFIGURED && typeof stripe !== 'undefined') {
+        // FLUJO STRIPE REAL
+        // Necesitas un backend que cree un PaymentIntent y devuelva el client_secret
+        // Ejemplo:
+        // fetch('/api/create-payment-intent', { method:'POST', body: JSON.stringify({ amount: 1000, currency:'eur' }) })
+        //   .then(r => r.json())
+        //   .then(data => {
+        //     stripe.confirmCardPayment(data.clientSecret, { payment_method: { card: modal._stripeCard } })
+        //       .then(result => {
+        //         if (result.error) { showStripeError(result.error.message); }
+        //         else { activatePremium(); }
+        //       });
+        //   });
+        showToast('⚙️ Configura el backend de Stripe para pagos reales');
+        btn.textContent = 'Pagar 10€ y activar Premium';
+        btn.disabled = false;
+      } else {
+        // Modo demo: simular pago
+        setTimeout(function() {
+          activatePremium();
+          var modal = document.getElementById('payModal');
+          if (modal) modal.remove();
+        }, 1200);
+      }
+    }
+
+    function activatePremium() {
+      state.isPremium = true;
+      state.maxScans = 9999;
+      try { localStorage.setItem('fl_premium', 'true'); } catch(e){}
+      var badge = document.getElementById('planBadge');
+      if (badge) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
+      renderScanPips();
+      renderPremium();
+      showToast('🎉 ¡Bienvenido a Premium! Todas las funciones desbloqueadas.');
+    }
+
+    function cancelPremium() {
+      if (!confirm('¿Seguro que quieres cancelar tu suscripción Premium?')) return;
+      state.isPremium = false;
+      state.maxScans = 10;
+      try { localStorage.removeItem('fl_premium'); } catch(e){}
+      var badge = document.getElementById('planBadge');
+      if (badge) { badge.textContent = 'Free · ' + (state.maxScans - state.scansUsed) + ' escaneos'; badge.classList.add('free'); }
+      renderScanPips();
+      renderPremium();
+      showToast('Suscripción cancelada');
+    }
+
     // ─── REVIEWS ───
     function renderReviews() {
       var html = '';
@@ -2277,5 +2682,4 @@
     init();
   </script>
 </body>
-
 </html>
