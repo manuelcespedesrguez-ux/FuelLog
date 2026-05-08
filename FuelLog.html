@@ -5,6 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>FuelLog</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FuelLog">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><path d='M55 18L28 55h22l-5 27 29-37H52l3-27z' fill='white'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1444,38 +1454,74 @@
       transform: translateX(2px)
     }
 
-    .food-card-emoji {
-      font-size: 20px;
-      flex-shrink: 0
-    }
-
     .food-card-info {
-      flex: 1
+      flex: 1;
+      min-width: 0
     }
 
     .food-card-name {
       font-size: 13px;
-      font-weight: 600
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .food-card-brand {
+      font-size: 10px;
+      color: var(--gray-400);
+      margin-top: 1px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .04em
     }
 
     .food-card-macros {
-      font-size: 11px;
-      color: var(--gray-400);
-      margin-top: 2px;
-      font-family: var(--mono)
+      display: flex;
+      gap: 6px;
+      margin-top: 5px;
+      flex-wrap: wrap
+    }
+
+    .food-macro-pill {
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--mono);
+      padding: 2px 6px;
+      border-radius: 5px
+    }
+
+    .food-macro-pill.p { background: rgba(74,222,128,.15); color: #16a34a }
+    .food-macro-pill.c { background: rgba(251,191,36,.15); color: #b45309 }
+    .food-macro-pill.f { background: rgba(129,140,248,.15); color: #4f46e5 }
+
+    .food-card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0
     }
 
     .food-card-kcal {
       font-size: 15px;
       font-weight: 700;
       font-family: var(--mono);
-      color: var(--accent)
+      color: var(--black);
+      line-height: 1
+    }
+
+    .food-card-kcal span {
+      font-size: 9px;
+      font-weight: 400;
+      color: var(--gray-400);
+      font-family: var(--font)
     }
 
     .food-card-add {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
       background: var(--black);
       border: none;
       color: white;
@@ -1966,6 +2012,60 @@
     </div>
   </div>
 
+  <!-- QUANTITY MODAL -->
+  <div class="modal-overlay" id="qtyModal" onclick="if(event.target===this)closeQtyModal()">
+    <div class="modal" style="padding-bottom:24px">
+      <div class="modal-handle"></div>
+      <div id="qtyFoodName" style="font-size:16px;font-weight:700;margin-bottom:4px"></div>
+      <div id="qtyFoodBrand" style="font-size:11px;color:var(--gray-400);margin-bottom:16px"></div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <svg id="qtyDonut" width="80" height="80" viewBox="0 0 80 80" style="flex-shrink:0">
+          <circle cx="40" cy="40" r="28" fill="none" stroke="var(--gray-100)" stroke-width="12"/>
+          <circle id="qtyArc1" cx="40" cy="40" r="28" fill="none" stroke="#fbbf24" stroke-width="12" stroke-linecap="butt" transform="rotate(-90 40 40)"/>
+          <circle id="qtyArc2" cx="40" cy="40" r="28" fill="none" stroke="#ec4899" stroke-width="12" stroke-linecap="butt" transform="rotate(-90 40 40)"/>
+          <circle id="qtyArc3" cx="40" cy="40" r="28" fill="none" stroke="#818cf8" stroke-width="12" stroke-linecap="butt" transform="rotate(-90 40 40)"/>
+        </svg>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1">
+          <div style="text-align:center">
+            <div id="qtyKcal" style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--black);line-height:1">0</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">Calorias</div>
+          </div>
+          <div style="text-align:center">
+            <div id="qtyProtVal" style="font-size:17px;font-weight:700;font-family:var(--mono);color:#16a34a;line-height:1">0g</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">Proteinas</div>
+          </div>
+          <div style="text-align:center">
+            <div id="qtyCarbVal" style="font-size:17px;font-weight:700;font-family:var(--mono);color:#b45309;line-height:1">0g</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">Carbos</div>
+          </div>
+          <div style="text-align:center">
+            <div id="qtyFatVal" style="font-size:17px;font-weight:700;font-family:var(--mono);color:#4f46e5;line-height:1">0g</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">Grasas</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div style="flex:1;position:relative">
+          <input id="qtyGrams" type="number" min="1" max="2000" value="100"
+            style="width:100%;padding:14px 44px 14px 16px;border:2px solid var(--accent);border-radius:12px;font-size:22px;font-weight:700;font-family:var(--mono);text-align:center;outline:none;background:var(--bg);color:var(--black)"
+            oninput="updateQtyCalc()" onchange="updateQtyCalc()">
+          <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--gray-400);font-weight:600">g</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:16px">
+        <button onclick="setQtyGrams(50)"  style="flex:1;padding:8px;background:var(--gray-100);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--gray-800)">50g</button>
+        <button onclick="setQtyGrams(100)" style="flex:1;padding:8px;background:var(--gray-100);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--gray-800)">100g</button>
+        <button onclick="setQtyGrams(150)" style="flex:1;padding:8px;background:var(--gray-100);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--gray-800)">150g</button>
+        <button onclick="setQtyGrams(200)" style="flex:1;padding:8px;background:var(--gray-100);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--gray-800)">200g</button>
+        <button onclick="setQtyGrams(250)" style="flex:1;padding:8px;background:var(--gray-100);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--gray-800)">250g</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="confirmQty()" style="flex:1;padding:14px;background:var(--black);border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">Actualizar</button>
+        <button onclick="deleteQtyItem()" style="width:48px;padding:14px;background:var(--red-bg);border:1px solid rgba(239,68,68,.2);border-radius:12px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">&#x1F5D1;</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -2095,11 +2195,12 @@
         if (items.length > 0) {
           html += '<div class="meal-items" id="meal-' + m.key + '">';
           items.forEach(function (item, idx) {
-            html += '<div class="meal-item">';
-            html += '<div class="meal-item-left"><div class="meal-item-name">' + item.emoji + ' ' + item.name + '</div>';
-            html += '<div class="meal-item-macros">P:' + item.p + 'g C:' + item.c + 'g G:' + item.f + 'g</div></div>';
+            html += '<div class="meal-item" style="cursor:pointer" onclick="openQtyModal(\'' + m.key + '\',' + idx + ')">';
+            html += '<div class="meal-item-left"><div class="meal-item-name">' + item.name + '</div>';
+            var gramsLabel = item.grams && item.grams !== 100 ? item.grams + 'g · ' : '';
+            html += '<div class="meal-item-macros">' + gramsLabel + 'P:' + item.p + 'g C:' + item.c + 'g G:' + item.f + 'g</div></div>';
             html += '<div class="meal-item-kcal">' + item.kcal + '</div>';
-            html += '<button class="meal-item-del" onclick="removeItem(\'' + m.key + '\',' + idx + ')">×</button>';
+            html += '<span style="font-size:11px;color:var(--gray-200);margin-left:6px">›</span>';
             html += '</div>';
           });
           html += '</div>';
@@ -2118,6 +2219,110 @@
     function removeItem(meal, idx) {
       state.meals[meal].splice(idx, 1);
       renderMeals();
+    }
+
+    // ─── QUANTITY MODAL ───
+    var qtyState = { meal: null, idx: null, baseFood: null };
+    var CIRCUMFERENCE = 2 * Math.PI * 28; // r=28
+
+    function openQtyModal(meal, idx) {
+      var item = state.meals[meal][idx];
+      if (!item) return;
+      qtyState.meal = meal;
+      qtyState.idx = idx;
+      // Store per-100g base values
+      var grams = item.grams || 100;
+      qtyState.baseFood = {
+        name: item.name,
+        brand: item.brand || '',
+        kcal100: Math.round(item.kcal / grams * 100 * 10) / 10,
+        p100:    Math.round(item.p    / grams * 100 * 10) / 10,
+        c100:    Math.round(item.c    / grams * 100 * 10) / 10,
+        f100:    Math.round(item.f    / grams * 100 * 10) / 10,
+      };
+      document.getElementById('qtyFoodName').textContent = item.name;
+      document.getElementById('qtyFoodBrand').textContent = item.brand ? item.brand + ' · por 100g' : 'Valores por 100g';
+      document.getElementById('qtyGrams').value = grams;
+      updateQtyCalc();
+      document.getElementById('qtyModal').classList.add('open');
+      setTimeout(function(){ document.getElementById('qtyGrams').select(); }, 200);
+    }
+
+    function setQtyGrams(g) {
+      document.getElementById('qtyGrams').value = g;
+      updateQtyCalc();
+    }
+
+    function updateQtyCalc() {
+      var b = qtyState.baseFood;
+      if (!b) return;
+      var g = parseFloat(document.getElementById('qtyGrams').value) || 0;
+      var ratio = g / 100;
+      var kcal = Math.round(b.kcal100 * ratio);
+      var p    = Math.round(b.p100    * ratio * 10) / 10;
+      var c    = Math.round(b.c100    * ratio * 10) / 10;
+      var f    = Math.round(b.f100    * ratio * 10) / 10;
+
+      document.getElementById('qtyKcal').textContent    = kcal;
+      document.getElementById('qtyProtVal').textContent = p + 'g';
+      document.getElementById('qtyCarbVal').textContent = c + 'g';
+      document.getElementById('qtyFatVal').textContent  = f + 'g';
+
+      // Donut arcs: C=carbs(yellow), P=protein(pink), F=fat(indigo)
+      var totalKcalMacros = p * 4 + c * 4 + f * 9;
+      if (totalKcalMacros > 0) {
+        var carbPct  = c * 4 / totalKcalMacros;
+        var protPct  = p * 4 / totalKcalMacros;
+        var fatPct   = f * 9 / totalKcalMacros;
+        var carbDash = carbPct * CIRCUMFERENCE;
+        var protDash = protPct * CIRCUMFERENCE;
+        var fatDash  = fatPct  * CIRCUMFERENCE;
+        var arc1 = document.getElementById('qtyArc1'); // carbs yellow
+        var arc2 = document.getElementById('qtyArc2'); // prot pink
+        var arc3 = document.getElementById('qtyArc3'); // fat indigo
+        var carbOffset = 0;
+        var protOffset = -carbDash;
+        var fatOffset  = -(carbDash + protDash);
+        arc1.setAttribute('stroke-dasharray', carbDash + ' ' + CIRCUMFERENCE);
+        arc1.setAttribute('stroke-dashoffset', carbOffset);
+        arc2.setAttribute('stroke-dasharray', protDash + ' ' + CIRCUMFERENCE);
+        arc2.setAttribute('stroke-dashoffset', protOffset);
+        arc3.setAttribute('stroke-dasharray', fatDash  + ' ' + CIRCUMFERENCE);
+        arc3.setAttribute('stroke-dashoffset', fatOffset);
+        arc1.style.display = arc2.style.display = arc3.style.display = '';
+      } else {
+        ['qtyArc1','qtyArc2','qtyArc3'].forEach(function(id){ document.getElementById(id).style.display='none'; });
+      }
+    }
+
+    function confirmQty() {
+      var b = qtyState.baseFood;
+      var g = parseFloat(document.getElementById('qtyGrams').value) || 100;
+      if (!b || qtyState.meal === null || qtyState.idx === null) return;
+      var ratio = g / 100;
+      var item = state.meals[qtyState.meal][qtyState.idx];
+      item.grams = g;
+      item.kcal  = Math.round(b.kcal100 * ratio);
+      item.p     = Math.round(b.p100    * ratio * 10) / 10;
+      item.c     = Math.round(b.c100    * ratio * 10) / 10;
+      item.f     = Math.round(b.f100    * ratio * 10) / 10;
+      closeQtyModal();
+      renderMeals();
+      showToast('✅ ' + item.name + ' · ' + g + 'g actualizado');
+    }
+
+    function deleteQtyItem() {
+      if (qtyState.meal === null || qtyState.idx === null) return;
+      var name = state.meals[qtyState.meal][qtyState.idx].name;
+      state.meals[qtyState.meal].splice(qtyState.idx, 1);
+      closeQtyModal();
+      renderMeals();
+      showToast('🗑️ ' + name + ' eliminado');
+    }
+
+    function closeQtyModal() {
+      document.getElementById('qtyModal').classList.remove('open');
+      qtyState = { meal: null, idx: null, baseFood: null };
     }
     function saveDayData() {
       var key = state.currentDate.toDateString();
@@ -2183,39 +2388,128 @@
     function filterModal(q) {
       var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
       var html = '';
-      list.forEach(function (f) {
-        html += '<div class="food-item" onclick="addFood(' + f.id + ')">';
-        html += '<div><div class="food-item-name">' + f.emoji + ' ' + f.name + '</div>';
-        html += '<div class="food-item-info">P:' + f.p + 'g C:' + f.c + 'g G:' + f.f + 'g</div></div>';
-        html += '<div class="food-item-kcal">' + f.kcal + ' kcal</div>';
+      list.slice(0, 20).forEach(function (f) {
+        var brand = f.brand ? '<div style="font-size:10px;color:var(--gray-400);font-weight:500;text-transform:uppercase;letter-spacing:.04em">' + f.brand + '</div>' : '';
+        html += '<div class="food-item" onclick="addFood(\'' + f.id + '\')">';
+        html += '<div><div class="food-item-name">' + f.name + '</div>' + brand;
+        html += '<div style="display:flex;gap:5px;margin-top:4px">';
+        html += '<span style="font-size:10px;font-weight:600;font-family:var(--mono);padding:2px 5px;border-radius:4px;background:rgba(74,222,128,.15);color:#16a34a">P ' + f.p + 'g</span>';
+        html += '<span style="font-size:10px;font-weight:600;font-family:var(--mono);padding:2px 5px;border-radius:4px;background:rgba(251,191,36,.15);color:#b45309">C ' + f.c + 'g</span>';
+        html += '<span style="font-size:10px;font-weight:600;font-family:var(--mono);padding:2px 5px;border-radius:4px;background:rgba(129,140,248,.15);color:#4f46e5">G ' + f.f + 'g</span>';
+        html += '</div></div>';
+        html += '<div class="food-item-kcal">' + f.kcal + '<div style="font-size:9px;font-weight:400;color:var(--gray-400);font-family:var(--font)">kcal</div></div>';
         html += '</div>';
       });
       document.getElementById('modalFoodList').innerHTML = html;
     }
     function addFood(id) {
-      var food = FOODS.find(function (f) { return f.id === id });
+      var food = FOODS.find(function (f) { return f.id == id || f.id === id });
       if (!food) return;
       var meal = state.currentMealTarget || 'desayuno';
-      state.meals[meal].push(JSON.parse(JSON.stringify(food)));
+      var item = JSON.parse(JSON.stringify(food));
+      if (!item.grams) item.grams = 100;
+      state.meals[meal].push(item);
       closeModal();
       renderMeals();
-      showToast(food.emoji + ' ' + food.name + ' añadido a ' + meal);
+      showToast('✅ ' + food.name + ' añadido a ' + meal);
     }
 
     // ─── FOODS LIST ───
     function renderFoods() { filterFoods(''); }
+
+    function foodCardHtml(f, addFn) {
+      var brand = f.brand ? '<div class="food-card-brand">' + f.brand + (f.grams ? ' · ' + f.grams + 'g' : '') + '</div>' : (f.grams ? '<div class="food-card-brand">' + f.grams + 'g por 100g</div>' : '');
+      return '<div class="food-card">' +
+        '<div class="food-card-info">' +
+          '<div class="food-card-name">' + f.name + '</div>' +
+          brand +
+          '<div class="food-card-macros">' +
+            '<span class="food-macro-pill p">P ' + f.p + 'g</span>' +
+            '<span class="food-macro-pill c">C ' + f.c + 'g</span>' +
+            '<span class="food-macro-pill f">G ' + f.f + 'g</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="food-card-right">' +
+          '<div class="food-card-kcal">' + f.kcal + '<span>kcal</span></div>' +
+          '<button class="food-card-add" onclick="' + addFn + '">+</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    var foodSearchTimer = null;
     function filterFoods(q) {
-      var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
-      var html = '';
-      list.forEach(function (f) {
-        html += '<div class="food-card"><div class="food-card-emoji">' + f.emoji + '</div>';
-        html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
-        html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
-        html += '<div class="food-card-kcal">' + f.kcal + '</div>';
-        html += '<button class="food-card-add" onclick="openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)">+</button>';
-        html += '</div>';
-      });
-      document.getElementById('foodsList').innerHTML = html;
+      clearTimeout(foodSearchTimer);
+      var el = document.getElementById('foodsList');
+      var chipEl = document.querySelector('.section-chip');
+
+      if (!q) {
+        if (chipEl) chipEl.textContent = 'Frecuentes';
+        var list = FOODS.slice(0, 20);
+        var html = list.map(function(f) {
+          return foodCardHtml(f, 'openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)');
+        }).join('');
+        el.innerHTML = html;
+        return;
+      }
+
+      // Búsqueda local inmediata
+      var localList = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
+      var localHtml = localList.map(function(f) {
+        return foodCardHtml(f, 'openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)');
+      }).join('');
+      if (chipEl) chipEl.textContent = 'Buscando en Open Food Facts...';
+      el.innerHTML = localHtml || '<div style="text-align:center;padding:16px;font-size:13px;color:var(--gray-400)">🔍 Buscando...</div>';
+
+      // Búsqueda remota con debounce
+      foodSearchTimer = setTimeout(function() { searchOpenFoodFacts(q); }, 500);
+    }
+
+    async function searchOpenFoodFacts(q) {
+      var el = document.getElementById('foodsList');
+      var chipEl = document.querySelector('.section-chip');
+      try {
+        var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(q) + '&search_simple=1&action=process&json=1&page_size=12&lc=es';
+        var res = await fetch(url);
+        var data = await res.json();
+        var products = (data.products || []).filter(function(p) {
+          var n = p.nutriments || {};
+          return p.product_name && n['energy-kcal_100g'];
+        });
+
+        if (products.length === 0) {
+          // Fallback: solo locales
+          var localList = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
+          if (chipEl) chipEl.textContent = localList.length + ' resultados locales';
+          el.innerHTML = localList.length
+            ? localList.map(function(f){ return foodCardHtml(f, 'openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)'); }).join('')
+            : '<div style="text-align:center;padding:24px;font-size:13px;color:var(--gray-400)">Sin resultados para "' + q + '"</div>';
+          return;
+        }
+
+        if (chipEl) chipEl.textContent = products.length + ' resultados';
+        var html = products.map(function(p) {
+          var n = p.nutriments || {};
+          var f = {
+            id: 'off_' + (p.code || Date.now() + Math.random()),
+            name: (p.product_name_es || p.product_name || 'Producto').substring(0, 45),
+            brand: p.brands ? p.brands.split(',')[0].trim().substring(0, 25) : '',
+            grams: 100,
+            kcal: Math.round(n['energy-kcal_100g'] || 0),
+            p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
+            c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
+            f: Math.round((n['fat_100g'] || 0) * 10) / 10,
+            emoji: '📦'
+          };
+          // Guardar en FOODS para poder añadirlo
+          if (!FOODS.find(function(x){ return x.id === f.id; })) FOODS.unshift(f);
+          return foodCardHtml(f, 'openAddModal(null);setTimeout(function(){addFood("' + f.id + '")},50)');
+        }).join('');
+        el.innerHTML = html;
+      } catch(e) {
+        if (chipEl) chipEl.textContent = 'Error de conexión — resultados locales';
+        var localList = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
+        el.innerHTML = localList.map(function(f){ return foodCardHtml(f, 'openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)'); }).join('');
+      }
     }
 
     // ─── SCANNER PIPS ───
@@ -2911,6 +3205,14 @@
 
     init();
     initTabs();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js')
+          .catch(function(e){ console.log('SW error:', e); });
+      });
+    }
   </script>
 </body>
 </html>
