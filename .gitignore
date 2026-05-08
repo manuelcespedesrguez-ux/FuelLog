@@ -1,0 +1,10 @@
+# PWABuilder / Google Play Packages
+FuelLog - Google Play package.zip
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Potential environment files
+.env
