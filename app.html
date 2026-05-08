@@ -171,6 +171,35 @@
     }
 
     /* TABS */
+    .tabs-wrap {
+      position: relative;
+    }
+    .tabs-arrow {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      cursor: pointer;
+      border: none;
+      font-size: 18px;
+      color: var(--gray-600);
+      transition: all .15s;
+      padding: 0;
+      font-family: var(--font);
+    }
+    .tabs-arrow:hover { color: var(--black); }
+    .tabs-arrow.left {
+      left: 0;
+      background: linear-gradient(to right, var(--white) 55%, transparent);
+    }
+    .tabs-arrow.right {
+      right: 0;
+      background: linear-gradient(to left, var(--white) 55%, transparent);
+    }
+    .tabs-arrow.hidden { opacity: 0; pointer-events: none; }
     .tabs {
       display: flex;
       gap: 2px;
@@ -1557,15 +1586,19 @@
       <span class="date-label" id="dateLabel"></span>
       <button class="date-btn" onclick="changeDay(1)">›</button>
     </div>
-    <div class="tabs">
-      <button class="tab active" onclick="showTab('diario',this)">📋 Diario</button>
-      <button class="tab" onclick="showTab('scanner',this)">📷 Escáner</button>
-      <button class="tab" onclick="showTab('alimentos',this)">🥗 Alimentos</button>
-      <button class="tab" onclick="showTab('historial',this)">📈 Historial</button>
-      <button class="tab" onclick="showTab('perfil',this)">👤 Perfil</button>
-      <button class="tab" onclick="showTab('semana',this)">📊 Semana</button>
-      <button class="tab" onclick="showTab('premium',this)">⭐ Premium</button>
-      <button class="tab" onclick="showTab('resenas',this)">💬 Reseñas</button>
+    <div class="tabs-wrap">
+      <button class="tabs-arrow left hidden" id="tabArrowLeft" onclick="scrollTabs(-1)">‹</button>
+      <div class="tabs" id="tabsRow">
+        <button class="tab active" onclick="showTab('diario',this)">📋 Diario</button>
+        <button class="tab" onclick="showTab('scanner',this)">📷 Escáner</button>
+        <button class="tab" onclick="showTab('alimentos',this)">🥗 Alimentos</button>
+        <button class="tab" onclick="showTab('historial',this)">📈 Historial</button>
+        <button class="tab" onclick="showTab('perfil',this)">👤 Perfil</button>
+        <button class="tab" onclick="showTab('semana',this)">📊 Semana</button>
+        <button class="tab" onclick="showTab('premium',this)">⭐ Premium</button>
+        <button class="tab" onclick="showTab('resenas',this)">💬 Reseñas</button>
+      </div>
+      <button class="tabs-arrow right" id="tabArrowRight" onclick="scrollTabs(1)">›</button>
     </div>
   </div>
 
@@ -1662,10 +1695,7 @@
         <div class="scanner-sub" id="scannerSub">Abre la cámara o introduce el código manualmente</div>
         <button class="scanner-btn" id="scannerCamBtn" onclick="toggleCamera()">📷 Abrir cámara</button>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <input class="form-input" type="text" id="barcodeInput" placeholder="Código de barras (ej: 8410306905238)" style="font-family:var(--mono);font-size:13px">
-        <button class="scanner-btn" style="padding:10px 14px;font-size:12px;white-space:nowrap" onclick="lookupBarcode()">Buscar</button>
-      </div>
+      <input type="hidden" id="barcodeInput">
       <div id="scanResultCard" style="display:none;background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)"></div>
       <div class="scan-limit">
         <div class="scan-limit-top"><span class="scan-limit-label">Escaneos este mes</span><span
@@ -2679,7 +2709,33 @@
       setTimeout(function () { t.classList.remove('show') }, 2500);
     }
 
+    // ─── TABS SCROLL ───
+    function scrollTabs(dir) {
+      var row = document.getElementById('tabsRow');
+      if (!row) return;
+      row.scrollBy({ left: dir * 100, behavior: 'smooth' });
+    }
+    function updateTabArrows() {
+      var row = document.getElementById('tabsRow');
+      var left = document.getElementById('tabArrowLeft');
+      var right = document.getElementById('tabArrowRight');
+      if (!row || !left || !right) return;
+      left.classList.toggle('hidden', row.scrollLeft <= 4);
+      right.classList.toggle('hidden', row.scrollLeft >= row.scrollWidth - row.clientWidth - 4);
+    }
+    function initTabs() {
+      var row = document.getElementById('tabsRow');
+      if (!row) return;
+      row.addEventListener('scroll', updateTabArrows);
+      row.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        row.scrollBy({ left: e.deltaY * 1.5, behavior: 'smooth' });
+      }, { passive: false });
+      updateTabArrows();
+    }
+
     init();
+    initTabs();
   </script>
 </body>
 </html>
