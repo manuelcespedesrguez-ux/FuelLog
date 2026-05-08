@@ -3180,51 +3180,23 @@
   </script>
   <script>
     // ─── VERSIÓN DE LA APP ─────────────────────────────────────────────────
-    // Solo cambia este número cuando subas una nueva versión al repositorio
-    var APP_VERSION = '1.0.2';
+    // Cambia este número con cada nueva versión que subas al repositorio
+    var APP_VERSION = '1.0.3';
     // ───────────────────────────────────────────────────────────────────────
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-
-        var refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', function() {
-          if (!refreshing) { refreshing = true; window.location.reload(); }
-        });
-
-        navigator.serviceWorker.register('sw.js?v=' + APP_VERSION).then(function(reg) {
-
-          // Detecta SW nuevo instalándose
-          function onNewSW(worker) {
-            worker.addEventListener('statechange', function() {
-              if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-                // iOS: aplicar inmediatamente sin esperar al usuario
-                worker.postMessage({ type: 'SKIP_WAITING' });
-              }
+        // Registra el SW pasando la versión — esto fuerza reinstalación al cambiar
+        navigator.serviceWorker.register('sw.js?v=' + APP_VERSION)
+          .then(function(reg) {
+            // Comprueba actualizaciones cada vez que la app vuelve al primer plano
+            document.addEventListener('visibilitychange', function() {
+              if (document.visibilityState === 'visible') reg.update();
             });
-          }
-
-          if (reg.installing) { onNewSW(reg.installing); }
-          if (reg.waiting)    { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }
-
-          reg.addEventListener('updatefound', function() {
-            onNewSW(reg.installing);
-          });
-
-          // Comprueba actualizaciones cada vez que la app vuelve al primer plano
-          // En iOS esto es clave — el SW no se actualiza en background
-          document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible') {
-              reg.update();
-            }
-          });
-
-          // También comprueba al abrir la app (primer load)
-          reg.update();
-
-        }).catch(function(e){ console.log('SW error:', e); });
+            reg.update();
+          })
+          .catch(function(e) { console.log('SW error:', e); });
       });
     }
   </script>
 </body>
-</html>
