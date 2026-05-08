@@ -3209,8 +3209,49 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js')
-          .catch(function(e){ console.log('SW error:', e); });
+
+        // ─── VERSIÓN DE LA APP ───────────────────────────────────────────
+        // Solo cambia este número cuando subas una nueva versión
+        var APP_VERSION = '1.0.6';
+        // ─────────────────────────────────────────────────────────────────
+
+        // Pasa la version al sw.js via URL param — el SW la usa para nombrar el cache
+        navigator.serviceWorker.register('sw.js?v=' + APP_VERSION).then(function(reg) {
+
+          reg.addEventListener('updatefound', function() {
+            var nw = reg.installing;
+            nw.addEventListener('statechange', function() {
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                showUpdateBanner();
+              }
+            });
+          });
+
+          if (reg.waiting) { showUpdateBanner(); }
+          reg.update();
+
+        }).catch(function(e){ console.log('SW error:', e); });
+
+        var refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          if (!refreshing) { refreshing = true; window.location.reload(); }
+        });
+      });
+    }
+
+    function showUpdateBanner() {
+      if (document.getElementById('updateBanner')) return;
+      var b = document.createElement('div');
+      b.id = 'updateBanner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#6366f1;color:white;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;z-index:9999;font-family:Sora,sans-serif;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.25);max-width:420px;margin:0 auto';
+      b.innerHTML = '<span>⚡ Nueva versión disponible</span><button onclick="applyUpdate()" style="background:white;color:#6366f1;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Sora,sans-serif">Actualizar</button>';
+      document.body.appendChild(b);
+    }
+
+    function applyUpdate() {
+      navigator.serviceWorker.getRegistration().then(function(reg) {
+        if (reg && reg.waiting) { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }
+        else { window.location.reload(true); }
       });
     }
   </script>
