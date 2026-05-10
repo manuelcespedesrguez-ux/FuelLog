@@ -1397,13 +1397,11 @@
       position: sticky;
       top: 0;
       background: var(--bg);
-      padding-bottom: 12px;
+      padding-bottom: 10px;
       z-index: 10
     }
 
-    .search-input-wrap {
-      position: relative
-    }
+    .search-input-wrap { position: relative }
 
     .search-icon {
       position: absolute;
@@ -1426,80 +1424,114 @@
       background: var(--white)
     }
 
-    .search-input:focus {
-      border-color: var(--accent)
-    }
+    .search-input:focus { border-color: var(--accent) }
 
-    .foods-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px
+    .search-spinner {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px;
+      border: 2px solid var(--gray-200);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: none;
     }
+    .search-spinner.visible { display: block; }
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
 
-    .food-card {
-      background: var(--white);
-      border: 1px solid var(--gray-100);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
+    .foods-list { display: flex; flex-direction: column; }
+
+    /* NEW FOOD ROW — matches reference */
+    .food-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: var(--shadow);
+      padding: 11px 0;
+      border-bottom: 1px solid var(--gray-100);
       cursor: pointer;
-      transition: all .15s
+      gap: 10px;
+      transition: background .1s;
+    }
+    .food-row:last-child { border-bottom: none; }
+    .food-row:active { background: var(--gray-50); }
+
+    .food-row-check {
+      width: 20px; height: 20px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 5px;
+      flex-shrink: 0;
     }
 
-    .food-card:hover {
-      border-color: var(--accent);
-      transform: translateX(2px)
+    .food-row-info { flex: 1; min-width: 0; }
+
+    .food-row-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--black);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .food-card-emoji {
-      font-size: 20px;
-      flex-shrink: 0
-    }
-
-    .food-card-info {
-      flex: 1
-    }
-
-    .food-card-name {
-      font-size: 13px;
-      font-weight: 600
-    }
-
-    .food-card-macros {
+    .food-row-sub {
       font-size: 11px;
       color: var(--gray-400);
       margin-top: 2px;
-      font-family: var(--mono)
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .food-card-kcal {
-      font-size: 15px;
+    .food-row-macros {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--gray-400);
+      margin-top: 3px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .food-row-macros .mc { color: #e53e3e; }
+    .food-row-macros .mp { color: #3182ce; }
+    .food-row-macros .mg { color: #d97706; }
+
+    .food-row-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex-shrink: 0;
+      gap: 4px;
+    }
+
+    .food-row-kcal {
+      font-size: 16px;
       font-weight: 700;
       font-family: var(--mono);
-      color: var(--accent)
+      color: var(--accent);
     }
 
-    .food-card-add {
-      width: 28px;
-      height: 28px;
+    .food-row-add {
+      width: 24px; height: 24px;
       border-radius: 50%;
       background: var(--black);
       border: none;
       color: white;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: opacity .15s
+      transition: opacity .15s;
     }
+    .food-row-add:hover { opacity: .7; }
 
-    .food-card-add:hover {
-      opacity: .75
+    .foods-empty {
+      text-align: center;
+      padding: 32px 0;
+      color: var(--gray-400);
+      font-size: 13px;
     }
 
     .section-chip {
@@ -1814,11 +1846,11 @@
       <div class="foods-search">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input class="search-input" type="text" placeholder="Buscar alimento..." oninput="filterFoods(this.value)"
-            id="foodSearch">
+          <input class="search-input" type="text" placeholder="Buscar alimento..." oninput="filterFoods(this.value)" id="foodSearch">
+          <div class="search-spinner" id="foodSpinner"></div>
         </div>
       </div>
-      <div class="section-chip">Frecuentes</div>
+      <div class="section-chip" id="foodsChip">Frecuentes</div>
       <div class="foods-list" id="foodsList"></div>
     </div>
 
@@ -1969,8 +2001,11 @@
     <div class="modal">
       <div class="modal-handle"></div>
       <div class="modal-title" id="modalTitle">Añadir alimento</div>
-      <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)"
-        id="modalSearch">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)" id="modalSearch" style="padding-left:34px">
+        <div class="search-spinner" id="modalSpinner"></div>
+      </div>
       <div class="food-list" id="modalFoodList"></div>
       <button class="modal-close" onclick="closeModal()">Cancelar</button>
     </div>
@@ -2190,42 +2225,151 @@
       document.getElementById('addModal').classList.add('open');
     }
     function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+    var modalSearchTimer = null;
     function filterModal(q) {
-      var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
-      var html = '';
-      list.forEach(function (f) {
-        html += '<div class="food-item" onclick="addFood(' + f.id + ')">';
-        html += '<div><div class="food-item-name">' + f.emoji + ' ' + f.name + '</div>';
-        html += '<div class="food-item-info">P:' + f.p + 'g C:' + f.c + 'g G:' + f.f + 'g</div></div>';
-        html += '<div class="food-item-kcal">' + f.kcal + ' kcal</div>';
-        html += '</div>';
-      });
-      document.getElementById('modalFoodList').innerHTML = html;
+      clearTimeout(modalSearchTimer);
+      var listEl = document.getElementById('modalFoodList');
+      // Show local instantly
+      var local = FOODS.filter(function(f){ return !q || f.name.toLowerCase().includes(q.toLowerCase()); });
+      listEl.innerHTML = local.slice(0, 10).map(function(f){
+        return foodRowHTML(f, 'addFoodFromModal(\'' + f.id + '\')');
+      }).join('') || '<div class="foods-empty">Escribe para buscar</div>';
+      if (!q || q.length < 2) return;
+      document.getElementById('modalSpinner').classList.add('visible');
+      modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 500);
     }
-    function addFood(id) {
-      var food = FOODS.find(function (f) { return f.id === id });
+    function addFoodFromModal(id) {
+      var food = FOODS.find(function(f){ return f.id == id; });
       if (!food) return;
       var meal = state.currentMealTarget || 'desayuno';
       state.meals[meal].push(JSON.parse(JSON.stringify(food)));
       closeModal();
       renderMeals();
-      showToast(food.emoji + ' ' + food.name + ' añadido a ' + meal);
+      showToast('✅ ' + food.name + ' añadido a ' + meal);
+    }
+    function addFood(id) {
+      var food = FOODS.find(function (f) { return f.id == id; });
+      if (!food) return;
+      var meal = state.currentMealTarget || 'desayuno';
+      state.meals[meal].push(JSON.parse(JSON.stringify(food)));
+      closeModal();
+      renderMeals();
+      showToast('✅ ' + food.name + ' añadido a ' + meal);
     }
 
-    // ─── FOODS LIST ───
-    function renderFoods() { filterFoods(''); }
-    function filterFoods(q) {
-      var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
+    // ─── FOODS LIST — Open Food Facts ───
+    var foodSearchTimer = null;
+
+    function foodRowHTML(f, onAddJS) {
+      var brand = f.brand ? f.brand + (f.qty ? ', ' + f.qty : '') : (f.qty || '');
+      return '<div class="food-row">' +
+        '<div class="food-row-check"></div>' +
+        '<div class="food-row-info">' +
+          '<div class="food-row-name">' + f.name + '</div>' +
+          (brand ? '<div class="food-row-sub">' + brand + '</div>' : '') +
+          '<div class="food-row-macros">' +
+            '<span><span class="mc">C: ' + f.c + '</span></span>' +
+            '<span><span class="mp">P: ' + f.p + '</span></span>' +
+            '<span><span class="mg">G: ' + f.f + '</span></span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="food-row-right">' +
+          '<div class="food-row-kcal">' + f.kcal + '</div>' +
+          '<button class="food-row-add" onclick="' + onAddJS + '">+</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderFoods() {
       var html = '';
-      list.forEach(function (f) {
-        html += '<div class="food-card"><div class="food-card-emoji">' + f.emoji + '</div>';
-        html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
-        html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
-        html += '<div class="food-card-kcal">' + f.kcal + '</div>';
-        html += '<button class="food-card-add" onclick="openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)">+</button>';
-        html += '</div>';
+      FOODS.slice(0, 15).forEach(function(f) {
+        html += foodRowHTML(f, 'openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)');
       });
-      document.getElementById('foodsList').innerHTML = html;
+      document.getElementById('foodsList').innerHTML = html || '<div class="foods-empty">Sin alimentos frecuentes aún</div>';
+    }
+
+    function filterFoods(q) {
+      clearTimeout(foodSearchTimer);
+      var chip = document.getElementById('foodsChip');
+      if (!q) {
+        if (chip) chip.textContent = 'Frecuentes';
+        renderFoods();
+        return;
+      }
+      if (chip) chip.textContent = 'Resultados';
+      // Search local first instantly
+      var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
+      var listEl = document.getElementById('foodsList');
+      if (local.length) {
+        listEl.innerHTML = local.map(function(f){
+          return foodRowHTML(f, 'openAddModal(null);setTimeout(function(){addFood(' + f.id + ')},50)');
+        }).join('');
+      } else {
+        listEl.innerHTML = '<div class="foods-empty">Buscando...</div>';
+      }
+      // Then hit Open Food Facts after 500ms debounce
+      if (q.length < 2) return;
+      document.getElementById('foodSpinner').classList.add('visible');
+      foodSearchTimer = setTimeout(function() {
+        searchOFF(q, false);
+      }, 500);
+    }
+
+    async function searchOFF(q, isModal) {
+      var spinnerId = isModal ? 'modalSpinner' : 'foodSpinner';
+      var listId = isModal ? 'modalFoodList' : 'foodsList';
+      var spinner = document.getElementById(spinnerId);
+      var listEl = document.getElementById(listId);
+      if (spinner) spinner.classList.add('visible');
+      try {
+        var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' +
+          encodeURIComponent(q) +
+          '&search_simple=1&action=process&json=1&page_size=20&lc=es&cc=es&fields=product_name,brands,quantity,nutriments,nutriscore_grade';
+        var res = await fetch(url);
+        var data = await res.json();
+        var products = (data.products || []).filter(function(p){
+          var n = p.nutriments || {};
+          return p.product_name && (n['energy-kcal_100g'] || n['energy-kcal']);
+        });
+        if (!products.length) {
+          listEl.innerHTML = '<div class="foods-empty">Sin resultados para "' + q + '"</div>';
+          return;
+        }
+        var html = '';
+        products.forEach(function(p) {
+          var n = p.nutriments || {};
+          var food = {
+            id: 'off_' + Math.random().toString(36).slice(2),
+            name: p.product_name || 'Producto',
+            brand: p.brands ? p.brands.split(',')[0].trim() : '',
+            qty: p.quantity || '',
+            emoji: '📦',
+            kcal: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
+            p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
+            c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
+            f: Math.round((n['fat_100g'] || 0) * 10) / 10
+          };
+          // Cache in FOODS if not already there
+          if (!FOODS.find(function(x){ return x.name === food.name && x.brand === food.brand; })) {
+            FOODS.unshift(food);
+          } else {
+            food = FOODS.find(function(x){ return x.name === food.name; });
+          }
+          var onAdd = isModal
+            ? 'addFoodFromModal(\'' + food.id + '\')'
+            : 'openAddModal(null);setTimeout(function(){addFood(\'' + food.id + '\')},50)';
+          html += foodRowHTML(food, onAdd);
+        });
+        listEl.innerHTML = html;
+      } catch(e) {
+        // Fallback to local only
+        var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
+        listEl.innerHTML = local.length
+          ? local.map(function(f){ return foodRowHTML(f, isModal ? 'addFoodFromModal(\'' + f.id + '\')' : 'openAddModal(null);setTimeout(function(){addFood(\'' + f.id + '\')},50)'); }).join('')
+          : '<div class="foods-empty">Sin conexión — mostrando resultados locales</div>';
+      } finally {
+        if (spinner) spinner.classList.remove('visible');
+      }
     }
 
     // ─── SCANNER PIPS ───
