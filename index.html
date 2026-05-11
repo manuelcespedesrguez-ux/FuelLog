@@ -2057,17 +2057,18 @@
         </div>
         <div class="qty-donut-wrap">
           <svg width="80" height="80" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#2a2a2a" stroke-width="14"/>
-            <circle id="donutP" cx="40" cy="40" r="30" fill="none" stroke="#3182ce" stroke-width="14"
-              stroke-dasharray="188.5" stroke-dashoffset="188.5"
-              stroke-linecap="round" transform="rotate(-90 40 40)"/>
-            <circle id="donutG" cx="40" cy="40" r="30" fill="none" stroke="#d97706" stroke-width="14"
-              stroke-dasharray="188.5" stroke-dashoffset="188.5"
-              stroke-linecap="round" transform="rotate(-90 40 40)"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#2a2a2a" stroke-width="13"/>
+            <circle id="donutC" cx="40" cy="40" r="30" fill="none" stroke="#f59e0b" stroke-width="13"
+              stroke-dasharray="0 188.5" transform="rotate(-90 40 40)"/>
+            <circle id="donutP" cx="40" cy="40" r="30" fill="none" stroke="#ec4899" stroke-width="13"
+              stroke-dasharray="0 188.5" transform="rotate(-90 40 40)"/>
+            <circle id="donutG" cx="40" cy="40" r="30" fill="none" stroke="#3182ce" stroke-width="13"
+              stroke-dasharray="0 188.5" transform="rotate(-90 40 40)"/>
           </svg>
-          <div class="qty-donut-label">
-            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600" id="donutLblP">P</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600" id="donutLblG">G</div>
+          <div class="qty-donut-label" style="gap:0">
+            <div style="font-size:10px;color:#f59e0b;font-weight:700" id="donutLblC">—</div>
+            <div style="font-size:10px;color:#ec4899;font-weight:700" id="donutLblP">—</div>
+            <div style="font-size:10px;color:#3182ce;font-weight:700" id="donutLblG">—</div>
           </div>
         </div>
       </div>
@@ -2326,7 +2327,7 @@
       listEl.innerHTML = local.slice(0, 10).map(function(f){ return foodRowHTML(f); }).join('') || '<div class="foods-empty">Escribe para buscar</div>';
       if (!q || q.length < 2) return;
       document.getElementById('modalSpinner').classList.add('visible');
-      modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 500);
+      modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 250);
     }
     // ─── QUANTITY PANEL ───
     var qtyFood = null;
@@ -2360,19 +2361,33 @@
       document.getElementById('qtyP').textContent = p;
       document.getElementById('qtyG').textContent = f;
       document.getElementById('qtyK').textContent = k;
-      // Donut
+
+      // 3-segment donut: C (amber), P (pink), G (blue)
       var circ = 188.5;
-      var total = qtyFood.kcal || 1;
-      var pPct = (qtyFood.p * 4) / total;
-      var gPct = (qtyFood.f * 9) / total;
-      var pDash = pPct * circ;
-      var gDash = gPct * circ;
-      document.getElementById('donutP').setAttribute('stroke-dasharray', pDash + ' ' + (circ - pDash));
-      document.getElementById('donutP').setAttribute('stroke-dashoffset', 0);
-      document.getElementById('donutG').setAttribute('stroke-dasharray', gDash + ' ' + (circ - gDash));
-      document.getElementById('donutG').setAttribute('stroke-dashoffset', -pDash);
-      document.getElementById('donutLblP').textContent = Math.round(pPct * 100) + '%';
-      document.getElementById('donutLblG').textContent = Math.round(gPct * 100) + '%';
+      var total = (qtyFood.c * 4) + (qtyFood.p * 4) + (qtyFood.f * 9);
+      if (total > 0) {
+        var cPct = (qtyFood.c * 4) / total;
+        var pPct = (qtyFood.p * 4) / total;
+        var gPct = (qtyFood.f * 9) / total;
+        var cDash = cPct * circ;
+        var pDash = pPct * circ;
+        var gDash = gPct * circ;
+        var gap = 1.5; // small gap between segments
+
+        // C segment starts at 0
+        document.getElementById('donutC').setAttribute('stroke-dasharray', Math.max(cDash - gap, 0) + ' ' + (circ - Math.max(cDash - gap, 0)));
+        document.getElementById('donutC').setAttribute('stroke-dashoffset', 0);
+        // P segment starts after C
+        document.getElementById('donutP').setAttribute('stroke-dasharray', Math.max(pDash - gap, 0) + ' ' + (circ - Math.max(pDash - gap, 0)));
+        document.getElementById('donutP').setAttribute('stroke-dashoffset', -cDash);
+        // G segment starts after C+P
+        document.getElementById('donutG').setAttribute('stroke-dasharray', Math.max(gDash - gap, 0) + ' ' + (circ - Math.max(gDash - gap, 0)));
+        document.getElementById('donutG').setAttribute('stroke-dashoffset', -(cDash + pDash));
+
+        document.getElementById('donutLblC').textContent = Math.round(cPct * 100) + '%';
+        document.getElementById('donutLblP').textContent = Math.round(pPct * 100) + '%';
+        document.getElementById('donutLblG').textContent = Math.round(gPct * 100) + '%';
+      }
     }
 
     function confirmQty() {
@@ -2400,6 +2415,7 @@
 
     // ─── FOODS LIST — Open Food Facts ───
     var foodSearchTimer = null;
+    var offCache = {}; // cache búsquedas ya realizadas
 
     function foodRowHTML(f) {
       var brand = f.brand ? f.brand + (f.qty ? ', ' + f.qty : '') : (f.qty || '');
@@ -2453,7 +2469,7 @@
       document.getElementById('foodSpinner').classList.add('visible');
       foodSearchTimer = setTimeout(function() {
         searchOFF(q, false);
-      }, 500);
+      }, 250);
     }
 
     async function searchOFF(q, isModal) {
@@ -2462,6 +2478,15 @@
       var spinner = document.getElementById(spinnerId);
       var listEl = document.getElementById(listId);
       if (spinner) spinner.classList.add('visible');
+
+      // Serve from cache if available
+      var cacheKey = q.toLowerCase().trim();
+      if (offCache[cacheKey]) {
+        renderOFFResults(offCache[cacheKey], listEl);
+        if (spinner) spinner.classList.remove('visible');
+        return;
+      }
+
       try {
         var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' +
           encodeURIComponent(q) +
@@ -2472,35 +2497,9 @@
           var n = p.nutriments || {};
           return p.product_name && (n['energy-kcal_100g'] || n['energy-kcal']);
         });
-        if (!products.length) {
-          listEl.innerHTML = '<div class="foods-empty">Sin resultados para "' + q + '"</div>';
-          return;
-        }
-        var html = '';
-        products.forEach(function(p) {
-          var n = p.nutriments || {};
-          var food = {
-            id: 'off_' + Math.random().toString(36).slice(2),
-            name: p.product_name || 'Producto',
-            brand: p.brands ? p.brands.split(',')[0].trim() : '',
-            qty: p.quantity || '',
-            emoji: '📦',
-            kcal: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
-            p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
-            c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
-            f: Math.round((n['fat_100g'] || 0) * 10) / 10
-          };
-          // Cache in FOODS if not already there
-          if (!FOODS.find(function(x){ return x.name === food.name && x.brand === food.brand; })) {
-            FOODS.unshift(food);
-          } else {
-            food = FOODS.find(function(x){ return x.name === food.name; });
-          }
-          html += foodRowHTML(food);
-        });
-        listEl.innerHTML = html;
+        offCache[cacheKey] = products; // store in cache
+        renderOFFResults(products, listEl);
       } catch(e) {
-        // Fallback to local only
         var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
         listEl.innerHTML = local.length
           ? local.map(function(f){ return foodRowHTML(f); }).join('')
@@ -2508,6 +2507,35 @@
       } finally {
         if (spinner) spinner.classList.remove('visible');
       }
+    }
+
+    function renderOFFResults(products, listEl) {
+      if (!products.length) {
+        listEl.innerHTML = '<div class="foods-empty">Sin resultados</div>';
+        return;
+      }
+      var html = '';
+      products.forEach(function(p) {
+        var n = p.nutriments || {};
+        var food = {
+          id: 'off_' + p.product_name + (p.brands || ''),
+          name: p.product_name || 'Producto',
+          brand: p.brands ? p.brands.split(',')[0].trim() : '',
+          qty: p.quantity || '',
+          emoji: '📦',
+          kcal: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
+          p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
+          c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
+          f: Math.round((n['fat_100g'] || 0) * 10) / 10
+        };
+        if (!FOODS.find(function(x){ return x.id === food.id; })) {
+          FOODS.unshift(food);
+        } else {
+          food = FOODS.find(function(x){ return x.id === food.id; });
+        }
+        html += foodRowHTML(food);
+      });
+      listEl.innerHTML = html;
     }
 
     // ─── SCANNER PIPS ───
