@@ -1679,9 +1679,9 @@
     .qty-macro-lbl.mg { color: #d97706; }
     .qty-macro-lbl.mk { color: #6366f1; }
     .qty-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .qty-input-box { background: #2a2a2a; border-radius: 12px; padding: 14px; text-align: center; }
-    .qty-input-box input { background: none; border: none; outline: none; font-size: 22px; font-weight: 700; color: white; font-family: var(--mono); width: 100%; text-align: center; }
-    .qty-input-box .qty-unit { font-size: 14px; color: rgba(255,255,255,.4); }
+    .qty-input-box { background: #2a2a2a; border-radius: 12px; padding: 14px; text-align: center; display:flex; align-items:center; justify-content:center; }
+    .qty-input-box input { background: none; border: none; outline: none; font-size: 26px; font-weight: 700; color: white !important; -webkit-text-fill-color: white !important; font-family: var(--mono); width: 100%; text-align: center; }
+    .qty-input-box .qty-unit { font-size: 22px; font-weight: 600; color: rgba(255,255,255,.5); }
     .qty-add-btn { width: 100%; padding: 16px; background: #e53e3e; border: none; border-radius: 14px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; font-family: var(--font); }
 
     /* FOOD ROW selected state */
@@ -2080,10 +2080,10 @@
       </div>
       <div class="qty-inputs">
         <div class="qty-input-box">
-          <input type="number" id="qtyGrams" value="100" min="1" max="9999" oninput="updateQty()" style="color:white;font-size:22px;font-weight:700;font-family:var(--mono);background:none;border:none;outline:none;width:100%;text-align:center;">
+          <input type="number" id="qtyGrams" value="100" min="1" max="9999" oninput="updateQty()" inputmode="numeric">
         </div>
-        <div class="qty-input-box" style="display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:20px;font-weight:600;color:rgba(255,255,255,.5)">g</span>
+        <div class="qty-input-box">
+          <span class="qty-unit">g</span>
         </div>
       </div>
       <button class="qty-add-btn" onclick="confirmQty()">Añadir</button>
@@ -2384,9 +2384,9 @@
         document.getElementById('donutG').setAttribute('stroke-dasharray', Math.max(gDash - gap, 0) + ' ' + (circ - Math.max(gDash - gap, 0)));
         document.getElementById('donutG').setAttribute('stroke-dashoffset', -(cDash + pDash));
 
-        document.getElementById('donutLblC').textContent = Math.round(cPct * 100) + '%';
-        document.getElementById('donutLblP').textContent = Math.round(pPct * 100) + '%';
-        document.getElementById('donutLblG').textContent = Math.round(gPct * 100) + '%';
+        document.getElementById('donutLblC').textContent = cPct > 0.01 ? Math.round(cPct * 100) + '%' : '';
+        document.getElementById('donutLblP').textContent = pPct > 0.01 ? Math.round(pPct * 100) + '%' : '';
+        document.getElementById('donutLblG').textContent = gPct > 0.01 ? Math.round(gPct * 100) + '%' : '';
       }
     }
 
