@@ -2500,7 +2500,7 @@
         // Fallback to local only
         var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
         listEl.innerHTML = local.length
-          ? local.map(function(f){ return foodRowHTML(f); })'); }).join('')
+          ? local.map(function(f){ return foodRowHTML(f); }).join('')
           : '<div class="foods-empty">Sin conexión — mostrando resultados locales</div>';
       } finally {
         if (spinner) spinner.classList.remove('visible');
