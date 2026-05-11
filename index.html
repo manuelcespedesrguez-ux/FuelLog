@@ -651,12 +651,14 @@
     }
 
     .modal-handle {
-      width: 36px;
-      height: 4px;
+      width: 48px;
+      height: 5px;
       background: var(--gray-200);
-      border-radius: 2px;
-      margin: 0 auto 16px
+      border-radius: 3px;
+      margin: 0 auto 16px;
+      cursor: pointer;
     }
+    .modal-handle:hover { background: var(--gray-400); }
 
     .modal-title {
       font-size: 16px;
@@ -1657,7 +1659,8 @@
       transition: transform .25s cubic-bezier(.32,0,.15,1);
     }
     .qty-overlay.open .qty-panel { transform: translateY(0); }
-    .qty-handle { width: 36px; height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; margin: 0 auto 18px; }
+    .qty-handle { width: 48px; height: 5px; background: rgba(255,255,255,.25); border-radius: 3px; margin: 0 auto 18px; cursor: pointer; }
+    .qty-handle:hover { background: rgba(255,255,255,.45); }
     .qty-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
     .qty-name { font-size: 20px; font-weight: 800; color: white; line-height: 1.2; flex: 1; margin-right: 12px; }
     .qty-brand { font-size: 13px; color: #e53e3e; font-weight: 600; margin-top: 3px; }
@@ -2045,8 +2048,8 @@
   <!-- ADD FOOD MODAL -->
   <!-- QUANTITY PANEL -->
   <div class="qty-overlay" id="qtyOverlay" onclick="if(event.target===this)closeQty()">
-    <div class="qty-panel">
-      <div class="qty-handle"></div>
+    <div class="qty-panel" id="qtyPanel">
+      <div class="qty-handle" onclick="closeQty()"></div>
       <div class="qty-header">
         <div>
           <div class="qty-name" id="qtyName">Producto</div>
@@ -2076,10 +2079,10 @@
       </div>
       <div class="qty-inputs">
         <div class="qty-input-box">
-          <input type="number" id="qtyGrams" value="100" min="1" max="9999" oninput="updateQty()">
+          <input type="number" id="qtyGrams" value="100" min="1" max="9999" oninput="updateQty()" style="color:white;font-size:22px;font-weight:700;font-family:var(--mono);background:none;border:none;outline:none;width:100%;text-align:center;">
         </div>
-        <div class="qty-input-box">
-          <div class="qty-unit">g</div>
+        <div class="qty-input-box" style="display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:20px;font-weight:600;color:rgba(255,255,255,.5)">g</span>
         </div>
       </div>
       <button class="qty-add-btn" onclick="confirmQty()">Añadir</button>
@@ -2087,8 +2090,8 @@
   </div>
 
   <div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
-    <div class="modal">
-      <div class="modal-handle"></div>
+    <div class="modal" id="addModalSheet">
+      <div class="modal-handle" onclick="closeModal()"></div>
       <div class="modal-title" id="modalTitle">Añadir alimento</div>
       <div class="search-input-wrap">
         <span class="search-icon">🔍</span>
@@ -3198,8 +3201,24 @@
       } catch(e) {}
     }
 
+    // ─── SWIPE TO CLOSE ───
+    function addSwipeToClose(panelId, closeFn) {
+      var panel = document.getElementById(panelId);
+      if (!panel) return;
+      var startY = 0;
+      panel.addEventListener('touchstart', function(e) {
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+      panel.addEventListener('touchend', function(e) {
+        var dy = e.changedTouches[0].clientY - startY;
+        if (dy > 60) closeFn();
+      }, { passive: true });
+    }
+
     init();
     initTabs();
+    addSwipeToClose('qtyPanel', closeQty);
+    addSwipeToClose('addModalSheet', closeModal);
   </script>
   <script>
     if ('serviceWorker' in navigator) {
