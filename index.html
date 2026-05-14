@@ -498,15 +498,27 @@
       border-radius: var(--radius);
       margin-bottom: 10px;
       overflow: hidden;
-      box-shadow: var(--shadow)
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: border-color .18s, box-shadow .18s, background .18s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .meal-section:active {
+      background: var(--gray-50);
+      border-color: rgba(168,85,247,.35);
+    }
+    .meal-section:hover {
+      border-color: rgba(168,85,247,.30);
+      box-shadow: 0 2px 12px rgba(168,85,247,.12);
     }
 
     .meal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 14px;
-      cursor: pointer
+      padding: 14px 14px;
     }
 
     .meal-header-left {
@@ -514,40 +526,55 @@
       align-items: center;
       gap: 8px;
       font-size: 14px;
-      font-weight: 600
+      font-weight: 600;
     }
 
     .meal-kcal-badge {
       font-size: 11px;
       color: var(--gray-400);
       font-weight: 400;
-      font-family: var(--mono)
+      font-family: var(--mono);
     }
 
     .meal-add-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 1.5px solid var(--gray-200);
-      background: transparent;
-      cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      color: var(--gray-400);
-      transition: all .15s;
-      font-weight: 300
+      gap: 5px;
+      padding: 6px 12px 6px 10px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(168,85,247,.40);
+      background: rgba(168,85,247,.12);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: var(--font);
+      transition: background .15s, border-color .15s;
+      flex-shrink: 0;
+      letter-spacing: .01em;
     }
-
-    .meal-add-btn:hover {
-      background: var(--black);
-      color: white;
-      border-color: var(--black)
+    .meal-add-btn::before {
+      content: '+';
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--accent);
+    }
+    .meal-add-btn:active {
+      background: rgba(168,85,247,.22);
+      border-color: var(--accent);
     }
 
     .meal-items {
-      border-top: 1px solid var(--gray-100)
+      border-top: 1px solid var(--gray-100);
+    }
+    .meal-empty-hint {
+      padding: 12px 14px 14px;
+      font-size: 12px;
+      color: var(--gray-600);
+      text-align: center;
+      letter-spacing: .01em;
+      font-style: italic;
     }
 
     .meal-item {
@@ -581,30 +608,35 @@
 
     .meal-item-kcal {
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       font-family: var(--mono);
-      color: var(--gray-800)
+      color: var(--accent);
+      margin-right: 6px;
     }
 
     .meal-item-del {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       border: none;
       background: var(--red-bg);
       color: var(--red);
       cursor: pointer;
-      font-size: 12px;
+      font-size: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-left: 8px;
-      opacity: 0;
-      transition: opacity .15s
+      opacity: 0.45;
+      transition: opacity .15s, background .15s;
+      flex-shrink: 0;
     }
-
-    .meal-item:hover .meal-item-del {
-      opacity: 1
+    .meal-item:hover .meal-item-del,
+    .meal-item:active .meal-item-del {
+      opacity: 1;
+    }
+    @media (hover: none) {
+      .meal-item-del { opacity: 0.55; }
     }
 
     /* ADD FOOD BUTTON */
@@ -2490,24 +2522,26 @@
       MEAL_DEFS.forEach(function (m) {
         var items = state.meals[m.key] || [];
         var total = items.reduce(function (a, i) { return a + i.kcal }, 0);
-        var html = '<div class="meal-section"><div class="meal-header" onclick="toggleMeal(\'' + m.key + '\')">';
+        var html = '<div class="meal-section" onclick="openAddModal(\\'' + m.key + '\\')"><div class="meal-header">'
         html += '<div class="meal-header-left"><span>' + m.emoji + '</span><span>' + m.label + '</span>';
         if (total > 0) html += '<span class="meal-kcal-badge">' + total + ' kcal</span>';
         html += '</div>';
-        html += '<button class="meal-add-btn" onclick="event.stopPropagation();openAddModal(\'' + m.key + '\')">+</button>';
+        html += '<button class="meal-add-btn" onclick="event.stopPropagation();openAddModal(\\'' + m.key + '\\')">Añadir</button>';
         html += '</div>';
-        if (items.length > 0) {
-          html += '<div class="meal-items" id="meal-' + m.key + '">';
+        html += '<div class="meal-items" id="meal-' + m.key + '">';
+        if (items.length === 0) {
+          html += '<div class="meal-empty-hint">Toca aquí para añadir</div>';
+        } else {
           items.forEach(function (item, idx) {
             html += '<div class="meal-item">';
             html += '<div class="meal-item-left"><div class="meal-item-name">' + item.emoji + ' ' + item.name + '</div>';
             html += '<div class="meal-item-macros">P:' + item.p + 'g C:' + item.c + 'g G:' + item.f + 'g</div></div>';
             html += '<div class="meal-item-kcal">' + item.kcal + '</div>';
-            html += '<button class="meal-item-del" onclick="removeItem(\'' + m.key + '\',' + idx + ')">×</button>';
+            html += '<button class="meal-item-del" onclick="event.stopPropagation();removeItem(\'' + m.key + '\',' + idx + ')">×</button>';
             html += '</div>';
           });
-          html += '</div>';
         }
+        html += '</div>';
         html += '</div>';
         container.innerHTML += html;
       });
