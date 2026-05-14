@@ -2522,28 +2522,51 @@
       MEAL_DEFS.forEach(function (m) {
         var items = state.meals[m.key] || [];
         var total = items.reduce(function (a, i) { return a + i.kcal }, 0);
-        var html = '<div class="meal-section" onclick="openAddModal(\\'' + m.key + '\\')"><div class="meal-header">'
-        html += '<div class="meal-header-left"><span>' + m.emoji + '</span><span>' + m.label + '</span>';
-        if (total > 0) html += '<span class="meal-kcal-badge">' + total + ' kcal</span>';
-        html += '</div>';
-        html += '<button class="meal-add-btn" onclick="event.stopPropagation();openAddModal(\\'' + m.key + '\\')">Añadir</button>';
-        html += '</div>';
-        html += '<div class="meal-items" id="meal-' + m.key + '">';
+        // Usar data-meal para evitar escapes anidados en onclick
+        var section = document.createElement('div');
+        section.className = 'meal-section';
+        section.dataset.meal = m.key;
+        section.addEventListener('click', function() { openAddModal(m.key); });
+
+        var headerHTML = '<div class="meal-header">';
+        headerHTML += '<div class="meal-header-left"><span>' + m.emoji + '</span><span>' + m.label + '</span>';
+        if (total > 0) headerHTML += '<span class="meal-kcal-badge">' + total + ' kcal</span>';
+        headerHTML += '</div>';
+        headerHTML += '<button class="meal-add-btn">Añadir</button>';
+        headerHTML += '</div>';
+
+        var itemsHTML = '<div class="meal-items" id="meal-' + m.key + '">';
         if (items.length === 0) {
-          html += '<div class="meal-empty-hint">Toca aquí para añadir</div>';
+          itemsHTML += '<div class="meal-empty-hint">Toca aquí para añadir</div>';
         } else {
           items.forEach(function (item, idx) {
-            html += '<div class="meal-item">';
-            html += '<div class="meal-item-left"><div class="meal-item-name">' + item.emoji + ' ' + item.name + '</div>';
-            html += '<div class="meal-item-macros">P:' + item.p + 'g C:' + item.c + 'g G:' + item.f + 'g</div></div>';
-            html += '<div class="meal-item-kcal">' + item.kcal + '</div>';
-            html += '<button class="meal-item-del" onclick="event.stopPropagation();removeItem(\'' + m.key + '\',' + idx + ')">×</button>';
-            html += '</div>';
+            itemsHTML += '<div class="meal-item">';
+            itemsHTML += '<div class="meal-item-left"><div class="meal-item-name">' + item.emoji + ' ' + item.name + '</div>';
+            itemsHTML += '<div class="meal-item-macros">P:' + item.p + 'g C:' + item.c + 'g G:' + item.f + 'g</div></div>';
+            itemsHTML += '<div class="meal-item-kcal">' + item.kcal + '</div>';
+            itemsHTML += '<button class="meal-item-del" data-meal="' + m.key + '" data-idx="' + idx + '">×</button>';
+            itemsHTML += '</div>';
           });
         }
-        html += '</div>';
-        html += '</div>';
-        container.innerHTML += html;
+        itemsHTML += '</div>';
+
+        section.innerHTML = headerHTML + itemsHTML;
+
+        // Botón Añadir: stopPropagation para no abrir el modal dos veces
+        section.querySelector('.meal-add-btn').addEventListener('click', function(e) {
+          e.stopPropagation();
+          openAddModal(m.key);
+        });
+
+        // Botones eliminar: stopPropagation + removeItem
+        section.querySelectorAll('.meal-item-del').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            removeItem(btn.dataset.meal, parseInt(btn.dataset.idx));
+          });
+        });
+
+        container.appendChild(section);
       });
       updateHeroRing();
       updateMacros();
