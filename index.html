@@ -114,13 +114,15 @@
     }
 
     .brand-icon {
-      width: 28px;
-      height: 28px;
-      background: var(--black);
-      border-radius: 7px;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+      border-radius: 9px;
       display: flex;
       align-items: center;
-      justify-content: center
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(168,85,247,.40);
+      flex-shrink: 0;
     }
 
     .header-right {
@@ -635,43 +637,54 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0,0,0,0);
       z-index: 200;
-      display: none;
+      display: flex;
       align-items: flex-end;
       justify-content: center;
       max-width: 420px;
-      margin: 0 auto
+      margin: 0 auto;
+      pointer-events: none;
+      transition: background .25s ease;
     }
-
     .modal-overlay.open {
-      display: flex
+      background: rgba(0,0,0,0.62);
+      pointer-events: all;
     }
-
     .modal {
-      background: #1e1e22;
+      background: var(--white);
       border-radius: 24px 24px 0 0;
-      padding: 20px;
+      padding: 20px 20px 32px;
       width: 100%;
-      max-height: 80vh;
+      max-height: 82vh;
       overflow-y: auto;
-      border-top: 1px solid rgba(168,85,247,.18);
+      border-top: 1px solid rgba(168,85,247,.22);
+      box-shadow: 0 -4px 32px rgba(0,0,0,.5);
+      transform: translateY(100%);
+      transition: transform .32s cubic-bezier(.32,0,.15,1);
+      will-change: transform;
     }
-
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
     .modal-handle {
-      width: 48px;
+      width: 44px;
       height: 5px;
       background: var(--gray-200);
       border-radius: 3px;
-      margin: 0 auto 16px;
-      cursor: pointer;
+      margin: 0 auto 18px;
+      cursor: grab;
+      transition: background .15s, width .15s;
     }
-    .modal-handle:hover { background: var(--gray-400); }
-
+    .modal-handle:hover, .modal-handle:active {
+      background: var(--accent);
+      width: 56px;
+    }
     .modal-title {
       font-size: 16px;
       font-weight: 700;
-      margin-bottom: 16px
+      margin-bottom: 14px;
+      color: var(--black);
     }
 
     .modal-input {
@@ -736,17 +749,19 @@
 
     .modal-close {
       width: 100%;
-      padding: 12px;
+      padding: 13px;
       background: var(--gray-100);
-      border: none;
+      border: 1px solid var(--gray-200);
       border-radius: var(--radius-sm);
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       font-family: var(--font);
       cursor: pointer;
-      margin-top: 12px;
-      color: var(--gray-800)
+      margin-top: 14px;
+      color: var(--gray-600);
+      transition: background .15s, color .15s;
     }
+    .modal-close:hover { background: var(--gray-200); color: var(--black); }
 
     /* MODAL TABS */
     .modal-tabs {
@@ -1846,7 +1861,7 @@
     .qty-handle:hover { background: rgba(255,255,255,.45); }
     .qty-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
     .qty-name { font-size: 20px; font-weight: 800; color: white; line-height: 1.2; flex: 1; margin-right: 12px; }
-    .qty-brand { font-size: 13px; color: #e53e3e; font-weight: 600; margin-top: 3px; }
+    .qty-brand { font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 3px; }
     .qty-donut-wrap { flex-shrink: 0; position: relative; width: 80px; height: 80px; }
     .qty-donut-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .qty-macros-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 20px; }
@@ -1856,16 +1871,16 @@
     .qty-macro-val.mc { color: #e53e3e; }
     .qty-macro-val.mp { color: #3182ce; }
     .qty-macro-val.mg { color: #d97706; }
-    .qty-macro-val.mk { color: #6366f1; }
+    .qty-macro-val.mk { color: var(--accent); }
     .qty-macro-lbl.mc { color: #e53e3e; }
     .qty-macro-lbl.mp { color: #3182ce; }
     .qty-macro-lbl.mg { color: #d97706; }
-    .qty-macro-lbl.mk { color: #6366f1; }
+    .qty-macro-lbl.mk { color: var(--accent); }
     .qty-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .qty-input-box { background: #2a2a2a; border-radius: 12px; padding: 14px; text-align: center; display:flex; align-items:center; justify-content:center; }
+    .qty-input-box { background: var(--gray-100); border: 1.5px solid var(--gray-200); border-radius: 12px; padding: 14px; text-align: center; display:flex; align-items:center; justify-content:center; }
     .qty-input-box input { background: none; border: none; outline: none; font-size: 26px; font-weight: 700; color: white !important; -webkit-text-fill-color: white !important; font-family: var(--mono); width: 100%; text-align: center; }
     .qty-input-box .qty-unit { font-size: 22px; font-weight: 600; color: rgba(255,255,255,.5); }
-    .qty-add-btn { width: 100%; padding: 16px; background: #e53e3e; border: none; border-radius: 14px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; font-family: var(--font); }
+    .qty-add-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #a855f7, #7c3aed); border: none; border-radius: 14px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; font-family: var(--font); box-shadow: 0 4px 16px rgba(168,85,247,.30); transition: opacity .15s; }
 
     /* FOOD ROW selected state */
     .food-row.selected .food-row-check { background: var(--accent); border-color: var(--accent); }
@@ -3667,23 +3682,78 @@
     }
 
     // ─── SWIPE TO CLOSE ───
-    function addSwipeToClose(panelId, closeFn) {
+    function addSwipeToClose(panelId, overlayId, closeFn) {
       var panel = document.getElementById(panelId);
+      var overlay = document.getElementById(overlayId);
       if (!panel) return;
-      var startY = 0;
+
+      var startY = 0, currentY = 0, dragging = false;
+      var THRESHOLD = 90;   // px hacia abajo para cerrar
+      var FAST_VEL = 0.5;   // velocidad mínima (px/ms) para cierre rápido
+
       panel.addEventListener('touchstart', function(e) {
-        startY = e.touches[0].clientY;
+        // Solo arrancar si el toque viene desde la zona del handle
+        var handle = panel.querySelector('.modal-handle, .qty-handle');
+        var rect = handle ? handle.getBoundingClientRect() : null;
+        var t = e.touches[0];
+        var fromHandle = rect
+          ? (t.clientY >= rect.top - 20 && t.clientY <= rect.bottom + 20)
+          : (t.clientY - panel.getBoundingClientRect().top < 60);
+        if (!fromHandle) return;
+        startY = t.clientY;
+        currentY = 0;
+        dragging = true;
+        panel.style.transition = 'none';
+        if (overlay) overlay.style.transition = 'none';
       }, { passive: true });
+
+      panel.addEventListener('touchmove', function(e) {
+        if (!dragging) return;
+        currentY = Math.max(0, e.touches[0].clientY - startY);
+        panel.style.transform = 'translateY(' + currentY + 'px)';
+        // Oscurece/aclara el backdrop proporcional
+        if (overlay) {
+          var ratio = Math.max(0, 1 - currentY / 300);
+          overlay.style.background = 'rgba(0,0,0,' + (ratio * 0.62).toFixed(2) + ')';
+        }
+      }, { passive: true });
+
+      var lastTime = 0, lastY = 0;
+      panel.addEventListener('touchmove', function(e) {
+        lastTime = e.timeStamp; lastY = e.touches[0].clientY;
+      }, { passive: true });
+
       panel.addEventListener('touchend', function(e) {
-        var dy = e.changedTouches[0].clientY - startY;
-        if (dy > 60) closeFn();
+        if (!dragging) return;
+        dragging = false;
+        var elapsed = e.timeStamp - lastTime;
+        var velocity = elapsed > 0 ? Math.abs(e.changedTouches[0].clientY - lastY) / elapsed : 0;
+        panel.style.transition = '';
+        if (overlay) overlay.style.transition = '';
+
+        if (currentY > THRESHOLD || velocity > FAST_VEL) {
+          // Cierre: deja caer el panel con animación antes de llamar closeFn
+          panel.style.transition = 'transform .28s cubic-bezier(.32,0,.67,0)';
+          panel.style.transform = 'translateY(100%)';
+          if (overlay) overlay.style.background = 'rgba(0,0,0,0)';
+          setTimeout(function() {
+            panel.style.transform = '';
+            panel.style.transition = '';
+            closeFn();
+          }, 280);
+        } else {
+          // Snap back con muelle
+          panel.style.transition = 'transform .35s cubic-bezier(.25,1.5,.5,1)';
+          panel.style.transform = 'translateY(0)';
+          setTimeout(function(){ panel.style.transform = ''; panel.style.transition = ''; }, 350);
+        }
       }, { passive: true });
     }
 
     init();
     initTabs();
-    addSwipeToClose('qtyPanel', closeQty);
-    addSwipeToClose('addModalSheet', closeModal);
+    addSwipeToClose('qtyPanel',       'qtyOverlay',  closeQty);
+    addSwipeToClose('addModalSheet',  'addModal',    closeModal);
   </script>
   <script>
     if ('serviceWorker' in navigator) {
