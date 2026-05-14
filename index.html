@@ -33,34 +33,41 @@
     }
 
     :root {
-      --bg: #f8f8f6;
-      --white: #ffffff;
-      --black: #0a0a0a;
-      --gray-50: #f4f4f2;
-      --gray-100: #ebebea;
-      --gray-200: #d4d4d0;
-      --gray-400: #9ca3af;
-      --gray-600: #6b7280;
-      --gray-800: #374151;
-      --accent: #6366f1;
-      --accent-light: #818cf8;
-      --accent-bg: rgba(99, 102, 241, 0.08);
-      --green: #16a34a;
-      --green-light: #4ade80;
-      --green-bg: rgba(34, 197, 94, 0.1);
-      --amber: #d97706;
-      --amber-light: #fbbf24;
-      --amber-bg: rgba(251, 191, 36, 0.12);
-      --blue: #2563eb;
-      --blue-bg: rgba(37, 99, 235, 0.08);
-      --red: #ef4444;
-      --red-bg: rgba(239, 68, 68, 0.08);
+      /* ── Dark Premium Theme ── */
+      --bg:       #0d0d0f;
+      --white:    #1e1e22;
+      --surf:     #161618;
+      --black:    #f0f0f2;
+      --gray-50:  #1a1a1e;
+      --gray-100: #252528;
+      --gray-200: #3a3a3f;
+      --gray-400: #6b7280;
+      --gray-600: #9ca3af;
+      --gray-800: #d1d5db;
+      --accent:        #a855f7;
+      --accent-light:  #c084fc;
+      --accent-bg:     rgba(168, 85, 247, 0.12);
+      --accent-glow:   rgba(168, 85, 247, 0.25);
+      --green:         #4ade80;
+      --green-light:   #86efac;
+      --green-bg:      rgba(74, 222, 128, 0.10);
+      --amber:         #fbbf24;
+      --amber-light:   #fde68a;
+      --amber-bg:      rgba(251, 191, 36, 0.12);
+      --blue:          #60a5fa;
+      --blue-bg:       rgba(96, 165, 250, 0.10);
+      --red:           #f87171;
+      --red-bg:        rgba(248, 113, 113, 0.10);
+      /* macro palette fija */
+      --macro-c: #e53e3e;
+      --macro-p: #3b82f6;
+      --macro-g: #f59e0b;
       --font: 'Sora', sans-serif;
       --mono: 'JetBrains Mono', monospace;
       --radius: 16px;
       --radius-sm: 10px;
-      --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.10);
+      --shadow: 0 1px 3px rgba(0,0,0,.30), 0 1px 2px rgba(0,0,0,.20);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.40);
     }
 
     html,
@@ -642,12 +649,13 @@
     }
 
     .modal {
-      background: var(--white);
+      background: #1e1e22;
       border-radius: 24px 24px 0 0;
       padding: 20px;
       width: 100%;
       max-height: 80vh;
-      overflow-y: auto
+      overflow-y: auto;
+      border-top: 1px solid rgba(168,85,247,.18);
     }
 
     .modal-handle {
@@ -675,7 +683,9 @@
       font-family: var(--font);
       outline: none;
       transition: border-color .15s;
-      background: var(--bg)
+      background: var(--gray-100);
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
     }
 
     .modal-input:focus {
@@ -736,6 +746,179 @@
       cursor: pointer;
       margin-top: 12px;
       color: var(--gray-800)
+    }
+
+    /* MODAL TABS */
+    .modal-tabs {
+      display: flex;
+      gap: 0;
+      background: var(--gray-100);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      margin-bottom: 14px;
+    }
+    .modal-tab {
+      flex: 1;
+      padding: 7px 4px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font);
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--gray-400);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .modal-tab.active {
+      background: var(--gray-200);
+      color: var(--black);
+      box-shadow: 0 1px 3px rgba(0,0,0,.40);
+    }
+    .modal-tab-panel { display: none; }
+    .modal-tab-panel.active { display: block; }
+
+    /* ADD CUSTOM FOOD FORM */
+    .custom-food-btn {
+      width: 100%;
+      padding: 11px;
+      background: var(--accent-bg);
+      border: 1.5px dashed var(--accent);
+      border-radius: var(--radius-sm);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background .15s;
+    }
+    .custom-food-btn:hover { background: rgba(168,85,247,.20); }
+    .custom-food-form {
+      background: var(--surf);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .custom-food-form.open { display: block; }
+    .cff-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+    .cff-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .cff-row.single { grid-template-columns: 1fr; }
+    .cff-field label {
+      display: block;
+      font-size: 10px;
+      color: var(--gray-400);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+    .cff-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font);
+      background: var(--gray-100);
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color .15s;
+    }
+    .cff-input:focus { border-color: var(--accent); }
+    .cff-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .cff-save {
+      flex: 1;
+      padding: 9px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+    .cff-cancel {
+      padding: 9px 14px;
+      background: var(--gray-100);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font);
+      cursor: pointer;
+      color: var(--gray-600);
+    }
+
+    /* RECIPE CARD */
+    .recipe-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .recipe-card:hover { border-color: var(--accent); }
+    .recipe-card-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--black);
+      margin-bottom: 2px;
+    }
+    .recipe-card-meta {
+      font-size: 11px;
+      color: var(--gray-400);
+      font-family: var(--mono);
+    }
+    .recipe-card-kcal {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--mono);
+      color: var(--accent);
+      margin-right: 8px;
+    }
+    .recipe-card-add {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .modal-empty {
+      text-align: center;
+      padding: 24px 0 12px;
+      color: var(--gray-400);
+      font-size: 13px;
     }
 
     /* SCANNER SCREEN */
@@ -1883,7 +2066,7 @@
       <div id="scanResultCard" style="display:none;background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)"></div>
       <div class="scan-limit">
         <div class="scan-limit-top"><span class="scan-limit-label">Escaneos este mes</span><span
-            class="scan-limit-count" id="scanCount">3 / 10</span></div>
+            class="scan-limit-count" id="scanCount">0 / 10</span></div>
         <div class="scan-pips" id="scanPips"></div>
       </div>
       <div class="recent-scans-title">Escaneados recientemente</div>
@@ -2094,12 +2277,75 @@
     <div class="modal" id="addModalSheet">
       <div class="modal-handle" onclick="closeModal()"></div>
       <div class="modal-title" id="modalTitle">Añadir alimento</div>
-      <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
-        <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)" id="modalSearch" style="padding-left:34px">
-        <div class="search-spinner" id="modalSpinner"></div>
+
+      <!-- Pestañas -->
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="mtab-biblioteca" onclick="switchModalTab('biblioteca')">🔍 Biblioteca</button>
+        <button class="modal-tab" id="mtab-mis-alimentos" onclick="switchModalTab('mis-alimentos')">⭐ Mis alimentos</button>
+        <button class="modal-tab" id="mtab-mis-recetas" onclick="switchModalTab('mis-recetas')">🍳 Mis recetas</button>
       </div>
-      <div class="food-list" id="modalFoodList"></div>
+
+      <!-- Panel: Biblioteca (búsqueda OFF) -->
+      <div class="modal-tab-panel active" id="mpanel-biblioteca">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)" id="modalSearch" style="padding-left:34px">
+          <div class="search-spinner" id="modalSpinner"></div>
+        </div>
+        <div class="food-list" id="modalFoodList"></div>
+      </div>
+
+      <!-- Panel: Mis alimentos -->
+      <div class="modal-tab-panel" id="mpanel-mis-alimentos">
+        <button class="custom-food-btn" onclick="toggleCustomFoodForm()">+ Añadir alimento propio</button>
+        <div class="custom-food-form" id="customFoodForm">
+          <div class="cff-title">Nuevo alimento</div>
+          <div class="cff-row single">
+            <div class="cff-field">
+              <label>Nombre</label>
+              <input class="cff-input" id="cff-name" type="text" placeholder="Ej: Tortilla de espinacas">
+            </div>
+          </div>
+          <div class="cff-row single">
+            <div class="cff-field">
+              <label>Marca (opcional)</label>
+              <input class="cff-input" id="cff-brand" type="text" placeholder="Ej: Hacendado">
+            </div>
+          </div>
+          <div class="cff-row">
+            <div class="cff-field">
+              <label>Kcal / 100g</label>
+              <input class="cff-input" id="cff-kcal" inputmode="numeric" type="number" placeholder="0">
+            </div>
+            <div class="cff-field">
+              <label>Proteínas (g)</label>
+              <input class="cff-input" id="cff-p" inputmode="numeric" type="number" placeholder="0">
+            </div>
+          </div>
+          <div class="cff-row">
+            <div class="cff-field">
+              <label>Carbohidratos (g)</label>
+              <input class="cff-input" id="cff-c" inputmode="numeric" type="number" placeholder="0">
+            </div>
+            <div class="cff-field">
+              <label>Grasas (g)</label>
+              <input class="cff-input" id="cff-f" inputmode="numeric" type="number" placeholder="0">
+            </div>
+          </div>
+          <div class="cff-actions">
+            <button class="cff-cancel" onclick="toggleCustomFoodForm()">Cancelar</button>
+            <button class="cff-save" onclick="saveCustomFood()">Guardar alimento</button>
+          </div>
+        </div>
+        <div class="food-list" id="myFoodsList"></div>
+      </div>
+
+      <!-- Panel: Mis recetas -->
+      <div class="modal-tab-panel" id="mpanel-mis-recetas">
+        <button class="custom-food-btn" onclick="openNewRecipeModal()">+ Crear receta nueva</button>
+        <div id="myRecipesList"></div>
+      </div>
+
       <button class="modal-close" onclick="closeModal()">Cancelar</button>
     </div>
   </div>
@@ -2112,7 +2358,7 @@
       profile: null, sex: 'H', activity: 1.2, goal: 'perder',
       meals: { desayuno: [], almuerzo: [], snacks: [], cena: [] },
       allDayData: {}, currentDate: new Date(),
-      scansUsed: 3, maxScans: 10, selectedStars: 5,
+      scansUsed: 0, maxScans: 10, selectedStars: 5,
       currentMealTarget: null, isPremium: false,
       histPeriod: 30
     };
@@ -2148,6 +2394,11 @@
       { name: 'Sergio R.', handle: 'Beta tester · Sevilla', stars: 5, text: '10€ al año es una risa comparado con MyFitnessPal. Y esta funciona mejor para productos españoles porque usa Open Food Facts.', color: '#ec4899' },
     ];
     var reviews = [...REVIEWS_INITIAL];
+
+    // ─── MIS ALIMENTOS & MIS RECETAS ───
+    var myFoods = [];   // alimentos creados manualmente por el usuario
+    var myRecipes = []; // recetas personalizadas
+    var scanHistory = []; // historial real de escaneos
 
     // ─── INIT ───
     function init() {
@@ -2309,10 +2560,25 @@
       }
     }
 
+    // ─── MODAL 3 PESTAÑAS ───
+    var activeModalTab = 'biblioteca';
+
+    function switchModalTab(tab) {
+      activeModalTab = tab;
+      document.querySelectorAll('.modal-tab').forEach(function(t){ t.classList.remove('active'); });
+      document.querySelectorAll('.modal-tab-panel').forEach(function(p){ p.classList.remove('active'); });
+      document.getElementById('mtab-' + tab).classList.add('active');
+      document.getElementById('mpanel-' + tab).classList.add('active');
+      if (tab === 'mis-alimentos') renderMyFoodsList();
+      if (tab === 'mis-recetas') renderMyRecipesList();
+    }
+
     // ─── MODAL ───
     function openAddModal(meal) {
       state.currentMealTarget = meal;
       document.getElementById('modalTitle').textContent = meal ? 'Añadir a ' + meal : 'Añadir alimento';
+      // Reset siempre a pestaña Biblioteca al abrir
+      switchModalTab('biblioteca');
       document.getElementById('modalSearch').value = '';
       filterModal('');
       document.getElementById('addModal').classList.add('open');
@@ -2412,6 +2678,139 @@
 
     function addFoodFromModal(id) { openQty(id); }
     function addFood(id) { openQty(id); }
+
+    // ─── MIS ALIMENTOS — funciones ───
+    function toggleCustomFoodForm() {
+      var form = document.getElementById('customFoodForm');
+      form.classList.toggle('open');
+      if (form.classList.contains('open')) {
+        // Limpiar campos
+        ['cff-name','cff-brand','cff-kcal','cff-p','cff-c','cff-f'].forEach(function(id){
+          document.getElementById(id).value = '';
+        });
+        setTimeout(function(){ document.getElementById('cff-name').focus(); }, 150);
+      }
+    }
+
+    function saveCustomFood() {
+      var name = document.getElementById('cff-name').value.trim();
+      if (!name) { showToast('⚠️ Escribe un nombre para el alimento'); return; }
+      var brand = document.getElementById('cff-brand').value.trim();
+      var kcal = parseFloat(document.getElementById('cff-kcal').value) || 0;
+      var p    = parseFloat(document.getElementById('cff-p').value) || 0;
+      var c    = parseFloat(document.getElementById('cff-c').value) || 0;
+      var f    = parseFloat(document.getElementById('cff-f').value) || 0;
+      var food = {
+        id: 'my_' + Date.now(),
+        name: name,
+        brand: brand,
+        emoji: '🍽️',
+        kcal: Math.round(kcal),
+        p: Math.round(p * 10) / 10,
+        c: Math.round(c * 10) / 10,
+        f: Math.round(f * 10) / 10,
+        isCustom: true
+      };
+      myFoods.unshift(food);
+      // También en FOODS para que esté disponible globalmente
+      FOODS.unshift(food);
+      saveAll();
+      toggleCustomFoodForm();
+      renderMyFoodsList();
+      showToast('✅ ' + name + ' guardado en Mis alimentos');
+    }
+
+    function deleteMyFood(id) {
+      myFoods = myFoods.filter(function(f){ return f.id !== id; });
+      FOODS = FOODS.filter(function(f){ return f.id !== id; });
+      saveAll();
+      renderMyFoodsList();
+      showToast('🗑️ Alimento eliminado');
+    }
+
+    function renderMyFoodsList() {
+      var el = document.getElementById('myFoodsList');
+      if (!myFoods.length) {
+        el.innerHTML = '<div class="modal-empty">No tienes alimentos propios aún.<br>Pulsa el botón de arriba para añadir uno.</div>';
+        return;
+      }
+      el.innerHTML = myFoods.map(function(f) {
+        var brand = f.brand ? f.brand : '';
+        return '<div class="food-row" style="position:relative">' +
+          '<div class="food-row-check"></div>' +
+          '<div class="food-row-info">' +
+            '<div class="food-row-name">' + f.name + '</div>' +
+            (brand ? '<div class="food-row-sub">' + brand + '</div>' : '') +
+            '<div class="food-row-macros">' +
+              '<span class="mc">C: ' + f.c + '</span>' +
+              '<span class="mp">P: ' + f.p + '</span>' +
+              '<span class="mg">G: ' + f.f + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="food-row-right">' +
+            '<div class="food-row-kcal">' + f.kcal + '</div>' +
+            '<button class="food-row-add" onclick="event.stopPropagation();openQty(\'' + f.id + '\')">+</button>' +
+          '</div>' +
+          '<button onclick="event.stopPropagation();deleteMyFood(\'' + f.id + '\')" ' +
+            'style="position:absolute;top:6px;right:44px;background:none;border:none;color:var(--gray-400);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1" ' +
+            'title="Eliminar">✕</button>' +
+        '</div>';
+      }).join('');
+    }
+
+    // ─── MIS RECETAS — funciones ───
+    function openNewRecipeModal() {
+      showToast('🚧 Recetas personalizadas — próximamente');
+    }
+
+    function renderMyRecipesList() {
+      var el = document.getElementById('myRecipesList');
+      if (!myRecipes.length) {
+        el.innerHTML = '<div class="modal-empty">No tienes recetas creadas aún.<br>Pulsa el botón de arriba para crear una.</div>';
+        return;
+      }
+      el.innerHTML = myRecipes.map(function(r) {
+        var totKcal = r.ingredients.reduce(function(acc, ing){ return acc + ing.kcal; }, 0);
+        var totP = r.ingredients.reduce(function(acc, ing){ return acc + ing.p; }, 0);
+        var totC = r.ingredients.reduce(function(acc, ing){ return acc + ing.c; }, 0);
+        var totF = r.ingredients.reduce(function(acc, ing){ return acc + ing.f; }, 0);
+        return '<div class="recipe-card">' +
+          '<div>' +
+            '<div class="recipe-card-name">' + r.name + '</div>' +
+            '<div class="recipe-card-meta">P:' + Math.round(totP) + 'g · C:' + Math.round(totC) + 'g · G:' + Math.round(totF) + 'g</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center">' +
+            '<div class="recipe-card-kcal">' + Math.round(totKcal) + '</div>' +
+            '<button class="recipe-card-add" onclick="addRecipeToMeal(\'' + r.id + '\')">+</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function addRecipeToMeal(id) {
+      var recipe = myRecipes.find(function(r){ return r.id === id; });
+      if (!recipe) return;
+      var totKcal = recipe.ingredients.reduce(function(acc, ing){ return acc + ing.kcal; }, 0);
+      var totP = recipe.ingredients.reduce(function(acc, ing){ return acc + ing.p; }, 0);
+      var totC = recipe.ingredients.reduce(function(acc, ing){ return acc + ing.c; }, 0);
+      var totF = recipe.ingredients.reduce(function(acc, ing){ return acc + ing.f; }, 0);
+      var entry = {
+        id: recipe.id, name: recipe.name, emoji: '🍳',
+        brand: '', grams: null,
+        kcal: Math.round(totKcal),
+        p: Math.round(totP * 10) / 10,
+        c: Math.round(totC * 10) / 10,
+        f: Math.round(totF * 10) / 10
+      };
+      var meal = state.currentMealTarget || 'desayuno';
+      state.meals[meal].push(entry);
+      saveAll();
+      closeModal();
+      renderMeals();
+      updateHeroRing();
+      updateMacros();
+      showToast('✅ ' + recipe.name + ' añadido a ' + meal);
+    }
 
     // ─── FOODS LIST — Open Food Facts ───
     var foodSearchTimer = null;
@@ -2549,16 +2948,20 @@
       document.getElementById('scanCount').textContent = state.isPremium ? '∞ ilimitados' : (state.scansUsed + ' / ' + state.maxScans);
     }
     function renderRecentScans() {
-      var recent = [FOODS[0], FOODS[6], FOODS[3]];
+      var el = document.getElementById('recentScans');
+      if (!scanHistory.length) {
+        el.innerHTML = '<div style="text-align:center;padding:18px 0;color:var(--gray-400);font-size:13px">Aún no has escaneado ningún producto este mes.</div>';
+        return;
+      }
       var html = '';
-      recent.forEach(function (f) {
-        html += '<div class="food-card"><div class="food-card-emoji">' + f.emoji + '</div>';
+      scanHistory.slice(0, 5).forEach(function(f) {
+        html += '<div class="food-card"><div class="food-card-emoji">' + (f.emoji || '📦') + '</div>';
         html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
         html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
         html += '<div class="food-card-kcal">' + f.kcal + '</div>';
-        html += '<button class="food-card-add" onclick="addFood(' + f.id + ');showTab(\'diario\',null)">+</button></div>';
+        html += '<button class="food-card-add" onclick="addFood(\'' + f.id + '\');showTab(\'diario\',null)">+</button></div>';
       });
-      document.getElementById('recentScans').innerHTML = html;
+      el.innerHTML = html;
     }
 
     // ─── QUAGGA SCANNER ───
@@ -2667,8 +3070,12 @@
           f: Math.round((n['fat_100g'] || 0) * 10) / 10
         };
         state.scansUsed++;
+        // Guardar en historial real de escaneos
+        if (!scanHistory.find(function(x){ return x.id === food.id; })) scanHistory.unshift(food);
+        else { scanHistory = scanHistory.filter(function(x){ return x.id !== food.id; }); scanHistory.unshift(food); }
         saveAll();
         renderScanPips();
+        renderRecentScans();
         if (!FOODS.find(function(f){ return f.name === food.name; })) FOODS.unshift(food);
 
         var nutriScore = p.nutriscore_grade ? p.nutriscore_grade.toUpperCase() : null;
@@ -3188,7 +3595,10 @@
         state.allDayData[key] = JSON.parse(JSON.stringify(state.meals));
         localStorage.setItem('fl_days', JSON.stringify(state.allDayData));
         localStorage.setItem('fl_reviews', JSON.stringify(reviews));
-        localStorage.setItem('fl_scans', JSON.stringify({ used: state.scansUsed, month: new Date().getMonth() }));
+        localStorage.setItem('fl_scans', JSON.stringify({ used: state.scansUsed, month: new Date().getMonth(), year: new Date().getFullYear() }));
+        localStorage.setItem('fl_myfoods', JSON.stringify(myFoods));
+        localStorage.setItem('fl_myrecipes', JSON.stringify(myRecipes));
+        localStorage.setItem('fl_scanhistory', JSON.stringify(scanHistory));
       } catch(e) {}
     }
     function loadAll() {
@@ -3203,12 +3613,18 @@
         // Reviews
         var rev = JSON.parse(localStorage.getItem('fl_reviews') || 'null');
         if (rev && rev.length > 0) reviews = rev;
-        // Scans
+        // Scans — reset si cambió el mes o el año
         var scans = JSON.parse(localStorage.getItem('fl_scans') || 'null');
         if (scans) {
-          // Reset if different month
-          if (scans.month !== new Date().getMonth()) { state.scansUsed = 0; }
-          else { state.scansUsed = scans.used || 0; }
+          var now = new Date();
+          // Migración: si no tiene year (datos viejos), resetear
+          var sameMonth = scans.month === now.getMonth() && scans.year === now.getFullYear();
+          if (!sameMonth) {
+            state.scansUsed = 0;
+            scanHistory = [];
+          } else {
+            state.scansUsed = scans.used || 0;
+          }
         }
         // Premium
         state.isPremium = localStorage.getItem('fl_premium') === 'true';
@@ -3225,6 +3641,27 @@
             document.getElementById('pWeight').value = prof.weight || '';
             document.getElementById('pHeight').value = prof.height || '';
           } catch(e) {}
+        }
+        // Mis alimentos propios
+        var mf = JSON.parse(localStorage.getItem('fl_myfoods') || 'null');
+        if (mf && mf.length) {
+          myFoods = mf;
+          // Reintegrar en FOODS para búsqueda global
+          mf.forEach(function(f){
+            if (!FOODS.find(function(x){ return x.id === f.id; })) FOODS.unshift(f);
+          });
+        }
+        // Mis recetas
+        var mr = JSON.parse(localStorage.getItem('fl_myrecipes') || 'null');
+        if (mr && mr.length) myRecipes = mr;
+        // Historial de escaneos (se resetea al cambiar de mes o año)
+        var sh = JSON.parse(localStorage.getItem('fl_scanhistory') || 'null');
+        if (sh && sh.length) {
+          var scansCheck = JSON.parse(localStorage.getItem('fl_scans') || 'null');
+          var nowCheck = new Date();
+          var validSH = scansCheck && scansCheck.month === nowCheck.getMonth() && scansCheck.year === nowCheck.getFullYear();
+          if (validSH) scanHistory = sh;
+          // Si cambió mes o año, scanHistory se queda vacío
         }
       } catch(e) {}
     }
@@ -3250,9 +3687,30 @@
   </script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js')
-          .catch(function(e){ console.log('SW error:', e); });
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').then(function (reg) {
+
+          // Detecta cuando hay un SW nuevo esperando y lo activa de inmediato
+          reg.addEventListener('updatefound', function () {
+            var newWorker = reg.installing;
+            newWorker.addEventListener('statechange', function () {
+              // 'activated' → el SW nuevo ya controla la página: recarga silenciosa
+              if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                window.location.reload();
+              }
+            });
+          });
+
+        }).catch(function (e) { console.log('SW error:', e); });
+
+        // Si el controlador cambia (skipWaiting de otra pestaña), recarga también
+        var refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
       });
     }
   </script>
