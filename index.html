@@ -3733,20 +3733,40 @@
       var age = parseFloat(document.getElementById('pAge').value);
       var w = parseFloat(document.getElementById('pWeight').value);
       var h = parseFloat(document.getElementById('pHeight').value);
+
       if (!age || !w || !h) return;
-      var bmr = state.sex === 'H' ? (88.362 + 13.397 * w + 4.799 * h - 5.677 * age) : (447.593 + 9.247 * w + 3.098 * h - 4.330 * age);
-      var tdee = Math.round(bmr * state.activity);
-      var adj = state.goal === 'perder' ? -300 : state.goal === 'ganar' ? 300 : 0;
-      var kcal = tdee + adj;
+
+      var bmr = state.sex === 'H'
+        ? (88.362 + 13.397 * w + 4.799 * h - 5.677 * age)
+        : (447.593 + 9.247 * w + 3.098 * h - 4.330 * age);
+
+      var tdee = bmr * state.activity;
+      var kcal = tdee;
+
+      if (state.goal === 'perder') {
+        kcal *= 0.9;
+      } else if (state.goal === 'ganar') {
+        kcal *= 1.1;
+      }
+
+      kcal = Math.round(kcal);
+
       var prot = Math.round(w * 2);
       var fat = Math.round(kcal * 0.25 / 9);
       var carb = Math.round((kcal - prot * 4 - fat * 9) / 4);
+
       document.getElementById('hbResult').style.display = 'block';
       document.getElementById('resKcal').textContent = kcal;
       document.getElementById('resProt').textContent = prot + 'g';
       document.getElementById('resCarb').textContent = carb + 'g';
       document.getElementById('resFat').textContent = fat + 'g';
-      state._pending = { kcal: kcal, prot: prot, carb: carb, fat: fat };
+
+      state._pending = {
+        kcal: kcal,
+        prot: prot,
+        carb: carb,
+        fat: fat
+      };
     }
     function saveProfile() {
       if (!state._pending) { showToast('Rellena todos los datos primero'); return; }
