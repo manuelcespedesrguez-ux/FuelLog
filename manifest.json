@@ -5,9 +5,9 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0d0f",
+  "theme_color": "#a855f7",
   "lang": "es",
   "icons": [
     {
@@ -35,5 +35,6 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["health", "fitness", "food"]
+  "categories": ["health", "fitness", "food"],
+  "prefer_related_applications": false
 }

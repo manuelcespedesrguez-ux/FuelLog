@@ -540,14 +540,17 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 6px 12px 6px 10px;
+      padding: 6px 14px 6px 10px;
       border-radius: 20px;
-      border: 1.5px solid rgba(168,85,247,.40);
-      background: rgba(168,85,247,.12);
+      border: 1.5px solid rgba(168,85,247,.50);
+      background: rgba(168,85,247,.15);
+      -webkit-appearance: none;
+      appearance: none;
       cursor: pointer;
       font-size: 12px;
       font-weight: 700;
       color: var(--accent);
+      -webkit-text-fill-color: var(--accent);
       font-family: var(--font);
       transition: background .15s, border-color .15s;
       flex-shrink: 0;
@@ -568,14 +571,7 @@
     .meal-items {
       border-top: 1px solid var(--gray-100);
     }
-    .meal-empty-hint {
-      padding: 12px 14px 14px;
-      font-size: 12px;
-      color: var(--gray-600);
-      text-align: center;
-      letter-spacing: .01em;
-      font-style: italic;
-    }
+    .meal-empty-hint { display: none; }
 
     .meal-item {
       display: flex;
@@ -1688,7 +1684,8 @@
     .food-row:last-child { border-bottom: none; }
     .food-row:active { background: var(--gray-50); }
 
-    .food-row-check {
+    .food-row-check { display: none; }
+    .food-row-check-hidden {
       width: 20px; height: 20px;
       border: 1.5px solid var(--gray-200);
       border-radius: 5px;
@@ -1744,20 +1741,34 @@
     }
 
     .food-row-add {
-      width: 24px; height: 24px;
+      width: 30px; height: 30px;
       border-radius: 50%;
-      background: var(--black);
+      background: var(--accent);
+      -webkit-appearance: none;
+      appearance: none;
       border: none;
       color: white;
+      -webkit-text-fill-color: white;
       cursor: pointer;
-      font-size: 15px;
+      font-size: 20px;
+      font-weight: 300;
+      line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: opacity .15s;
+      box-shadow: 0 2px 10px rgba(168,85,247,.45);
+      transition: transform .15s, box-shadow .15s;
     }
-    .food-row-add:hover { opacity: .7; }
+    .food-row-add:active { transform: scale(.86); box-shadow: none; }
+    .food-row-del-btn {
+      position: absolute; top: 8px; right: 44px;
+      background: none; border: none;
+      color: var(--gray-400); font-size: 13px;
+      cursor: pointer; padding: 4px 6px; line-height: 1;
+      border-radius: 50%; transition: color .15s, background .15s;
+    }
+    .food-row-del-btn:hover { color: var(--red); background: var(--red-bg); }
 
     .foods-empty {
       text-align: center;
@@ -2537,7 +2548,7 @@
 
         var itemsHTML = '<div class="meal-items" id="meal-' + m.key + '">';
         if (items.length === 0) {
-          itemsHTML += '<div class="meal-empty-hint">Toca aquí para añadir</div>';
+          // Sin hint text — la tarjeta entera es clickable
         } else {
           items.forEach(function (item, idx) {
             itemsHTML += '<div class="meal-item">';
@@ -2662,7 +2673,9 @@
       var listEl = document.getElementById('modalFoodList');
       // Show local instantly
       var local = FOODS.filter(function(f){ return !q || f.name.toLowerCase().includes(q.toLowerCase()); });
-      listEl.innerHTML = local.slice(0, 10).map(function(f){ return foodRowHTML(f); }).join('') || '<div class="foods-empty">Escribe para buscar</div>';
+      listEl.innerHTML = '';
+      if (local.length === 0) { listEl.innerHTML = '<div class="foods-empty">Escribe para buscar</div>'; }
+      else { local.slice(0, 10).forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
       if (!q || q.length < 2) return;
       document.getElementById('modalSpinner').classList.add('visible');
       modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 250);
@@ -2806,10 +2819,13 @@
         el.innerHTML = '<div class="modal-empty">No tienes alimentos propios aún.<br>Pulsa el botón de arriba para añadir uno.</div>';
         return;
       }
-      el.innerHTML = myFoods.map(function(f) {
+      var fragment = document.createDocumentFragment();
+      myFoods.forEach(function(f) {
         var brand = f.brand ? f.brand : '';
-        return '<div class="food-row" style="position:relative">' +
-          '<div class="food-row-check"></div>' +
+        var row = document.createElement('div');
+        row.className = 'food-row';
+        row.style.position = 'relative';
+        row.innerHTML =
           '<div class="food-row-info">' +
             '<div class="food-row-name">' + f.name + '</div>' +
             (brand ? '<div class="food-row-sub">' + brand + '</div>' : '') +
@@ -2821,13 +2837,20 @@
           '</div>' +
           '<div class="food-row-right">' +
             '<div class="food-row-kcal">' + f.kcal + '</div>' +
-            '<button class="food-row-add" onclick="event.stopPropagation();openQty(\'' + f.id + '\')">+</button>' +
+            '<button class="food-row-add">+</button>' +
           '</div>' +
-          '<button onclick="event.stopPropagation();deleteMyFood(\'' + f.id + '\')" ' +
-            'style="position:absolute;top:6px;right:44px;background:none;border:none;color:var(--gray-400);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1" ' +
-            'title="Eliminar">✕</button>' +
-        '</div>';
-      }).join('');
+          '<button class="food-row-del-btn" title="Eliminar">✕</button>';
+        row.addEventListener('click', function() { openQty(f.id); });
+        row.querySelector('.food-row-add').addEventListener('click', function(e) {
+          e.stopPropagation(); openQty(f.id);
+        });
+        row.querySelector('.food-row-del-btn').addEventListener('click', function(e) {
+          e.stopPropagation(); deleteMyFood(f.id);
+        });
+        fragment.appendChild(row);
+      });
+      el.innerHTML = '';
+      el.appendChild(fragment);
     }
 
     // ─── MIS RECETAS — funciones ───
@@ -2888,10 +2911,12 @@
     var foodSearchTimer = null;
     var offCache = {}; // cache búsquedas ya realizadas
 
-    function foodRowHTML(f) {
+    // Crea un food-row como elemento DOM con listeners reales (no outerHTML)
+    function createFoodRow(f) {
       var brand = f.brand ? f.brand + (f.qty ? ', ' + f.qty : '') : (f.qty || '');
-      return '<div class="food-row" onclick="toggleFoodRow(this)">' +
-        '<div class="food-row-check"></div>' +
+      var row = document.createElement('div');
+      row.className = 'food-row';
+      row.innerHTML =
         '<div class="food-row-info">' +
           '<div class="food-row-name">' + f.name + '</div>' +
           (brand ? '<div class="food-row-sub">' + brand + '</div>' : '') +
@@ -2903,19 +2928,26 @@
         '</div>' +
         '<div class="food-row-right">' +
           '<div class="food-row-kcal">' + f.kcal + '</div>' +
-          '<button class="food-row-add" onclick="event.stopPropagation();openQty(\'' + f.id + '\')">+</button>' +
-        '</div>' +
-      '</div>';
+          '<button class="food-row-add">+</button>' +
+        '</div>';
+      // Toda la fila (y el botón +) abren directamente el panel de gramos
+      row.addEventListener('click', function() { openQty(f.id); });
+      row.querySelector('.food-row-add').addEventListener('click', function(e) {
+        e.stopPropagation();
+        openQty(f.id);
+      });
+      return row;
     }
+    // Compatibilidad: devuelve outerHTML para sitios que lo necesiten
+    function foodRowHTML(f) { return createFoodRow(f).outerHTML; }
 
     function toggleFoodRow(el) { el.classList.toggle('selected'); }
 
     function renderFoods() {
-      var html = '';
-      FOODS.slice(0, 15).forEach(function(f) {
-        html += foodRowHTML(f);
-      });
-      document.getElementById('foodsList').innerHTML = html || '<div class="foods-empty">Sin alimentos frecuentes aún</div>';
+      var el = document.getElementById('foodsList');
+      el.innerHTML = '';
+      if (!FOODS.length) { el.innerHTML = '<div class="foods-empty">Sin alimentos frecuentes aún</div>'; return; }
+      FOODS.slice(0, 15).forEach(function(f){ el.appendChild(createFoodRow(f)); });
     }
 
     function filterFoods(q) {
@@ -2931,7 +2963,8 @@
       var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
       var listEl = document.getElementById('foodsList');
       if (local.length) {
-        listEl.innerHTML = local.map(function(f){ return foodRowHTML(f); }).join('');
+        listEl.innerHTML = '';
+        local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
       } else {
         listEl.innerHTML = '<div class="foods-empty">Buscando...</div>';
       }
@@ -2972,9 +3005,9 @@
         renderOFFResults(products, listEl);
       } catch(e) {
         var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
-        listEl.innerHTML = local.length
-          ? local.map(function(f){ return foodRowHTML(f); }).join('')
-          : '<div class="foods-empty">Sin conexión — mostrando resultados locales</div>';
+        listEl.innerHTML = '';
+        if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+        else { listEl.innerHTML = '<div class="foods-empty">Sin conexión — mostrando resultados locales</div>'; }
       } finally {
         if (spinner) spinner.classList.remove('visible');
       }
@@ -2985,7 +3018,8 @@
         listEl.innerHTML = '<div class="foods-empty">Sin resultados</div>';
         return;
       }
-      var html = '';
+      // Renderiza con DOM para que los listeners funcionen
+      listEl.innerHTML = '';
       products.forEach(function(p) {
         var n = p.nutriments || {};
         var food = {
@@ -2999,14 +3033,10 @@
           c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
           f: Math.round((n['fat_100g'] || 0) * 10) / 10
         };
-        if (!FOODS.find(function(x){ return x.id === food.id; })) {
-          FOODS.unshift(food);
-        } else {
-          food = FOODS.find(function(x){ return x.id === food.id; });
-        }
-        html += foodRowHTML(food);
+        if (!FOODS.find(function(x){ return x.id === food.id; })) { FOODS.unshift(food); }
+        else { food = FOODS.find(function(x){ return x.id === food.id; }); }
+        listEl.appendChild(createFoodRow(food));
       });
-      listEl.innerHTML = html;
     }
 
     // ─── SCANNER PIPS ───
