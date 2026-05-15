@@ -732,6 +732,10 @@
     .modal-input:focus {
       border-color: var(--accent)
     }
+    .modal-input::placeholder {
+      color: var(--gray-400);
+      -webkit-text-fill-color: var(--gray-400);
+    }
 
     .food-list {
       margin-top: 12px;
@@ -1376,6 +1380,24 @@
       margin-bottom: 8px
     }
 
+    /* ── FIX iOS: placeholder y autofill en inputs oscuros ── */
+    input, textarea, select {
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
+    }
+    input::placeholder, textarea::placeholder {
+      color: var(--gray-400);
+      -webkit-text-fill-color: var(--gray-400);
+      opacity: 1;
+    }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 40px var(--gray-100) inset !important;
+      -webkit-text-fill-color: var(--black) !important;
+      caret-color: var(--black);
+    }
     .form-input {
       width: 100%;
       padding: 10px 12px;
@@ -1385,7 +1407,12 @@
       font-family: var(--font);
       outline: none;
       transition: border-color .15s;
-      background: var(--bg)
+      background: var(--gray-100);
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
+      -webkit-appearance: none;
+      appearance: none;
+      box-sizing: border-box;
     }
 
     .form-input:focus {
@@ -2386,16 +2413,16 @@
           <div class="form-row">
             <div>
               <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Edad (años)</div><input
-                class="form-input" type="number" id="pAge" placeholder="25" min="15" max="80" oninput="calcHB()">
+                class="form-input" type="number" id="pAge" placeholder="25" min="15" max="80" inputmode="numeric" oninput="calcHB()">
             </div>
             <div>
               <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Peso (kg)</div><input
-                class="form-input" type="number" id="pWeight" placeholder="70" min="30" max="250" oninput="calcHB()">
+                class="form-input" type="number" id="pWeight" placeholder="70" min="30" max="250" inputmode="decimal" oninput="calcHB()">
             </div>
           </div>
           <div style="margin-top:8px">
             <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Altura (cm)</div><input
-              class="form-input" type="number" id="pHeight" placeholder="170" min="120" max="230" oninput="calcHB()">
+              class="form-input" type="number" id="pHeight" placeholder="170" min="120" max="230" inputmode="numeric" oninput="calcHB()">
           </div>
         </div>
         <div class="form-group">
@@ -2451,6 +2478,19 @@
               <div class="result-item-lbl">g grasas</div>
             </div>
           </div>
+        </div>
+        <div class="form-group" id="vipSection">
+          <div class="form-label">Acceso VIP <span style="font-size:11px;font-weight:400;color:var(--gray-400)">(beta testers)</span></div>
+          <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">Introduce tu email de tester o código de acceso para activar escaneos ilimitados.</div>
+          <div style="margin-bottom:8px">
+            <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Email</div>
+            <input class="form-input" type="email" id="pEmail" placeholder="tu@email.com" autocomplete="email">
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Código de acceso</div>
+            <input class="form-input" type="text" id="pVipCode" placeholder="Ej: FUELLOG2026" autocomplete="off" style="text-transform:uppercase;letter-spacing:.05em">
+          </div>
+          <div id="vipStatus" style="margin-top:8px;font-size:12px;display:none"></div>
         </div>
         <button class="save-btn" onclick="saveProfile()">Guardar perfil</button>
       </div>
@@ -3709,9 +3749,20 @@
           height: document.getElementById('pHeight').value
         }));
       } catch(e) {}
+      // Comprobar acceso VIP
+      var wasVip = applyVipIfEligible();
+      // Mostrar estado VIP en perfil
+      var vipStatus = document.getElementById('vipStatus');
+      if (vipStatus) {
+        if (state.isPremium) {
+          vipStatus.style.display = 'block';
+          vipStatus.innerHTML = '<span style="color:#a855f7;font-weight:600">⚡ Acceso VIP activo — escaneos ilimitados</span>';
+        }
+      }
       saveAll();
       updateHeroRing();
       updateMacros();
+      updatePremiumBadge();
       showToast('✅ Perfil guardado');
       setTimeout(function () { showTab('diario', null); }, 800);
     }
@@ -4231,6 +4282,76 @@
         localStorage.setItem('fl_scanhistory', JSON.stringify(scanHistory));
       } catch(e) {}
     }
+    // ─── USUARIOS VIP — acceso premium por lista blanca ───
+    // Añade aquí los identificadores que quieras (email o nickname)
+    // El usuario lo introduce en Perfil → campo "Email (opcional)"
+    // o se puede usar un código de acceso
+    // ─────────────────────────────────────────────
+    // USUARIOS VIP — edita estas listas para dar
+    // acceso premium a usuarios específicos.
+    //
+    // Opción A: por EMAIL (el usuario lo introduce
+    //           en Perfil → campo Email)
+    // Opción B: por CÓDIGO (lo introduce en el
+    //           campo Código VIP del perfil)
+    // ─────────────────────────────────────────────
+    var VIP_EMAILS = [
+      // ← pon aquí los emails de tus testers
+      'manuel@fuellog.app',
+      'beta1@fuellog.app',
+      'beta2@fuellog.app',
+      // 'amigo@gmail.com',
+    ];
+
+    var VIP_CODES = [
+      // ← comparte estos códigos con quien quieras
+      'FUELLOG2026',   // código general beta
+      'BETA-VIP-01',   // tester 1
+      'BETA-VIP-02',   // tester 2
+      'BETA-VIP-03',   // tester 3
+      'FUELBETA',      // código corto fácil de recordar
+    ];
+
+    function checkVipAccess(emailOrCode) {
+      if (!emailOrCode) return false;
+      var val = emailOrCode.trim().toLowerCase();
+      // Comprobar email
+      if (VIP_EMAILS.some(function(e){ return e.toLowerCase() === val; })) return true;
+      // Comprobar código (insensible a mayúsculas)
+      if (VIP_CODES.some(function(c){ return c.toLowerCase() === val; })) return true;
+      return false;
+    }
+
+    function applyVipIfEligible() {
+      var emailVal = (document.getElementById('pEmail') ? document.getElementById('pEmail').value : '') || '';
+      var codeVal  = (document.getElementById('pVipCode') ? document.getElementById('pVipCode').value : '') || '';
+      var vipStored = localStorage.getItem('fl_vip_id') || '';
+      var eligible = checkVipAccess(emailVal) || checkVipAccess(codeVal) || checkVipAccess(vipStored);
+      if (eligible && !state.isPremium) {
+        state.isPremium = true;
+        state.maxScans = 9999;
+        localStorage.setItem('fl_premium', 'true');
+        // Guardar el identificador para persistencia
+        if (checkVipAccess(emailVal)) localStorage.setItem('fl_vip_id', emailVal.trim().toLowerCase());
+        if (checkVipAccess(codeVal))  localStorage.setItem('fl_vip_id', codeVal.trim().toUpperCase());
+        updatePremiumBadge();
+        showToast('⚡ Acceso VIP activado — escaneos ilimitados');
+        return true;
+      }
+      return false;
+    }
+
+    function updatePremiumBadge() {
+      var badge = document.getElementById('planBadge');
+      if (!badge) return;
+      if (state.isPremium) {
+        badge.textContent = '★ Premium';
+        badge.classList.remove('free');
+      } else {
+        badge.textContent = 'Free · ' + state.maxScans + ' escaneos';
+      }
+    }
+
     function loadAll() {
       try {
         // Days
