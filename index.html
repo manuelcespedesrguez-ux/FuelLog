@@ -913,6 +913,214 @@
       color: var(--gray-600);
     }
 
+
+    /* RECIPE FORM */
+    .recipe-form {
+      background: var(--surf);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .recipe-form.open { display: block; }
+    .rff-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+    .rff-name-row {
+      margin-bottom: 10px;
+    }
+    .rff-name-row label {
+      display: block;
+      font-size: 10px;
+      color: var(--gray-400);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+    .rff-ingredients-list {
+      margin-bottom: 10px;
+    }
+    .rff-ingredient-row {
+      display: grid;
+      grid-template-columns: 1fr 56px 28px;
+      gap: 6px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+    .rff-ingredient-row input {
+      padding: 7px 9px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: var(--font);
+      background: var(--gray-100);
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color .15s;
+    }
+    .rff-ingredient-row input:focus { border-color: var(--accent); }
+    .rff-remove-btn {
+      width: 28px; height: 28px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 50%;
+      color: var(--gray-400);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      line-height: 1;
+      -webkit-appearance: none; appearance: none;
+    }
+    .rff-add-ing-btn {
+      width: 100%;
+      padding: 8px;
+      background: transparent;
+      border: 1.5px dashed var(--gray-200);
+      border-radius: 8px;
+      color: var(--gray-600);
+      font-size: 12px;
+      font-family: var(--font);
+      cursor: pointer;
+      margin-bottom: 10px;
+      -webkit-appearance: none; appearance: none;
+    }
+    .rff-macros-preview {
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-around;
+      gap: 4px;
+    }
+    .rff-macro-item {
+      text-align: center;
+      flex: 1;
+    }
+    .rff-macro-val {
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--mono);
+    }
+    .rff-macro-lbl {
+      font-size: 10px;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .rff-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .rff-save {
+      flex: 1;
+      padding: 9px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      -webkit-text-fill-color: white;
+    }
+    .rff-cancel {
+      padding: 9px 14px;
+      background: var(--gray-100);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font);
+      cursor: pointer;
+      color: var(--gray-600);
+      -webkit-appearance: none; appearance: none;
+    }
+    /* FEEDBACK FORM */
+    .feedback-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .feedback-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--black);
+      margin: 0 0 4px;
+    }
+    .feedback-card p {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin: 0 0 14px;
+    }
+    .feedback-stars {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .feedback-star {
+      font-size: 26px;
+      cursor: pointer;
+      opacity: .3;
+      transition: opacity .12s, transform .12s;
+      line-height: 1;
+      user-select: none;
+    }
+    .feedback-star.active { opacity: 1; transform: scale(1.15); }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      background: var(--gray-100);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
+      font-size: 13px;
+      font-family: var(--font);
+      resize: vertical;
+      outline: none;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      transition: border-color .15s;
+    }
+    .feedback-textarea:focus { border-color: var(--accent); }
+    .feedback-submit {
+      width: 100%;
+      padding: 11px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      -webkit-text-fill-color: white;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+    }
+    .feedback-sent {
+      text-align: center;
+      padding: 20px;
+      color: var(--gray-400);
+      font-size: 13px;
+    }
+    .feedback-sent .fb-check {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+    }
     /* RECIPE CARD */
     .recipe-card {
       display: flex;
@@ -1084,46 +1292,57 @@
 
     .scan-limit {
       background: var(--white);
-      border: 1px solid var(--gray-100);
+      border: 1px solid var(--gray-200);
       border-radius: var(--radius);
-      padding: 14px;
+      padding: 14px 16px;
       margin-bottom: 16px;
-      box-shadow: var(--shadow)
+      box-shadow: var(--shadow);
     }
 
     .scan-limit-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 10px
+      margin-bottom: 12px;
     }
 
     .scan-limit-label {
       font-size: 12px;
-      font-weight: 600
+      font-weight: 700;
+      color: var(--black);
+      letter-spacing: .02em;
+      text-transform: uppercase;
     }
 
     .scan-limit-count {
-      font-size: 12px;
+      font-size: 14px;
+      font-weight: 700;
       font-family: var(--mono);
-      color: var(--gray-600)
+      color: var(--accent);
+      background: var(--accent-bg);
+      padding: 2px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(168,85,247,.25);
     }
 
     .scan-pips {
       display: flex;
-      gap: 4px
+      gap: 5px;
+      flex-wrap: wrap;
     }
 
     .pip {
-      width: 20px;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--gray-100);
-      transition: background .3s
+      flex: 1;
+      min-width: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--gray-200);
+      transition: background .25s;
     }
 
     .pip.used {
-      background: var(--accent)
+      background: var(--accent);
+      box-shadow: 0 0 6px rgba(168,85,247,.40);
     }
 
     .recent-scans-title {
@@ -2029,6 +2248,7 @@
         <button class="tab" onclick="showTab('semana',this)">📊 Semana</button>
         <button class="tab" onclick="showTab('premium',this)">⭐ Premium</button>
         <button class="tab" onclick="showTab('resenas',this)">💬 Reseñas</button>
+        <button class="tab" onclick="showTab('feedback',this)">📝 Feedback</button>
       </div>
       <button class="tabs-arrow right" id="tabArrowRight" onclick="scrollTabs(1)">›</button>
     </div>
@@ -2291,6 +2511,23 @@
       <div id="reviewsList"></div>
     </div>
 
+    <!-- FEEDBACK SCREEN -->
+    <div class="screen" id="screen-feedback">
+      <div class="feedback-card" id="feedbackFormCard">
+        <h3>Cuéntanos qué piensas</h3>
+        <p>Tu opinión nos ayuda a mejorar FuelLog. ¡Gracias por estar en la beta!</p>
+        <div class="feedback-stars" id="feedbackStars">
+          <span class="feedback-star" data-val="1">★</span>
+          <span class="feedback-star" data-val="2">★</span>
+          <span class="feedback-star" data-val="3">★</span>
+          <span class="feedback-star" data-val="4">★</span>
+          <span class="feedback-star" data-val="5">★</span>
+        </div>
+        <textarea class="feedback-textarea" id="feedbackText" placeholder="¿Qué te ha gustado? ¿Qué mejorarías? ¿Algún bug?"></textarea>
+        <button class="feedback-submit" onclick="submitFeedback()">Enviar feedback</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- ADD FOOD MODAL -->
@@ -2407,7 +2644,38 @@
 
       <!-- Panel: Mis recetas -->
       <div class="modal-tab-panel" id="mpanel-mis-recetas">
-        <button class="custom-food-btn" onclick="openNewRecipeModal()">+ Crear receta nueva</button>
+        <button class="custom-food-btn" id="btnNewRecipe" onclick="toggleRecipeForm()">+ Crear receta nueva</button>
+        <div class="recipe-form" id="recipeForm">
+          <div class="rff-title">Nueva receta</div>
+          <div class="rff-name-row">
+            <label>Nombre de la receta</label>
+            <input class="cff-input" type="text" id="rffName" placeholder="Ej: Bol de proteínas" autocomplete="off">
+          </div>
+          <div class="rff-ingredients-list" id="rffIngredientsList"></div>
+          <button class="rff-add-ing-btn" onclick="addRecipeIngredientRow()">+ Añadir ingrediente</button>
+          <div class="rff-macros-preview" id="rffMacrosPreview">
+            <div class="rff-macro-item">
+              <div class="rff-macro-val" id="rffPrevKcal" style="color:var(--accent)">0</div>
+              <div class="rff-macro-lbl">kcal</div>
+            </div>
+            <div class="rff-macro-item">
+              <div class="rff-macro-val" id="rffPrevP" style="color:#3b82f6">0g</div>
+              <div class="rff-macro-lbl">Prot</div>
+            </div>
+            <div class="rff-macro-item">
+              <div class="rff-macro-val" id="rffPrevC" style="color:#e53e3e">0g</div>
+              <div class="rff-macro-lbl">Carb</div>
+            </div>
+            <div class="rff-macro-item">
+              <div class="rff-macro-val" id="rffPrevF" style="color:#f59e0b">0g</div>
+              <div class="rff-macro-lbl">Gras</div>
+            </div>
+          </div>
+          <div class="rff-actions">
+            <button class="rff-cancel" onclick="toggleRecipeForm()">Cancelar</button>
+            <button class="rff-save" onclick="saveNewRecipe()">Guardar receta</button>
+          </div>
+        </div>
         <div id="myRecipesList"></div>
       </div>
 
@@ -2525,6 +2793,7 @@
       if (tab === 'premium') renderPremium();
       if (tab === 'historial') renderHistorial();
       if (tab === 'scanner') stopQuagga();
+      if (tab === 'feedback') initFeedbackStars();
     }
 
     // ─── MEALS ───
@@ -2669,9 +2938,12 @@
       document.getElementById('modalTitle').textContent = meal ? 'Añadir a ' + meal : 'Añadir alimento';
       // Reset siempre a pestaña Biblioteca al abrir
       switchModalTab('biblioteca');
-      document.getElementById('modalSearch').value = '';
+      var searchInput = document.getElementById('modalSearch');
+      searchInput.value = '';
       filterModal('');
       document.getElementById('addModal').classList.add('open');
+      // Focus al input para teclado inmediato en Android
+      setTimeout(function(){ searchInput.focus(); }, 320);
     }
     function closeModal() { document.getElementById('addModal').classList.remove('open'); }
     var modalSearchTimer = null;
@@ -2685,7 +2957,7 @@
       else { local.slice(0, 10).forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
       if (!q || q.length < 2) return;
       document.getElementById('modalSpinner').classList.add('visible');
-      modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 250);
+      modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 180);
     }
     // ─── QUANTITY PANEL ───
     var qtyFood = null;
@@ -2861,32 +3133,188 @@
     }
 
     // ─── MIS RECETAS — funciones ───
-    function openNewRecipeModal() {
-      showToast('🚧 Recetas personalizadas — próximamente');
+    // ─── RECETAS — formulario ───
+    var rffIngredients = []; // [{name, kcal, p, c, f}]
+    var rffStarRating = 5;
+
+    function toggleRecipeForm() {
+      var form = document.getElementById('recipeForm');
+      var isOpen = form.classList.contains('open');
+      if (isOpen) {
+        form.classList.remove('open');
+      } else {
+        form.classList.add('open');
+        rffIngredients = [];
+        document.getElementById('rffName').value = '';
+        renderRffIngredients();
+        updateRffPreview();
+        // Añadir primera fila vacía
+        addRecipeIngredientRow();
+      }
+    }
+
+    function addRecipeIngredientRow() {
+      var list = document.getElementById('rffIngredientsList');
+      var idx = rffIngredients.length;
+      rffIngredients.push({ name: '', kcal: 0, p: 0, c: 0, f: 0 });
+
+      var row = document.createElement('div');
+      row.className = 'rff-ingredient-row';
+      row.dataset.idx = idx;
+
+      var nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.placeholder = 'Ingrediente (ej: Arroz 100g)';
+      nameInput.autocomplete = 'off';
+      nameInput.addEventListener('input', function() {
+        rffIngredients[idx].name = this.value;
+      });
+
+      var kcalInput = document.createElement('input');
+      kcalInput.type = 'number';
+      kcalInput.placeholder = 'kcal';
+      kcalInput.min = '0';
+      kcalInput.style.textAlign = 'center';
+      kcalInput.addEventListener('input', function() {
+        var v = parseFloat(this.value) || 0;
+        rffIngredients[idx].kcal = v;
+        updateRffPreview();
+      });
+
+      var removeBtn = document.createElement('button');
+      removeBtn.className = 'rff-remove-btn';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', function() {
+        rffIngredients.splice(idx, 1);
+        row.remove();
+        // Re-indexar
+        var rows = document.querySelectorAll('.rff-ingredient-row');
+        rows.forEach(function(r, i) { r.dataset.idx = i; });
+        updateRffPreview();
+      });
+
+      row.appendChild(nameInput);
+      row.appendChild(kcalInput);
+      row.appendChild(removeBtn);
+      list.appendChild(row);
+    }
+
+    function renderRffIngredients() {
+      document.getElementById('rffIngredientsList').innerHTML = '';
+    }
+
+    function updateRffPreview() {
+      var totKcal = 0, totP = 0, totC = 0, totF = 0;
+      // Leer valores directamente de los inputs del DOM
+      var rows = document.querySelectorAll('.rff-ingredient-row');
+      rows.forEach(function(row) {
+        var inputs = row.querySelectorAll('input');
+        var kcalVal = parseFloat(inputs[1] ? inputs[1].value : 0) || 0;
+        totKcal += kcalVal;
+      });
+      // Si existen macros detalladas en rffIngredients, úsalas
+      rffIngredients.forEach(function(ing) {
+        totP += ing.p || 0;
+        totC += ing.c || 0;
+        totF += ing.f || 0;
+      });
+      document.getElementById('rffPrevKcal').textContent = Math.round(totKcal);
+      document.getElementById('rffPrevP').textContent = Math.round(totP) + 'g';
+      document.getElementById('rffPrevC').textContent = Math.round(totC) + 'g';
+      document.getElementById('rffPrevF').textContent = Math.round(totF) + 'g';
+    }
+
+    function saveNewRecipe() {
+      var name = (document.getElementById('rffName').value || '').trim();
+      if (!name) { showToast('⚠️ Pon un nombre a la receta'); return; }
+
+      // Recoger ingredientes desde el DOM
+      var rows = document.querySelectorAll('.rff-ingredient-row');
+      var ings = [];
+      var totKcal = 0;
+      rows.forEach(function(row) {
+        var inputs = row.querySelectorAll('input');
+        var ingName = inputs[0] ? inputs[0].value.trim() : '';
+        var ingKcal = parseFloat(inputs[1] ? inputs[1].value : 0) || 0;
+        if (ingName) {
+          ings.push({ name: ingName, kcal: ingKcal, p: 0, c: 0, f: 0 });
+          totKcal += ingKcal;
+        }
+      });
+      if (!ings.length) { showToast('⚠️ Añade al menos un ingrediente'); return; }
+
+      var recipe = {
+        id: 'r' + Date.now(),
+        name: name,
+        ingredients: ings,
+        createdAt: Date.now()
+      };
+      myRecipes.push(recipe);
+      saveAll();
+      toggleRecipeForm();
+      renderMyRecipesList();
+      showToast('✅ Receta "' + name + '" guardada');
     }
 
     function renderMyRecipesList() {
       var el = document.getElementById('myRecipesList');
+      if (!el) return;
       if (!myRecipes.length) {
         el.innerHTML = '<div class="modal-empty">No tienes recetas creadas aún.<br>Pulsa el botón de arriba para crear una.</div>';
         return;
       }
-      el.innerHTML = myRecipes.map(function(r) {
-        var totKcal = r.ingredients.reduce(function(acc, ing){ return acc + ing.kcal; }, 0);
-        var totP = r.ingredients.reduce(function(acc, ing){ return acc + ing.p; }, 0);
-        var totC = r.ingredients.reduce(function(acc, ing){ return acc + ing.c; }, 0);
-        var totF = r.ingredients.reduce(function(acc, ing){ return acc + ing.f; }, 0);
-        return '<div class="recipe-card">' +
-          '<div>' +
-            '<div class="recipe-card-name">' + r.name + '</div>' +
-            '<div class="recipe-card-meta">P:' + Math.round(totP) + 'g · C:' + Math.round(totC) + 'g · G:' + Math.round(totF) + 'g</div>' +
-          '</div>' +
-          '<div style="display:flex;align-items:center">' +
-            '<div class="recipe-card-kcal">' + Math.round(totKcal) + '</div>' +
-            '<button class="recipe-card-add" onclick="addRecipeToMeal(\'' + r.id + '\')">+</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+      el.innerHTML = '';
+      myRecipes.forEach(function(r) {
+        var totKcal = r.ingredients.reduce(function(acc, ing){ return acc + (ing.kcal || 0); }, 0);
+        var totP = r.ingredients.reduce(function(acc, ing){ return acc + (ing.p || 0); }, 0);
+        var totC = r.ingredients.reduce(function(acc, ing){ return acc + (ing.c || 0); }, 0);
+        var totF = r.ingredients.reduce(function(acc, ing){ return acc + (ing.f || 0); }, 0);
+
+        var card = document.createElement('div');
+        card.className = 'recipe-card';
+
+        var info = document.createElement('div');
+        var nameEl = document.createElement('div');
+        nameEl.className = 'recipe-card-name';
+        nameEl.textContent = r.name;
+        var metaEl = document.createElement('div');
+        metaEl.className = 'recipe-card-meta';
+        metaEl.textContent = 'P:' + Math.round(totP) + 'g · C:' + Math.round(totC) + 'g · G:' + Math.round(totF) + 'g · ' + r.ingredients.length + ' ing.';
+        info.appendChild(nameEl);
+        info.appendChild(metaEl);
+
+        var right = document.createElement('div');
+        right.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0';
+
+        var kcalEl = document.createElement('div');
+        kcalEl.className = 'recipe-card-kcal';
+        kcalEl.textContent = Math.round(totKcal) + ' kcal';
+
+        var delBtn = document.createElement('button');
+        delBtn.style.cssText = 'width:26px;height:26px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:50%;color:var(--gray-400);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;flex-shrink:0;margin-right:4px';
+        delBtn.textContent = '×';
+        delBtn.title = 'Eliminar receta';
+        (function(rid){ delBtn.addEventListener('click', function(e){ e.stopPropagation(); deleteRecipe(rid); }); })(r.id);
+
+        var addBtn = document.createElement('button');
+        addBtn.className = 'recipe-card-add';
+        addBtn.textContent = '+';
+        (function(rid){ addBtn.addEventListener('click', function(e){ e.stopPropagation(); addRecipeToMeal(rid); }); })(r.id);
+
+        right.appendChild(kcalEl);
+        right.appendChild(delBtn);
+        right.appendChild(addBtn);
+        card.appendChild(info);
+        card.appendChild(right);
+        el.appendChild(card);
+      });
+    }
+
+    function deleteRecipe(id) {
+      myRecipes = myRecipes.filter(function(r){ return r.id !== id; });
+      saveAll();
+      renderMyRecipesList();
+      showToast('Receta eliminada');
     }
 
     function addRecipeToMeal(id) {
@@ -2983,14 +3411,22 @@
       }, 250);
     }
 
+    var _offController = null; // AbortController activo
+
     async function searchOFF(q, isModal) {
       var spinnerId = isModal ? 'modalSpinner' : 'foodSpinner';
       var listId = isModal ? 'modalFoodList' : 'foodsList';
       var spinner = document.getElementById(spinnerId);
       var listEl = document.getElementById(listId);
+
+      // Cancela petición anterior si sigue en vuelo
+      if (_offController) { _offController.abort(); }
+      _offController = new AbortController();
+      var signal = _offController.signal;
+
       if (spinner) spinner.classList.add('visible');
 
-      // Serve from cache if available
+      // Cache hit → instantáneo
       var cacheKey = q.toLowerCase().trim();
       if (offCache[cacheKey]) {
         renderOFFResults(offCache[cacheKey], listEl);
@@ -2999,24 +3435,27 @@
       }
 
       try {
+        // page_size=8, solo campos mínimos, mercado español primero
         var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' +
           encodeURIComponent(q) +
-          '&search_simple=1&action=process&json=1&page_size=20&lc=es&cc=es&fields=product_name,brands,quantity,nutriments,nutriscore_grade';
-        var res = await fetch(url);
+          '&search_simple=1&action=process&json=1&page_size=8&cc=es&lc=es' +
+          '&fields=product_name,brands,quantity,nutriments';
+        var res = await fetch(url, { signal: signal });
         var data = await res.json();
         var products = (data.products || []).filter(function(p){
           var n = p.nutriments || {};
           return p.product_name && (n['energy-kcal_100g'] || n['energy-kcal']);
         });
-        offCache[cacheKey] = products; // store in cache
+        offCache[cacheKey] = products;
         renderOFFResults(products, listEl);
       } catch(e) {
+        if (e.name === 'AbortError') return; // petición cancelada, no hacer nada
         var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
         listEl.innerHTML = '';
         if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
         else { listEl.innerHTML = '<div class="foods-empty">Sin conexión — mostrando resultados locales</div>'; }
       } finally {
-        if (spinner) spinner.classList.remove('visible');
+        if (!signal.aborted && spinner) spinner.classList.remove('visible');
       }
     }
 
@@ -3621,6 +4060,54 @@
       renderReviews();
       saveAll();
       showToast('✅ Reseña publicada. ¡Gracias!');
+    }
+
+    // ─── FEEDBACK ───
+    var feedbackStarVal = 5;
+
+    function initFeedbackStars() {
+      var stars = document.querySelectorAll('.feedback-star');
+      stars.forEach(function(star) {
+        star.addEventListener('click', function() {
+          feedbackStarVal = parseInt(this.dataset.val);
+          stars.forEach(function(s) {
+            s.classList.toggle('active', parseInt(s.dataset.val) <= feedbackStarVal);
+          });
+        });
+        star.addEventListener('mouseover', function() {
+          var val = parseInt(this.dataset.val);
+          stars.forEach(function(s) {
+            s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+          });
+        });
+        star.addEventListener('mouseout', function() {
+          stars.forEach(function(s) {
+            s.classList.toggle('active', parseInt(s.dataset.val) <= feedbackStarVal);
+          });
+        });
+      });
+      // Activar las 5 estrellas por defecto
+      stars.forEach(function(s) { s.classList.add('active'); });
+    }
+
+    function submitFeedback() {
+      var text = (document.getElementById('feedbackText').value || '').trim();
+      if (!text) { showToast('⚠️ Escribe algo antes de enviar'); return; }
+
+      // Guardar feedback localmente (sin backend real todavía)
+      var feedbacks = JSON.parse(localStorage.getItem('fl_feedbacks') || '[]');
+      feedbacks.push({
+        stars: feedbackStarVal,
+        text: text,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('fl_feedbacks', JSON.stringify(feedbacks));
+
+      // Mostrar estado enviado
+      var card = document.getElementById('feedbackFormCard');
+      card.innerHTML = '<div class="feedback-sent"><span class="fb-check">✅</span><strong>¡Gracias por tu feedback!</strong><br><br>Tu opinión ayuda a hacer FuelLog mejor cada día.</div>';
+
+      showToast('✅ Feedback enviado. ¡Gracias!');
     }
 
     // ─── TOAST ───
