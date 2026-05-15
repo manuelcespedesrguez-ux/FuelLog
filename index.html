@@ -1871,16 +1871,23 @@
 
     /* DOWNLOAD BUTTON */
     .dl-btn {
-      position: fixed; bottom: 16px; right: 16px;
-      width: 44px; height: 44px; border-radius: 50%;
-      background: var(--black); color: white;
-      border: none; cursor: pointer; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,.25);
-      z-index: 100; transition: transform .15s, opacity .15s;
-      opacity: 0.7;
+      position: fixed; bottom: 20px; right: 16px;
+      height: 44px;
+      padding: 0 18px 0 14px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      color: white;
+      -webkit-text-fill-color: white;
+      border: none; cursor: pointer;
+      font-size: 13px; font-weight: 700; font-family: var(--font);
+      display: none; align-items: center; justify-content: center; gap: 7px;
+      box-shadow: 0 4px 18px rgba(168,85,247,.50);
+      z-index: 100; transition: transform .15s, box-shadow .15s;
+      white-space: nowrap;
+      -webkit-appearance: none; appearance: none;
     }
-    .dl-btn:hover { transform: scale(1.1); opacity: 1; }
+    .dl-btn.visible { display: flex; }
+    .dl-btn:active { transform: scale(.96); box-shadow: 0 2px 8px rgba(168,85,247,.30); }
     /* QUANTITY PANEL */
     .qty-overlay {
       position: fixed; inset: 0; z-index: 250;
@@ -1988,7 +1995,7 @@
   </div>
 
   <!-- DOWNLOAD BTN -->
-  <button class="dl-btn" onclick="downloadApp()" title="Guardar app en tu dispositivo">⬇️</button>
+  <button class="dl-btn" id="installBtn" onclick="triggerInstall()" title="Instalar FuelLog como app">⚡ Instalar app</button>
 
   <!-- HEADER -->
   <div class="app-header">
@@ -3676,18 +3683,52 @@
     }
 
     // ─── DOWNLOAD APP ───
-    function downloadApp() {
-      var html = document.documentElement.outerHTML;
-      var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'FuelLog.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('✅ FuelLog.html descargado — ábrelo en tu navegador');
+    // ─── PWA INSTALL ───
+    var _installPrompt = null;
+
+    // Captura el evento antes de que Chrome lo muestre automáticamente
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      _installPrompt = e;
+      // Mostrar el botón solo si la app NO está instalada ya
+      var btn = document.getElementById('installBtn');
+      if (btn) btn.classList.add('visible');
+    });
+
+    // Ocultar el botón si el usuario instala la app
+    window.addEventListener('appinstalled', function() {
+      _installPrompt = null;
+      var btn = document.getElementById('installBtn');
+      if (btn) btn.classList.remove('visible');
+      showToast('✅ ¡FuelLog instalada correctamente!');
+    });
+
+    // Si ya está en modo standalone (app instalada), ocultar siempre el botón
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('installBtn');
+        if (btn) btn.classList.remove('visible');
+      });
+    }
+
+    function triggerInstall() {
+      if (_installPrompt) {
+        // Dispara el banner nativo de instalación de Chrome
+        _installPrompt.prompt();
+        _installPrompt.userChoice.then(function(result) {
+          if (result.outcome === 'accepted') {
+            showToast('🚀 Instalando FuelLog...');
+          }
+          _installPrompt = null;
+          var btn = document.getElementById('installBtn');
+          if (btn) btn.classList.remove('visible');
+        });
+      } else if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        showToast('✅ FuelLog ya está instalada como app');
+      } else {
+        // iOS Safari o navegador que no soporta beforeinstallprompt
+        showToast('📱 En iOS: pulsa Compartir → Añadir a pantalla de inicio');
+      }
     }
 
     // ─── FULL PERSISTENCE SAVE ───
