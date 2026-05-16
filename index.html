@@ -17,6 +17,8 @@
   <link rel="icon" href="icon-192.png">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><path d='M55 18L28 55h22l-5 27 29-37H52l3-27z' fill='white'/></svg>">
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
@@ -1386,6 +1388,247 @@
       margin-bottom: 8px
     }
 
+    /* ─── AUTH MODAL ─── */
+    .auth-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.72);
+      z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      display: none;
+    }
+    .auth-overlay.open { display: flex; }
+    .auth-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .auth-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .auth-logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-logo-name {
+      font-size: 20px; font-weight: 800; color: var(--black);
+    }
+    .auth-title {
+      font-size: 17px; font-weight: 700; color: var(--black);
+      margin-bottom: 4px;
+    }
+    .auth-sub {
+      font-size: 13px; color: var(--gray-400);
+      margin-bottom: 20px;
+    }
+    .auth-tabs {
+      display: flex; gap: 0;
+      background: var(--gray-100);
+      border-radius: 10px; padding: 3px;
+      margin-bottom: 18px;
+    }
+    .auth-tab {
+      flex: 1; padding: 7px;
+      border: none; background: transparent;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      color: var(--gray-400);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .auth-tab.active {
+      background: var(--white);
+      color: var(--black);
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    }
+    .auth-field { margin-bottom: 12px; }
+    .auth-field label {
+      display: block; font-size: 11px;
+      font-weight: 600; color: var(--gray-400);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+    .auth-input {
+      width: 100%; padding: 11px 13px;
+      background: var(--gray-100);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 14px; font-family: var(--font);
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
+      outline: none; box-sizing: border-box;
+      transition: border-color .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-submit {
+      width: 100%; padding: 13px;
+      background: var(--accent);
+      border: none; border-radius: 10px;
+      color: white; -webkit-text-fill-color: white;
+      font-size: 14px; font-weight: 700;
+      font-family: var(--font); cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      margin-top: 4px;
+      box-shadow: 0 0 20px rgba(168,85,247,.35);
+      transition: opacity .15s;
+    }
+    .auth-submit:active { opacity: .85; }
+    .auth-err {
+      font-size: 12px; color: #ef4444;
+      margin-top: 8px; text-align: center;
+      min-height: 18px;
+    }
+    .auth-skip {
+      text-align: center; margin-top: 14px;
+      font-size: 12px; color: var(--gray-400);
+    }
+    .auth-skip span {
+      color: var(--accent); cursor: pointer;
+      text-decoration: underline;
+    }
+    /* Badge usuario en header */
+    .user-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: white;
+      cursor: pointer; flex-shrink: 0;
+      display: none;
+    }
+    .sync-indicator {
+      font-size: 10px; color: var(--gray-400);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .sync-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e;
+    }
+    .sync-dot.syncing { background: #f59e0b; animation: pulse 1s infinite; }
+    .sync-dot.error { background: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+
+    /* ── AUTH MODAL ── */
+    .auth-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .auth-overlay.hidden { display: none; }
+    .auth-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 360px;
+      position: relative;
+    }
+    .auth-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 24px;
+    }
+    .auth-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg,#a855f7,#7c3aed);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .auth-logo-name {
+      font-size: 20px; font-weight: 800;
+      color: var(--black);
+    }
+    .auth-title {
+      font-size: 18px; font-weight: 700;
+      color: var(--black); margin-bottom: 6px;
+    }
+    .auth-sub {
+      font-size: 13px; color: var(--gray-400);
+      margin-bottom: 24px; line-height: 1.5;
+    }
+    .auth-field { margin-bottom: 12px; }
+    .auth-field label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--gray-400); text-transform: uppercase;
+      letter-spacing: .06em; margin-bottom: 5px;
+    }
+    .auth-input {
+      width: 100%; padding: 11px 14px;
+      background: var(--gray-100);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 14px; font-family: var(--font);
+      color: var(--black); -webkit-text-fill-color: var(--black);
+      outline: none; box-sizing: border-box;
+      transition: border-color .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-btn {
+      width: 100%; padding: 13px;
+      background: var(--accent);
+      border: none; border-radius: 12px;
+      color: white; -webkit-text-fill-color: white;
+      font-size: 14px; font-weight: 700;
+      font-family: var(--font); cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      margin-top: 4px;
+      box-shadow: 0 0 20px rgba(168,85,247,.35);
+      transition: opacity .15s;
+    }
+    .auth-btn:active { opacity: .85; }
+    .auth-btn.secondary {
+      background: var(--gray-100);
+      color: var(--black); -webkit-text-fill-color: var(--black);
+      box-shadow: none; margin-top: 8px;
+    }
+    .auth-divider {
+      text-align: center; font-size: 12px;
+      color: var(--gray-400); margin: 14px 0;
+    }
+    .auth-error {
+      font-size: 12px; color: #ef4444;
+      margin-bottom: 10px; display: none;
+    }
+    .auth-skip {
+      text-align: center; margin-top: 16px;
+      font-size: 12px; color: var(--gray-400);
+    }
+    .auth-skip a {
+      color: var(--accent); cursor: pointer;
+      text-decoration: none; font-weight: 600;
+    }
+    /* User badge en el header cuando logueado */
+    .user-badge {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 10px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      color: var(--black);
+      cursor: pointer;
+    }
+    .user-badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+    }
     /* ── FIX iOS: placeholder y autofill en inputs oscuros ── */
     input, textarea, select {
       color: var(--black);
@@ -2265,7 +2508,11 @@
         </div>
         FuelLog
       </div>
-      <div class="header-right">
+      <div class="header-right" style="display:flex;align-items:center;gap:8px">
+        <div class="user-badge hidden" id="userBadge" onclick="showAuthModal()">
+          <div class="user-badge-dot"></div>
+          <span id="userBadgeEmail">cuenta</span>
+        </div>
         <span class="plan-badge free" id="planBadge">Free · 10 escaneos</span>
       </div>
     </div>
@@ -2498,11 +2745,21 @@
           </div>
           <div>
             <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Código de acceso</div>
-            <input class="form-input" type="text" id="pVipCode" autocomplete="off" style="text-transform:uppercase;letter-spacing:.05em">
+            <input class="form-input" type="text" id="pVipCode" placeholder="Ej: FUELLOG2026" autocomplete="off" style="text-transform:uppercase;letter-spacing:.05em">
           </div>
           <div id="vipStatus" style="margin-top:8px;font-size:12px;display:none"></div>
         </div>
         <button class="save-btn" onclick="saveProfile()">Guardar perfil</button>
+        <div id="logoutSection" style="display:none;margin-top:12px">
+          <button onclick="doLogout()" style="width:100%;padding:11px;background:transparent;border:1.5px solid var(--gray-200);border-radius:var(--radius);color:var(--gray-400);font-size:13px;font-family:var(--font);cursor:pointer;-webkit-appearance:none;appearance:none">
+            Cerrar sesión
+          </button>
+        </div>
+        <div id="loginSection" style="margin-top:12px">
+          <button onclick="showAuthModal()" style="width:100%;padding:11px;background:var(--accent-bg);border:1.5px solid var(--accent);border-radius:var(--radius);color:var(--accent);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(--accent)">
+            ☁️ Iniciar sesión / Crear cuenta
+          </button>
+        </div>
       </div>
     </div>
 
@@ -2733,6 +2990,64 @@
     </div>
   </div>
 
+
+  <!-- AUTH MODAL -->
+  <div class="auth-overlay hidden" id="authOverlay">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">⚡</div>
+        <div class="auth-logo-name">FuelLog</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="authPanelLogin">
+        <div class="auth-title">Bienvenido de nuevo</div>
+        <div class="auth-sub">Inicia sesión para sincronizar tus datos en todos tus dispositivos.</div>
+        <div class="auth-error" id="authLoginError"></div>
+        <div class="auth-field">
+          <label>Email</label>
+          <input class="auth-input" type="email" id="authLoginEmail" placeholder="tu@email.com" autocomplete="email">
+        </div>
+        <div class="auth-field">
+          <label>Contraseña</label>
+          <input class="auth-input" type="password" id="authLoginPass" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="auth-btn" onclick="doLogin()">Iniciar sesión</button>
+        <div class="auth-divider">¿No tienes cuenta?</div>
+        <button class="auth-btn secondary" onclick="switchAuthPanel('register')">Crear cuenta gratis</button>
+        <div class="auth-skip"><a onclick="skipAuth()">Continuar sin cuenta →</a></div>
+      </div>
+
+      <!-- REGISTRO -->
+      <div id="authPanelRegister" style="display:none">
+        <div class="auth-title">Crear cuenta</div>
+        <div class="auth-sub">Gratis. Tus datos sincronizados en todos tus dispositivos.</div>
+        <div class="auth-error" id="authRegisterError"></div>
+        <div class="auth-field">
+          <label>Email</label>
+          <input class="auth-input" type="email" id="authRegEmail" placeholder="tu@email.com" autocomplete="email">
+        </div>
+        <div class="auth-field">
+          <label>Contraseña</label>
+          <input class="auth-input" type="password" id="authRegPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <button class="auth-btn" onclick="doRegister()">Crear cuenta</button>
+        <div class="auth-divider">¿Ya tienes cuenta?</div>
+        <button class="auth-btn secondary" onclick="switchAuthPanel('login')">Iniciar sesión</button>
+        <div class="auth-skip"><a onclick="skipAuth()">Continuar sin cuenta →</a></div>
+      </div>
+
+      <!-- VERIFICACIÓN EMAIL -->
+      <div id="authPanelVerify" style="display:none; text-align:center; padding: 10px 0">
+        <div style="font-size:40px;margin-bottom:16px">📧</div>
+        <div class="auth-title">Revisa tu email</div>
+        <div class="auth-sub">Te hemos enviado un enlace de confirmación. Ábrelo y vuelve aquí para iniciar sesión.</div>
+        <button class="auth-btn secondary" onclick="switchAuthPanel('login')">Ya lo confirmé → Iniciar sesión</button>
+        <div class="auth-skip"><a onclick="skipAuth()">Continuar sin cuenta →</a></div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -2784,6 +3099,335 @@
     var scanHistory = []; // historial real de escaneos
 
     // ─── INIT ───
+
+    // ═══════════════════════════════════════════════════════
+    // ─── SUPABASE — Auth + Sync ───
+    // ═══════════════════════════════════════════════════════
+    var SUPA_URL = 'https://wsevpblhjugnszwagcyz.supabase.co';
+    var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZXZwYmxoanVnbnN6d2FnY3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTc3NzksImV4cCI6MjA5NDM5Mzc3OX0._nU5mCHUKwAIKl4Kqh4c4NG8jzX17g_4k_93ikSANpI';
+    var sb = null;
+    var sbUser = null;     // usuario actual (null = no logueado)
+    var sbSyncing = false; // evitar sync simultáneos
+
+    // Inicializar cliente Supabase
+    function initSupabase() {
+      try {
+        sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+        // Escuchar cambios de sesión
+        sb.auth.onAuthStateChange(function(event, session) {
+          sbUser = session ? session.user : null;
+          updateUserUI();
+          if (event === 'SIGNED_IN') {
+            showToast('✅ Sesión iniciada — sincronizando...');
+            closeAuthModal();
+            syncFromCloud(); // descargar datos del servidor al entrar
+          }
+          if (event === 'SIGNED_OUT') {
+            sbUser = null;
+            updateUserUI();
+            showToast('Sesión cerrada');
+          }
+        });
+        // Comprobar si ya había sesión activa
+        sb.auth.getSession().then(function(res) {
+          if (res.data && res.data.session) {
+            sbUser = res.data.session.user;
+            updateUserUI();
+          } else {
+            // Primera vez: mostrar modal de auth (después de 1.5s para no interrumpir carga)
+            var skipped = localStorage.getItem('fl_auth_skipped');
+            if (!skipped) setTimeout(showAuthModal, 1500);
+          }
+        });
+      } catch(e) {
+        console.error('Supabase init error:', e);
+      }
+    }
+
+    // ─── UI de auth ───
+    function showAuthModal() {
+      document.getElementById('authOverlay').classList.remove('hidden');
+      switchAuthPanel('login');
+    }
+    function closeAuthModal() {
+      document.getElementById('authOverlay').classList.add('hidden');
+    }
+    function skipAuth() {
+      localStorage.setItem('fl_auth_skipped', '1');
+      closeAuthModal();
+    }
+    function switchAuthPanel(panel) {
+      document.getElementById('authPanelLogin').style.display    = panel === 'login'    ? '' : 'none';
+      document.getElementById('authPanelRegister').style.display = panel === 'register' ? '' : 'none';
+      document.getElementById('authPanelVerify').style.display   = panel === 'verify'   ? '' : 'none';
+    }
+
+    // ─── Registro ───
+    async function doRegister() {
+      var email = document.getElementById('authRegEmail').value.trim();
+      var pass  = document.getElementById('authRegPass').value;
+      var errEl = document.getElementById('authRegisterError');
+      errEl.style.display = 'none';
+      if (!email || !pass) { errEl.textContent = 'Rellena email y contraseña'; errEl.style.display = 'block'; return; }
+      if (pass.length < 6)  { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres'; errEl.style.display = 'block'; return; }
+      try {
+        var btn = document.querySelector('#authPanelRegister .auth-btn');
+        btn.textContent = 'Creando cuenta...'; btn.disabled = true;
+        var res = await sb.auth.signUp({ email: email, password: pass });
+        btn.textContent = 'Crear cuenta'; btn.disabled = false;
+        if (res.error) { errEl.textContent = translateAuthError(res.error.message); errEl.style.display = 'block'; return; }
+        switchAuthPanel('verify');
+      } catch(e) {
+        errEl.textContent = 'Error de conexión. Inténtalo de nuevo.'; errEl.style.display = 'block';
+      }
+    }
+
+    // ─── Login ───
+    async function doLogin() {
+      var email = document.getElementById('authLoginEmail').value.trim();
+      var pass  = document.getElementById('authLoginPass').value;
+      var errEl = document.getElementById('authLoginError');
+      errEl.style.display = 'none';
+      if (!email || !pass) { errEl.textContent = 'Rellena email y contraseña'; errEl.style.display = 'block'; return; }
+      try {
+        var btn = document.querySelector('#authPanelLogin .auth-btn');
+        btn.textContent = 'Entrando...'; btn.disabled = true;
+        var res = await sb.auth.signInWithPassword({ email: email, password: pass });
+        btn.textContent = 'Iniciar sesión'; btn.disabled = false;
+        if (res.error) { errEl.textContent = translateAuthError(res.error.message); errEl.style.display = 'block'; return; }
+        // onAuthStateChange se encarga del resto
+      } catch(e) {
+        errEl.textContent = 'Error de conexión. Inténtalo de nuevo.'; errEl.style.display = 'block';
+      }
+    }
+
+    // ─── Logout ───
+    async function doLogout() {
+      if (!sb) return;
+      await sb.auth.signOut();
+    }
+
+    function translateAuthError(msg) {
+      if (msg.includes('Invalid login'))       return 'Email o contraseña incorrectos';
+      if (msg.includes('Email not confirmed')) return 'Confirma tu email antes de entrar';
+      if (msg.includes('already registered')) return 'Este email ya tiene cuenta. Inicia sesión.';
+      if (msg.includes('Password should'))    return 'La contraseña debe tener al menos 6 caracteres';
+      return msg;
+    }
+
+    // ─── UI: actualizar header según sesión ───
+    function updateUserUI() {
+      var badge = document.getElementById('userBadge');
+      var emailEl = document.getElementById('userBadgeEmail');
+      var logoutSec = document.getElementById('logoutSection');
+      var loginSec  = document.getElementById('loginSection');
+      if (!badge) return;
+      if (sbUser) {
+        badge.classList.remove('hidden');
+        var short = sbUser.email ? sbUser.email.split('@')[0] : 'cuenta';
+        emailEl.textContent = short;
+        if (logoutSec) logoutSec.style.display = '';
+        if (loginSec)  loginSec.style.display  = 'none';
+      } else {
+        badge.classList.add('hidden');
+        if (logoutSec) logoutSec.style.display = 'none';
+        if (loginSec)  loginSec.style.display  = '';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── SYNC — subir datos al servidor ───
+    // ═══════════════════════════════════════════════════════
+
+    async function syncToCloud() {
+      if (!sb || !sbUser || sbSyncing) return;
+      sbSyncing = true;
+      try {
+        var uid = sbUser.id;
+        var today = toDateKey(state.currentDate);
+
+        // 1. Perfil
+        if (state.profile) {
+          var age    = document.getElementById('pAge')    ? parseFloat(document.getElementById('pAge').value)    : null;
+          var weight = document.getElementById('pWeight') ? parseFloat(document.getElementById('pWeight').value) : null;
+          var height = document.getElementById('pHeight') ? parseFloat(document.getElementById('pHeight').value) : null;
+          await sb.from('profiles').upsert({
+            id: uid,
+            email: sbUser.email,
+            sex: state.sex,
+            age: age,
+            weight: weight,
+            height: height,
+            activity: state.activity,
+            goal: state.goal,
+            is_premium: state.isPremium,
+            vip_id: localStorage.getItem('fl_vip_id') || null
+          }, { onConflict: 'id' });
+        }
+
+        // 2. Día actual
+        var key = state.currentDate.toDateString();
+        state.allDayData[key] = JSON.parse(JSON.stringify(state.meals));
+        // Subir todos los días (máx últimos 90 días)
+        var dayEntries = Object.entries(state.allDayData);
+        for (var i = 0; i < dayEntries.length; i++) {
+          var dk = dayEntries[i][0];
+          var dv = dayEntries[i][1];
+          var dateStr = toSupaDateKey(new Date(dk));
+          await sb.from('days').upsert({
+            user_id: uid,
+            date: dateStr,
+            meals: dv
+          }, { onConflict: 'user_id,date' });
+        }
+
+        // 3. Mis alimentos
+        for (var j = 0; j < myFoods.length; j++) {
+          var mf = myFoods[j];
+          await sb.from('my_foods').upsert({
+            user_id: uid,
+            food_id: String(mf.id),
+            name: mf.name,
+            brand: mf.brand || '',
+            kcal: mf.kcal || 0,
+            p: mf.p || 0,
+            c: mf.c || 0,
+            f: mf.f || 0
+          }, { onConflict: 'user_id,food_id' });
+        }
+
+        // 4. Mis recetas
+        for (var k = 0; k < myRecipes.length; k++) {
+          var mr = myRecipes[k];
+          await sb.from('my_recipes').upsert({
+            user_id: uid,
+            recipe_id: String(mr.id),
+            name: mr.name,
+            ingredients: mr.ingredients
+          }, { onConflict: 'user_id,recipe_id' });
+        }
+
+        // 5. Escaneos
+        await sb.from('scans').upsert({
+          user_id: uid,
+          count: state.scansUsed,
+          month: new Date().getMonth(),
+          year: new Date().getFullYear()
+        }, { onConflict: 'user_id' });
+
+      } catch(e) {
+        console.error('syncToCloud error:', e);
+      }
+      sbSyncing = false;
+    }
+
+    // ─── SYNC — descargar datos del servidor ───
+    async function syncFromCloud() {
+      if (!sb || !sbUser) return;
+      try {
+        var uid = sbUser.id;
+
+        // 1. Perfil
+        var profRes = await sb.from('profiles').select('*').eq('id', uid).single();
+        if (profRes.data) {
+          var p = profRes.data;
+          state.sex      = p.sex      || 'H';
+          state.activity = p.activity || 1.2;
+          state.goal     = p.goal     || 'perder';
+          state.isPremium = p.is_premium || false;
+          if (state.isPremium) state.maxScans = 9999;
+          if (p.vip_id) localStorage.setItem('fl_vip_id', p.vip_id);
+          try {
+            if (p.age)    document.getElementById('pAge').value    = p.age;
+            if (p.weight) document.getElementById('pWeight').value = p.weight;
+            if (p.height) document.getElementById('pHeight').value = p.height;
+          } catch(e) {}
+          updatePremiumBadge();
+          try { calcHB(); } catch(e) {}
+        }
+
+        // 2. Días
+        var daysRes = await sb.from('days').select('*').eq('user_id', uid);
+        if (daysRes.data && daysRes.data.length) {
+          daysRes.data.forEach(function(row) {
+            // date en Supabase está en YYYY-MM-DD, convertir a toDateString key
+            var d = new Date(row.date + 'T12:00:00');
+            state.allDayData[d.toDateString()] = row.meals;
+          });
+          // Recargar día actual
+          var key = state.currentDate.toDateString();
+          if (state.allDayData[key]) state.meals = state.allDayData[key];
+          renderMeals();
+          updateHeroRing();
+          updateMacros();
+        }
+
+        // 3. Mis alimentos
+        var mfRes = await sb.from('my_foods').select('*').eq('user_id', uid);
+        if (mfRes.data && mfRes.data.length) {
+          myFoods = mfRes.data.map(function(row) {
+            return { id: row.food_id, name: row.name, brand: row.brand, kcal: row.kcal, p: row.p, c: row.c, f: row.f };
+          });
+          myFoods.forEach(function(f) {
+            if (!FOODS.find(function(x){ return String(x.id) === String(f.id); })) FOODS.unshift(f);
+          });
+        }
+
+        // 4. Mis recetas
+        var mrRes = await sb.from('my_recipes').select('*').eq('user_id', uid);
+        if (mrRes.data && mrRes.data.length) {
+          myRecipes = mrRes.data.map(function(row) {
+            return { id: row.recipe_id, name: row.name, ingredients: row.ingredients };
+          });
+        }
+
+        // 5. Escaneos
+        var scanRes = await sb.from('scans').select('*').eq('user_id', uid).single();
+        if (scanRes.data) {
+          var sc = scanRes.data;
+          var now = new Date();
+          if (sc.month === now.getMonth() && sc.year === now.getFullYear()) {
+            state.scansUsed = sc.count || 0;
+          } else {
+            state.scansUsed = 0;
+          }
+          renderScanPips();
+        }
+
+        saveAll(); // actualizar localStorage con datos del servidor
+        showToast('☁️ Datos sincronizados');
+      } catch(e) {
+        console.error('syncFromCloud error:', e);
+      }
+    }
+
+    // ─── Helpers de fecha ───
+    function toDateKey(d) {
+      return d.toDateString();
+    }
+    function toSupaDateKey(d) {
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+
+    // ─── Feedback a Supabase ───
+    async function submitFeedbackToCloud(stars, text) {
+      if (!sb) return;
+      try {
+        await sb.from('feedbacks').insert({
+          user_id: sbUser ? sbUser.id : null,
+          email: sbUser ? sbUser.email : null,
+          stars: stars,
+          text: text,
+          app_version: '1.0'
+        });
+      } catch(e) {
+        console.error('feedback error:', e);
+      }
+    }
+
     function init() {
       loadAll();
       updateDateLabel();
@@ -2794,7 +3438,6 @@
       renderReviews();
       renderWeek();
       renderPremium();
-      // Sync profile fields & ring after loadAll
       if (state.profile) {
         try { calcHB(); } catch(e) {}
         updateHeroRing();
@@ -2803,6 +3446,8 @@
       var badge = document.getElementById('planBadge');
       if (badge && state.isPremium) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
       checkOnboarding();
+      // Inicializar Supabase después de cargar la UI
+      initSupabase();
     }
 
     // ─── DATE ───
@@ -3733,40 +4378,20 @@
       var age = parseFloat(document.getElementById('pAge').value);
       var w = parseFloat(document.getElementById('pWeight').value);
       var h = parseFloat(document.getElementById('pHeight').value);
-
       if (!age || !w || !h) return;
-
-      var bmr = state.sex === 'H'
-        ? (88.362 + 13.397 * w + 4.799 * h - 5.677 * age)
-        : (447.593 + 9.247 * w + 3.098 * h - 4.330 * age);
-
-      var tdee = bmr * state.activity;
-      var kcal = tdee;
-
-      if (state.goal === 'perder') {
-        kcal *= 0.9;
-      } else if (state.goal === 'ganar') {
-        kcal *= 1.1;
-      }
-
-      kcal = Math.round(kcal);
-
+      var bmr = state.sex === 'H' ? (88.362 + 13.397 * w + 4.799 * h - 5.677 * age) : (447.593 + 9.247 * w + 3.098 * h - 4.330 * age);
+      var tdee = Math.round(bmr * state.activity);
+      var adj = state.goal === 'perder' ? -300 : state.goal === 'ganar' ? 300 : 0;
+      var kcal = tdee + adj;
       var prot = Math.round(w * 2);
       var fat = Math.round(kcal * 0.25 / 9);
       var carb = Math.round((kcal - prot * 4 - fat * 9) / 4);
-
       document.getElementById('hbResult').style.display = 'block';
       document.getElementById('resKcal').textContent = kcal;
       document.getElementById('resProt').textContent = prot + 'g';
       document.getElementById('resCarb').textContent = carb + 'g';
       document.getElementById('resFat').textContent = fat + 'g';
-
-      state._pending = {
-        kcal: kcal,
-        prot: prot,
-        carb: carb,
-        fat: fat
-      };
+      state._pending = { kcal: kcal, prot: prot, carb: carb, fat: fat };
     }
     function saveProfile() {
       if (!state._pending) { showToast('Rellena todos los datos primero'); return; }
@@ -4175,19 +4800,19 @@
       var text = (document.getElementById('feedbackText').value || '').trim();
       if (!text) { showToast('⚠️ Escribe algo antes de enviar'); return; }
 
-      // Guardar feedback localmente (sin backend real todavía)
-      var feedbacks = JSON.parse(localStorage.getItem('fl_feedbacks') || '[]');
-      feedbacks.push({
-        stars: feedbackStarVal,
-        text: text,
-        date: new Date().toISOString()
-      });
-      localStorage.setItem('fl_feedbacks', JSON.stringify(feedbacks));
+      // Enviar a Supabase
+      submitFeedbackToCloud(feedbackStarVal, text);
+
+      // Guardar también localmente como respaldo
+      try {
+        var feedbacks = JSON.parse(localStorage.getItem('fl_feedbacks') || '[]');
+        feedbacks.push({ stars: feedbackStarVal, text: text, date: new Date().toISOString() });
+        localStorage.setItem('fl_feedbacks', JSON.stringify(feedbacks));
+      } catch(e) {}
 
       // Mostrar estado enviado
       var card = document.getElementById('feedbackFormCard');
       card.innerHTML = '<div class="feedback-sent"><span class="fb-check">✅</span><strong>¡Gracias por tu feedback!</strong><br><br>Tu opinión ayuda a hacer FuelLog mejor cada día.</div>';
-
       showToast('✅ Feedback enviado. ¡Gracias!');
     }
 
@@ -4311,6 +4936,11 @@
         localStorage.setItem('fl_myrecipes', JSON.stringify(myRecipes));
         localStorage.setItem('fl_scanhistory', JSON.stringify(scanHistory));
       } catch(e) {}
+      // Sincronizar a la nube si hay sesión activa (debounced)
+      if (sbUser) {
+        clearTimeout(saveAll._syncTimer);
+        saveAll._syncTimer = setTimeout(syncToCloud, 2000);
+      }
     }
     // ─── USUARIOS VIP — acceso premium por lista blanca ───
     // Añade aquí los identificadores que quieras (email o nickname)
