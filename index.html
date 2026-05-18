@@ -2520,7 +2520,7 @@
         FuelLog
       </div>
       <div class="header-right" style="display:flex;align-items:center;gap:8px">
-        <div class="user-badge hidden" id="userBadge" onclick="showAuthModal()">
+        <div class="user-badge hidden" id="userBadge" onclick="showTab('perfil',null)">
           <div class="user-badge-dot"></div>
           <span id="userBadgeEmail">cuenta</span>
         </div>
@@ -3245,6 +3245,7 @@
     function updateUserUI() {
       var badge = document.getElementById('userBadge');
       var emailEl = document.getElementById('userBadgeEmail');
+      var planBadge = document.getElementById('planBadge');
       var logoutSec = document.getElementById('logoutSection');
       var loginSec  = document.getElementById('loginSection');
       if (!badge) return;
@@ -3252,10 +3253,12 @@
         badge.classList.remove('hidden');
         var short = sbUser.email ? sbUser.email.split('@')[0] : 'cuenta';
         emailEl.textContent = short;
+        if (planBadge) planBadge.style.display = 'none';
         if (logoutSec) logoutSec.style.display = '';
         if (loginSec)  loginSec.style.display  = 'none';
       } else {
         badge.classList.add('hidden');
+        if (planBadge) planBadge.style.display = '';
         if (logoutSec) logoutSec.style.display = 'none';
         if (loginSec)  loginSec.style.display  = '';
       }
@@ -5030,6 +5033,8 @@
     function updatePremiumBadge() {
       var badge = document.getElementById('planBadge');
       if (!badge) return;
+      // Si hay sesión activa, el planBadge está oculto — no lo mostramos
+      if (sbUser) return;
       if (state.isPremium) {
         badge.textContent = '★ Premium';
         badge.classList.remove('free');
