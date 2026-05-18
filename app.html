@@ -13,7 +13,6 @@
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <script src="https://js.stripe.com/v3/"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *,
     *::before,
@@ -1605,12 +1604,13 @@
     .auth-user-email { font-size:12px;color:var(--gray-600);font-weight:500; }
     .auth-signout { font-size:12px;color:var(--red);font-weight:600;cursor:pointer;border:none;background:none;font-family:var(--font); }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
   <!-- LOGIN SCREEN -->
-  <div id="loginScreen" style="display:none;position:fixed;inset:0;background:#0d0d0f;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;max-width:420px;margin:0 auto">
+  <div id="loginScreen" style="display:none;position:fixed;inset:0;background:#0d0d0f;z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;max-width:420px;margin:0 auto">
     <div style="margin-bottom:32px;text-align:center">
       <div style="width:64px;height:64px;background:linear-gradient(135deg,#a855f7,#7c3aed);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px">⚡</div>
       <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-.03em">FuelLog</div>
@@ -1972,9 +1972,7 @@
 
   </div> <!-- /appShell -->
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ─── SUPABASE AUTH ───
     var _supa = supabase.createClient(
       'https://wsevpblhjugnszwagcyz.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZXZwYmxoanVnbnN6d2FnY3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTc3NzksImV4cCI6MjA5NDM5Mzc3OX0._nU5mCHUKwAIKl4Kqh4c4NG8jzX17g_4k_93ikSANpI'
