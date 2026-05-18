@@ -1560,6 +1560,16 @@
     #quaggaTarget canvas { position:absolute; top:0; left:0; width:100%; height:100%; }
     .scan-detect-flash { position:absolute; inset:0; border-radius:14px; background:rgba(99,102,241,.25); animation:flashAnim .3s ease; pointer-events:none; }
     @keyframes flashAnim { 0%{opacity:1} 100%{opacity:0} }
+    /* ADMIN PANEL */
+    .feedback-card { background:var(--white);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow);border-left:3px solid var(--accent); }
+    .feedback-card .fc-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:8px; }
+    .feedback-card .fc-email { font-size:12px;font-weight:600;color:var(--accent); }
+    .feedback-card .fc-stars { font-size:13px; }
+    .feedback-card .fc-text { font-size:13px;color:var(--gray-800);line-height:1.5;margin-bottom:6px; }
+    .feedback-card .fc-meta { font-size:11px;color:var(--gray-400);display:flex;gap:8px; }
+    .admin-stat { background:var(--white);border-radius:var(--radius-sm);padding:12px;text-align:center;box-shadow:var(--shadow); }
+    .admin-stat .as-val { font-size:22px;font-weight:800;color:var(--accent); }
+    .admin-stat .as-label { font-size:10px;color:var(--gray-400);margin-top:2px; }
   </style>
 </head>
 
@@ -1597,6 +1607,7 @@
         <button class="tab" onclick="showTab('semana',this)">📊 Semana</button>
         <button class="tab" onclick="showTab('premium',this)">⭐ Premium</button>
         <button class="tab" onclick="showTab('resenas',this)">💬 Reseñas</button>
+        <button class="tab" onclick="showTab('admin',this)">🛠 Admin</button>
       </div>
       <button class="tabs-arrow right" id="tabArrowRight" onclick="scrollTabs(1)">›</button>
     </div>
@@ -1861,6 +1872,20 @@
 
   </div>
 
+    <!-- ADMIN SCREEN -->
+    <div class="screen" id="screen-admin">
+      <div style="padding:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-size:17px;font-weight:700;letter-spacing:-.03em">Panel de Feedbacks</div>
+          <button onclick="loadFeedbacks()" style="background:var(--accent-bg);color:var(--accent);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">↻ Actualizar</button>
+        </div>
+        <div id="adminStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px"></div>
+        <div id="feedbacksList" style="display:flex;flex-direction:column;gap:10px">
+          <div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando feedbacks...</div>
+        </div>
+      </div>
+    </div>
+
   <!-- ADD FOOD MODAL -->
   <div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
@@ -1976,6 +2001,7 @@
       if (tab === 'premium') renderPremium();
       if (tab === 'historial') renderHistorial();
       if (tab === 'scanner') stopQuagga();
+      if (tab === 'admin') loadFeedbacks();
     }
 
     // ─── MEALS ───
@@ -2736,6 +2762,45 @@
 
     init();
     initTabs();
+    // ─── SUPABASE CONFIG ───
+    var SUPA_URL = 'https://wsevpblhjugnszwagcyz.supabase.co';
+    var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZXZwYmxoanVnbnN6d2FnY3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTc3NzksImV4cCI6MjA5NDM5Mzc3OX0._nU5mCHUKwAIKl4Kqh4c4NG8jzX17g_4k_93ikSANpI';
+
+    async function loadFeedbacks() {
+      var list = document.getElementById('feedbacksList');
+      var stats = document.getElementById('adminStats');
+      list.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando...</div>';
+      try {
+        var res = await fetch(SUPA_URL + '/rest/v1/feedbacks?select=*&order=created_at.desc', {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+        });
+        var data = await res.json();
+        if (!data || !data.length) {
+          list.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">No hay feedbacks aún</div>';
+          stats.innerHTML = '';
+          return;
+        }
+        // Stats
+        var avg = (data.reduce(function(a,b){ return a + (b.stars||0); }, 0) / data.length).toFixed(1);
+        stats.innerHTML =
+          '<div class="admin-stat"><div class="as-val">' + data.length + '</div><div class="as-label">Total</div></div>' +
+          '<div class="admin-stat"><div class="as-val">' + avg + '</div><div class="as-label">Media ⭐</div></div>' +
+          '<div class="admin-stat"><div class="as-val">' + data.filter(function(f){ return f.stars >= 4; }).length + '</div><div class="as-label">≥ 4 ⭐</div></div>';
+        // Cards
+        list.innerHTML = data.map(function(f) {
+          var stars = '⭐'.repeat(f.stars || 0);
+          var date = new Date(f.created_at).toLocaleDateString('es-ES', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+          return '<div class="feedback-card">' +
+            '<div class="fc-header"><span class="fc-email">' + (f.email || 'anónimo') + '</span><span class="fc-stars">' + stars + '</span></div>' +
+            '<div class="fc-text">' + (f.text || '—') + '</div>' +
+            '<div class="fc-meta"><span>v' + (f.app_version || '?') + '</span><span>' + date + '</span></div>' +
+          '</div>';
+        }).join('');
+      } catch(e) {
+        list.innerHTML = '<div style="text-align:center;color:var(--red);padding:40px 0;font-size:14px">Error al cargar: ' + e.message + '</div>';
+      }
+    }
+
   </script>
 </body>
 </html>
