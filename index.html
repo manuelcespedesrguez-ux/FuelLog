@@ -2469,6 +2469,34 @@
   </div>
   <style>
     @keyframes splashSpin { to { transform: rotate(360deg); } }
+    .admin-itab {
+      flex-shrink:0; padding:8px 12px; font-size:12px; font-weight:500;
+      color:var(--gray-400); border:none; background:transparent;
+      cursor:pointer; font-family:var(--font);
+      border-bottom:2px solid transparent; transition:all .15s;
+      white-space:nowrap;
+    }
+    .admin-itab.active { color:var(--black); border-bottom-color:var(--accent); font-weight:600; }
+    .admin-itab:hover:not(.active) { color:var(--gray-800); }
+    .admin-stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+    .admin-stat { background:var(--white); border:1px solid var(--gray-100); border-radius:var(--radius-sm); padding:12px; box-shadow:var(--shadow); }
+    .admin-stat-val { font-size:22px; font-weight:700; font-family:var(--mono); letter-spacing:-.03em; color:var(--accent); }
+    .admin-stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--gray-400); margin-top:3px; font-weight:600; }
+    .admin-section-title { font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; }
+    .admin-user-row { background:var(--white); border:1px solid var(--gray-100); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; box-shadow:var(--shadow); }
+    .admin-user-email { font-size:13px; font-weight:600; color:var(--black); }
+    .admin-user-meta { font-size:11px; color:var(--gray-400); margin-top:2px; }
+    .admin-badge { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; margin-left:6px; }
+    .admin-badge.premium { background:var(--amber-bg); color:var(--amber); border:1px solid rgba(217,119,6,.2); }
+    .admin-badge.free { background:var(--gray-100); color:var(--gray-600); }
+    .admin-toggle-btn { font-size:11px; font-weight:600; padding:4px 10px; border-radius:8px; border:1px solid var(--gray-200); background:var(--gray-100); color:var(--gray-800); cursor:pointer; font-family:var(--font); float:right; }
+    .admin-toggle-btn.on { background:var(--amber-bg); color:var(--amber); border-color:rgba(217,119,6,.3); }
+    .admin-fb-row { background:var(--white); border:1px solid var(--gray-100); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; box-shadow:var(--shadow); }
+    .admin-vip-code { background:var(--accent-bg); border:1px solid rgba(168,85,247,.25); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+    .admin-vip-code-text { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--accent); }
+    .admin-input { width:100%; padding:10px 12px; background:var(--gray-100); border:1px solid var(--gray-200); border-radius:var(--radius-sm); color:var(--black); font-size:13px; font-family:var(--font); margin-bottom:8px; -webkit-text-fill-color:var(--black); }
+    .admin-btn { width:100%; padding:11px; background:var(--accent); border:none; border-radius:var(--radius-sm); color:#fff; -webkit-text-fill-color:#fff; font-size:13px; font-weight:700; font-family:var(--font); cursor:pointer; margin-bottom:8px; }
+    .admin-btn.secondary { background:var(--gray-100); color:var(--black); -webkit-text-fill-color:var(--black); }
   </style>
 
   <!-- ONBOARDING -->
@@ -2870,9 +2898,18 @@
 
     <!-- ADMIN -->
     <div class="screen" id="screen-admin">
-      <div id="adminContent">
-        <div style="font-size:13px;color:var(--gray-400);text-align:center;padding:40px 0">Cargando feedbacks...</div>
+      <div style="display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;border-bottom:1px solid var(--gray-100)" id="adminTabsRow">
+        <button class="admin-itab active" onclick="switchAdminTab('resumen',this)">Resumen</button>
+        <button class="admin-itab" onclick="switchAdminTab('usuarios',this)">Usuarios</button>
+        <button class="admin-itab" onclick="switchAdminTab('feedbacks',this)">Feedbacks</button>
+        <button class="admin-itab" onclick="switchAdminTab('alimentos',this)">Alimentos</button>
+        <button class="admin-itab" onclick="switchAdminTab('vip',this)">VIP</button>
       </div>
+      <div id="adminPanelResumen"></div>
+      <div id="adminPanelUsuarios" style="display:none"></div>
+      <div id="adminPanelFeedbacks" style="display:none"></div>
+      <div id="adminPanelAlimentos" style="display:none"></div>
+      <div id="adminPanelVip" style="display:none"></div>
     </div>
 
   </div>
@@ -3616,39 +3653,245 @@
     }
 
     // ─── ADMIN ───
-    async function renderAdmin() {
-      var el = document.getElementById('adminContent');
-      if (!el) return;
-      if (!sb || !sbUser || sbUser.email !== ADMIN_EMAIL) {
-        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:40px 0">Acceso denegado</div>';
-        return;
-      }
-      el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:40px 0">Cargando...</div>';
+    // ─── ADMIN: tab switcher ───
+    var adminCurrentTab = 'resumen';
+    function switchAdminTab(tab, btn) {
+      adminCurrentTab = tab;
+      document.querySelectorAll('.admin-itab').forEach(function(b){ b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      ['resumen','usuarios','feedbacks','alimentos','vip'].forEach(function(t){
+        document.getElementById('adminPanel' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? '' : 'none';
+      });
+      if (tab === 'resumen')   adminRenderResumen();
+      if (tab === 'usuarios')  adminRenderUsuarios();
+      if (tab === 'feedbacks') adminRenderFeedbacks();
+      if (tab === 'alimentos') adminRenderAlimentos();
+      if (tab === 'vip')       adminRenderVip();
+    }
+
+    function renderAdmin() {
+      if (!sb || !sbUser || sbUser.email !== ADMIN_EMAIL) return;
+      switchAdminTab('resumen', document.querySelector('.admin-itab'));
+    }
+
+    // ── RESUMEN ──
+    async function adminRenderResumen() {
+      var el = document.getElementById('adminPanelResumen');
+      el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
       try {
-        var res = await sb.from('feedbacks').select('*').order('created_at', { ascending: false });
+        var fbRes  = await sb.from('feedbacks').select('stars', { count: 'exact' });
+        var usrRes = await sb.from('profiles').select('id,is_premium', { count: 'exact' });
+        var fbCount  = fbRes.count || 0;
+        var usrCount = usrRes.count || 0;
+        var premCount = (usrRes.data || []).filter(function(u){ return u.is_premium; }).length;
+        var avgStars = 0;
+        if (fbRes.data && fbRes.data.length) {
+          avgStars = (fbRes.data.reduce(function(a,r){ return a + (r.stars||0); }, 0) / fbRes.data.length).toFixed(1);
+        }
+        var myFoodsRes = await sb.from('my_foods').select('id', { count: 'exact' });
+        var foodCount = myFoodsRes.count || 0;
+        el.innerHTML =
+          '<div class="admin-stat-grid">' +
+            '<div class="admin-stat"><div class="admin-stat-val">' + usrCount + '</div><div class="admin-stat-lbl">Usuarios</div></div>' +
+            '<div class="admin-stat"><div class="admin-stat-val">' + premCount + '</div><div class="admin-stat-lbl">Premium</div></div>' +
+            '<div class="admin-stat"><div class="admin-stat-val">' + fbCount + '</div><div class="admin-stat-lbl">Feedbacks</div></div>' +
+            '<div class="admin-stat"><div class="admin-stat-val">' + avgStars + '</div><div class="admin-stat-lbl">Media estrellas</div></div>' +
+          '</div>' +
+          '<div class="admin-stat-grid">' +
+            '<div class="admin-stat"><div class="admin-stat-val">' + foodCount + '</div><div class="admin-stat-lbl">Alimentos custom</div></div>' +
+          '</div>';
+      } catch(e) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:30px 0">Error al cargar</div>';
+      }
+    }
+
+    // ── USUARIOS ──
+    async function adminRenderUsuarios() {
+      var el = document.getElementById('adminPanelUsuarios');
+      el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
+      try {
+        var res = await sb.from('profiles').select('*').order('created_at', { ascending: false });
         if (res.error) throw res.error;
         var rows = res.data || [];
-        if (!rows.length) {
-          el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:40px 0">Sin feedbacks aún</div>';
-          return;
-        }
-        var html = '<div style="font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">' + rows.length + ' feedbacks</div>';
-        rows.forEach(function(r) {
-          var stars = '';
-          for (var i = 0; i < 5; i++) stars += i < r.stars ? '★' : '☆';
-          var date = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '';
-          html += '<div style="background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)">';
-          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
-          html += '<span style="color:var(--amber);font-size:15px;letter-spacing:1px">' + stars + '</span>';
-          html += '<span style="font-size:11px;color:var(--gray-400)">' + date + '</span>';
+        if (!rows.length) { el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Sin usuarios aún</div>'; return; }
+        var html = '<div class="admin-section-title">' + rows.length + ' usuarios registrados</div>';
+        rows.forEach(function(u) {
+          var date = u.created_at ? new Date(u.created_at).toLocaleDateString('es-ES') : '';
+          var isPrem = u.is_premium;
+          html += '<div class="admin-user-row">';
+          html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+          html += '<div>';
+          html += '<div class="admin-user-email">' + (u.email || u.id.slice(0,8) + '...') + '<span class="admin-badge ' + (isPrem ? 'premium' : 'free') + '">' + (isPrem ? 'Premium' : 'Free') + '</span></div>';
+          html += '<div class="admin-user-meta">Registro: ' + date + (u.goal ? ' · ' + u.goal : '') + (u.vip_id ? ' · VIP: ' + u.vip_id : '') + '</div>';
           html += '</div>';
-          if (r.email) html += '<div style="font-size:11px;color:var(--accent);margin-bottom:6px">' + r.email + '</div>';
-          if (r.text) html += '<div style="font-size:13px;color:var(--gray-800);line-height:1.5">' + r.text + '</div>';
+          html += '<button class="admin-toggle-btn' + (isPrem ? ' on' : '') + '" onclick="adminTogglePremium(\'' + u.id + '\',' + isPrem + ',this)">' + (isPrem ? 'Quitar premium' : 'Dar premium') + '</button>';
+          html += '</div>';
           html += '</div>';
         });
         el.innerHTML = html;
       } catch(e) {
-        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:40px 0">Error al cargar feedbacks</div>';
+        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:30px 0">Error al cargar</div>';
+      }
+    }
+
+    async function adminTogglePremium(uid, current, btn) {
+      btn.disabled = true;
+      btn.textContent = '...';
+      var newVal = !current;
+      try {
+        var res = await sb.from('profiles').update({ is_premium: newVal }).eq('id', uid);
+        if (res.error) throw res.error;
+        btn.textContent = newVal ? 'Quitar premium' : 'Dar premium';
+        btn.className = 'admin-toggle-btn' + (newVal ? ' on' : '');
+        var badge = btn.parentElement.querySelector('.admin-badge');
+        if (badge) { badge.textContent = newVal ? 'Premium' : 'Free'; badge.className = 'admin-badge ' + (newVal ? 'premium' : 'free'); }
+        btn.onclick = function(){ adminTogglePremium(uid, newVal, btn); };
+        showToast(newVal ? 'Premium activado' : 'Premium desactivado');
+      } catch(e) {
+        btn.textContent = current ? 'Quitar premium' : 'Dar premium';
+        showToast('Error al actualizar');
+      }
+      btn.disabled = false;
+    }
+
+    // ── FEEDBACKS ──
+    async function adminRenderFeedbacks() {
+      var el = document.getElementById('adminPanelFeedbacks');
+      el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
+      try {
+        var res = await sb.from('feedbacks').select('*').order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        if (!rows.length) { el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Sin feedbacks aún</div>'; return; }
+
+        // Filtros
+        var html = '<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">';
+        html += '<button class="admin-toggle-btn on" id="fbFilterAll" onclick="adminFbFilter(0,this)">Todos (' + rows.length + ')</button>';
+        [1,2,3,4,5].forEach(function(s){
+          var cnt = rows.filter(function(r){ return r.stars===s; }).length;
+          if (cnt) html += '<button class="admin-toggle-btn" id="fbFilter' + s + '" onclick="adminFbFilter(' + s + ',this)">' + s + '★ (' + cnt + ')</button>';
+        });
+        html += '</div>';
+        html += '<div id="fbList">';
+        rows.forEach(function(r) {
+          var stars = '';
+          for (var i = 0; i < 5; i++) stars += i < r.stars ? '★' : '☆';
+          var date = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '';
+          html += '<div class="admin-fb-row" data-stars="' + (r.stars||0) + '">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+          html += '<span style="color:var(--amber);font-size:14px">' + stars + '</span>';
+          html += '<span style="font-size:11px;color:var(--gray-400)">' + date + '</span>';
+          html += '</div>';
+          if (r.email) html += '<div style="font-size:11px;color:var(--accent);margin-bottom:4px">' + r.email + '</div>';
+          if (r.text) html += '<div style="font-size:13px;color:var(--gray-800);line-height:1.5">' + r.text + '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+        el.innerHTML = html;
+      } catch(e) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:30px 0">Error al cargar</div>';
+      }
+    }
+
+    function adminFbFilter(stars, btn) {
+      document.querySelectorAll('[id^="fbFilter"]').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      document.querySelectorAll('#fbList .admin-fb-row').forEach(function(row){
+        row.style.display = (!stars || parseInt(row.dataset.stars) === stars) ? '' : 'none';
+      });
+    }
+
+    // ── ALIMENTOS ──
+    async function adminRenderAlimentos() {
+      var el = document.getElementById('adminPanelAlimentos');
+      el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
+      try {
+        var res = await sb.from('my_foods').select('*').order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        var html = '<div class="admin-section-title">' + rows.length + ' alimentos custom creados por usuarios</div>';
+        if (!rows.length) { html += '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:20px 0">Sin alimentos aún</div>'; }
+        rows.forEach(function(f) {
+          var date = f.created_at ? new Date(f.created_at).toLocaleDateString('es-ES') : '';
+          html += '<div class="admin-user-row">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+          html += '<div>';
+          html += '<div class="admin-user-email">' + (f.name || '—') + '</div>';
+          html += '<div class="admin-user-meta">' + (f.kcal||0) + ' kcal · P:' + (f.protein||0) + 'g C:' + (f.carbs||0) + 'g G:' + (f.fat||0) + 'g · ' + date + '</div>';
+          html += '</div>';
+          html += '<button class="admin-toggle-btn" onclick="adminDeleteFood(\'' + f.id + '\',this)">Borrar</button>';
+          html += '</div></div>';
+        });
+        el.innerHTML = html;
+      } catch(e) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:30px 0">Error al cargar</div>';
+      }
+    }
+
+    async function adminDeleteFood(id, btn) {
+      if (!confirm('¿Borrar este alimento?')) return;
+      btn.disabled = true;
+      try {
+        var res = await sb.from('my_foods').delete().eq('id', id);
+        if (res.error) throw res.error;
+        btn.closest('.admin-user-row').remove();
+        showToast('Alimento eliminado');
+      } catch(e) {
+        showToast('Error al borrar');
+        btn.disabled = false;
+      }
+    }
+
+    // ── VIP ──
+    var VIP_CODES = ['FUELLOG2026','BETA-VIP-01','BETA-VIP-02','BETA-VIP-03','FUELBETA'];
+
+    function adminRenderVip() {
+      var el = document.getElementById('adminPanelVip');
+      var html = '<div class="admin-section-title">Códigos activos</div>';
+      VIP_CODES.forEach(function(c) {
+        html += '<div class="admin-vip-code">';
+        html += '<span class="admin-vip-code-text">' + c + '</span>';
+        html += '<button class="admin-toggle-btn" onclick="adminCopyCode(\'' + c + '\',this)">Copiar</button>';
+        html += '</div>';
+      });
+      html += '<div class="admin-section-title" style="margin-top:16px">Añadir código nuevo</div>';
+      html += '<input class="admin-input" id="newVipCodeInput" placeholder="NUEVO-CODIGO" style="text-transform:uppercase">';
+      html += '<button class="admin-btn" onclick="adminAddVipCode()">Añadir código</button>';
+      html += '<div class="admin-section-title" style="margin-top:16px">Dar premium por email</div>';
+      html += '<input class="admin-input" id="vipEmailInput" placeholder="usuario@email.com" type="email">';
+      html += '<button class="admin-btn" onclick="adminGivePremiumByEmail()">Activar premium</button>';
+      el.innerHTML = html;
+    }
+
+    function adminCopyCode(code, btn) {
+      navigator.clipboard.writeText(code).then(function(){
+        btn.textContent = 'Copiado';
+        setTimeout(function(){ btn.textContent = 'Copiar'; }, 1500);
+      });
+    }
+
+    function adminAddVipCode() {
+      var input = document.getElementById('newVipCodeInput');
+      var code = input.value.trim().toUpperCase();
+      if (!code) { showToast('Escribe un código'); return; }
+      if (VIP_CODES.indexOf(code) !== -1) { showToast('Ese código ya existe'); return; }
+      VIP_CODES.push(code);
+      input.value = '';
+      adminRenderVip();
+      showToast('Código añadido');
+    }
+
+    async function adminGivePremiumByEmail() {
+      var input = document.getElementById('vipEmailInput');
+      var email = input.value.trim().toLowerCase();
+      if (!email) { showToast('Introduce un email'); return; }
+      try {
+        var res = await sb.from('profiles').update({ is_premium: true }).eq('email', email);
+        if (res.error) throw res.error;
+        showToast('Premium activado para ' + email);
+        input.value = '';
+      } catch(e) {
+        showToast('Error: ' + (e.message || 'no encontrado'));
       }
     }
 
