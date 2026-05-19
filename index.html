@@ -1598,9 +1598,10 @@
     }
     .auth-btn-oauth {
       width: 100%; padding: 13px;
-      background: white;
-      border: 1.5px solid var(--gray-200); border-radius: 12px;
-      color: var(--black); font-size: 14px; font-weight: 600;
+      background: #ffffff;
+      border: 1.5px solid #d1d5db; border-radius: 12px;
+      color: #111111; -webkit-text-fill-color: #111111;
+      font-size: 14px; font-weight: 600;
       font-family: var(--font); cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px;
       margin-top: 8px; -webkit-appearance: none; appearance: none;
@@ -1609,7 +1610,7 @@
     .auth-btn-oauth:active { opacity: .85; }
     .auth-divider {
       text-align: center; font-size: 12px;
-      color: var(--gray-400); margin: 14px 0;
+      color: #9ca3af; margin: 14px 0;
     }
     .auth-error {
       font-size: 12px; color: #ef4444;
@@ -2302,8 +2303,10 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: var(--black);
-      color: white;
+      background: #1e1e24;
+      color: #f0f0f2;
+      -webkit-text-fill-color: #f0f0f2;
+      border: 1px solid rgba(255,255,255,.10);
       padding: 10px 18px;
       border-radius: 20px;
       font-size: 13px;
@@ -3024,6 +3027,9 @@
           <input class="auth-input" type="password" id="authLoginPass" placeholder="••••••••" autocomplete="current-password">
         </div>
         <button class="auth-btn" onclick="doLogin()">Iniciar sesión</button>
+        <div style="text-align:center;margin-top:10px">
+          <a onclick="switchAuthPanel('forgot')" style="font-size:12px;color:var(--gray-600);cursor:pointer;text-decoration:underline">¿Olvidaste tu contraseña?</a>
+        </div>
         <div class="auth-divider">¿No tienes cuenta?</div>
         <button class="auth-btn secondary" onclick="switchAuthPanel('register')">Crear cuenta gratis</button>
         <div class="auth-divider" style="margin-top:12px">o continúa con</div>
@@ -3061,6 +3067,23 @@
         <button class="auth-btn secondary" onclick="switchAuthPanel('login')">Ya lo confirmé → Iniciar sesión</button>
         <div class="auth-skip"><a onclick="skipAuth()">Continuar sin cuenta →</a></div>
       </div>
+      <!-- RECUPERAR CONTRASEÑA -->
+      <div id="authPanelForgot" style="display:none">
+        <div class="auth-title">Recuperar contraseña</div>
+        <div class="auth-sub">Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.</div>
+        <div class="auth-error" id="authForgotError"></div>
+        <div id="authForgotSuccess" style="display:none;background:var(--green-bg);border:1px solid var(--green);color:var(--green);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;margin-bottom:12px">
+          Enlace enviado. Revisa tu bandeja de entrada.
+        </div>
+        <div class="auth-field">
+          <label>Email</label>
+          <input class="auth-input" type="email" id="authForgotEmail" placeholder="tu@email.com" autocomplete="email">
+        </div>
+        <button class="auth-btn" onclick="doForgotPassword()">Enviar enlace</button>
+        <div class="auth-divider" style="margin-top:12px"></div>
+        <button class="auth-btn secondary" onclick="switchAuthPanel('login')">Volver al inicio de sesión</button>
+      </div>
+
     </div>
   </div>
 
@@ -3182,6 +3205,38 @@
       document.getElementById('authPanelLogin').style.display    = panel === 'login'    ? '' : 'none';
       document.getElementById('authPanelRegister').style.display = panel === 'register' ? '' : 'none';
       document.getElementById('authPanelVerify').style.display   = panel === 'verify'   ? '' : 'none';
+      document.getElementById('authPanelForgot').style.display   = panel === 'forgot'   ? '' : 'none';
+      // Limpiar estado del panel forgot al salir
+      if (panel !== 'forgot') {
+        var errEl = document.getElementById('authForgotError');
+        var okEl  = document.getElementById('authForgotSuccess');
+        if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+        if (okEl)  { okEl.style.display  = 'none'; }
+        var emailEl = document.getElementById('authForgotEmail');
+        if (emailEl) emailEl.value = '';
+      }
+    }
+
+    // ─── Recuperar contraseña ───
+    async function doForgotPassword() {
+      var email = document.getElementById('authForgotEmail').value.trim();
+      var errEl = document.getElementById('authForgotError');
+      var okEl  = document.getElementById('authForgotSuccess');
+      errEl.style.display = 'none'; errEl.textContent = '';
+      okEl.style.display  = 'none';
+      if (!email) { errEl.textContent = 'Introduce tu email'; errEl.style.display = 'block'; return; }
+      try {
+        var btn = document.querySelector('#authPanelForgot .auth-btn');
+        btn.textContent = 'Enviando...'; btn.disabled = true;
+        var res = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/index.html'
+        });
+        btn.textContent = 'Enviar enlace'; btn.disabled = false;
+        if (res.error) { errEl.textContent = translateAuthError(res.error.message); errEl.style.display = 'block'; return; }
+        okEl.style.display = 'block';
+      } catch(e) {
+        errEl.textContent = 'Error de conexión. Inténtalo de nuevo.'; errEl.style.display = 'block';
+      }
     }
 
     // ─── Registro ───
