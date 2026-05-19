@@ -1444,8 +1444,10 @@
       transform: translateX(2px)
     }
 
-    .food-card-emoji {
-      font-size: 20px;
+    .food-card-cat {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
       flex-shrink: 0
     }
 
@@ -2049,27 +2051,121 @@
     };
 
     // ─── FOOD DB ───
+    // Base de datos local — valores por 100g salvo indicación — fuente: USDA FoodData Central + etiquetas reales
+    var FOOD_CAT_COLOR = {
+      carne:   '#ef4444', pescado: '#3b82f6', lacteo:  '#f59e0b',
+      cereal:  '#f97316', legumbre:'#84cc16', verdura: '#22c55e',
+      fruta:   '#ec4899', seco:    '#a855f7', grasa:   '#eab308',
+      bebida:  '#06b6d4', otro:    '#6b7280'
+    };
     var FOODS = [
-      { id: 1, name: 'Pollo a la plancha', emoji: '🍗', kcal: 165, p: 31, c: 0, f: 3.6 },
-      { id: 2, name: 'Arroz blanco', emoji: '🍚', kcal: 130, p: 2.7, c: 28, f: 0.3 },
-      { id: 3, name: 'Huevo entero', emoji: '🥚', kcal: 78, p: 6.3, c: 0.6, f: 5.3 },
-      { id: 4, name: 'Avena', emoji: '🌾', kcal: 389, p: 17, c: 66, f: 7 },
-      { id: 5, name: 'Plátano', emoji: '🍌', kcal: 89, p: 1.1, c: 23, f: 0.3 },
-      { id: 6, name: 'Leche entera', emoji: '🥛', kcal: 61, p: 3.2, c: 4.8, f: 3.3 },
-      { id: 7, name: 'Salmón', emoji: '🐟', kcal: 208, p: 20, c: 0, f: 13 },
-      { id: 8, name: 'Brócoli', emoji: '🥦', kcal: 34, p: 2.8, c: 7, f: 0.4 },
-      { id: 9, name: 'Almendras', emoji: '🫘', kcal: 579, p: 21, c: 22, f: 50 },
-      { id: 10, name: 'Yogur griego', emoji: '🫙', kcal: 59, p: 10, c: 3.6, f: 0.4 },
-      { id: 11, name: 'Pan integral', emoji: '🍞', kcal: 247, p: 9, c: 41, f: 4 },
-      { id: 12, name: 'Pechuga de pavo', emoji: '🦃', kcal: 135, p: 30, c: 0, f: 1 },
-      { id: 13, name: 'Lentejas cocidas', emoji: '🫘', kcal: 116, p: 9, c: 20, f: 0.4 },
-      { id: 14, name: 'Atún en lata', emoji: '🐟', kcal: 116, p: 26, c: 0, f: 1 },
-      { id: 15, name: 'Manzana', emoji: '🍎', kcal: 52, p: 0.3, c: 14, f: 0.2 },
-      { id: 16, name: 'Pasta integral', emoji: '🍝', kcal: 124, p: 5, c: 26, f: 0.9 },
-      { id: 17, name: 'Aceite de oliva (1 cda)', emoji: '🫒', kcal: 119, p: 0, c: 0, f: 13.5 },
-      { id: 18, name: 'Queso fresco', emoji: '🧀', kcal: 98, p: 11, c: 3, f: 4 },
-      { id: 19, name: 'Batata/Boniato', emoji: '🍠', kcal: 86, p: 1.6, c: 20, f: 0.1 },
-      { id: 20, name: 'Naranja', emoji: '🍊', kcal: 47, p: 0.9, c: 12, f: 0.1 },
+      // ── CARNES ──
+      { id: 101, name: 'Pechuga de pollo (cruda)',          cat: 'carne',    kcal: 110, p: 23.1, c: 0,    f: 1.2  },
+      { id: 102, name: 'Pechuga de pollo (plancha)',        cat: 'carne',    kcal: 165, p: 31.0, c: 0,    f: 3.6  },
+      { id: 103, name: 'Contramuslo de pollo (sin piel)',   cat: 'carne',    kcal: 153, p: 24.8, c: 0,    f: 5.7  },
+      { id: 104, name: 'Pechuga de pavo (plancha)',         cat: 'carne',    kcal: 135, p: 29.9, c: 0,    f: 1.0  },
+      { id: 105, name: 'Ternera magra (solomillo)',         cat: 'carne',    kcal: 143, p: 21.5, c: 0,    f: 5.9  },
+      { id: 106, name: 'Lomo de cerdo (plancha)',           cat: 'carne',    kcal: 166, p: 28.8, c: 0,    f: 5.2  },
+      { id: 107, name: 'Jamón serrano (lonchas)',           cat: 'carne',    kcal: 241, p: 30.5, c: 0.3,  f: 13.0 },
+      { id: 108, name: 'Jamón cocido (york)',               cat: 'carne',    kcal: 107, p: 17.4, c: 1.5,  f: 3.3  },
+      { id: 109, name: 'Carne picada de ternera (5% grasa)',cat: 'carne',    kcal: 137, p: 21.4, c: 0,    f: 5.4  },
+      { id: 110, name: 'Carne picada de ternera (20% grasa)',cat:'carne',    kcal: 215, p: 18.0, c: 0,    f: 15.8 },
+      { id: 111, name: 'Chorizo (fresco)',                  cat: 'carne',    kcal: 455, p: 24.1, c: 1.9,  f: 38.5 },
+      { id: 112, name: 'Pechuga de pollo empanada',         cat: 'carne',    kcal: 231, p: 16.2, c: 15.8, f: 11.4 },
+      // ── PESCADOS ──
+      { id: 201, name: 'Salmón (plancha)',                  cat: 'pescado',  kcal: 208, p: 20.4, c: 0,    f: 13.4 },
+      { id: 202, name: 'Merluza (al horno)',                cat: 'pescado',  kcal: 90,  p: 18.8, c: 0,    f: 1.4  },
+      { id: 203, name: 'Atún fresco (plancha)',             cat: 'pescado',  kcal: 144, p: 23.3, c: 0,    f: 5.1  },
+      { id: 204, name: 'Atún en lata (al natural)',         cat: 'pescado',  kcal: 116, p: 25.5, c: 0,    f: 0.8  },
+      { id: 205, name: 'Atún en lata (en aceite, escurrido)',cat:'pescado',  kcal: 198, p: 29.1, c: 0,    f: 9.2  },
+      { id: 206, name: 'Sardinas en lata (escurridas)',     cat: 'pescado',  kcal: 208, p: 24.6, c: 0,    f: 11.5 },
+      { id: 207, name: 'Bacalao (plancha)',                 cat: 'pescado',  kcal: 105, p: 22.8, c: 0,    f: 0.9  },
+      { id: 208, name: 'Gambas (cocidas)',                  cat: 'pescado',  kcal: 99,  p: 20.9, c: 0.9,  f: 1.1  },
+      { id: 209, name: 'Mejillones (al vapor)',             cat: 'pescado',  kcal: 86,  p: 11.9, c: 3.7,  f: 2.2  },
+      { id: 210, name: 'Trucha (plancha)',                  cat: 'pescado',  kcal: 149, p: 21.5, c: 0,    f: 6.6  },
+      // ── HUEVOS Y LÁCTEOS ──
+      { id: 301, name: 'Huevo entero (talla L)',            cat: 'lacteo',   kcal: 143, p: 12.6, c: 0.7,  f: 9.5  },
+      { id: 302, name: 'Clara de huevo',                    cat: 'lacteo',   kcal: 52,  p: 10.9, c: 0.7,  f: 0.2  },
+      { id: 303, name: 'Leche entera',                      cat: 'lacteo',   kcal: 61,  p: 3.2,  c: 4.8,  f: 3.3  },
+      { id: 304, name: 'Leche semidesnatada',               cat: 'lacteo',   kcal: 46,  p: 3.4,  c: 4.7,  f: 1.5  },
+      { id: 305, name: 'Leche desnatada',                   cat: 'lacteo',   kcal: 34,  p: 3.4,  c: 4.9,  f: 0.1  },
+      { id: 306, name: 'Yogur natural (sin azúcar)',        cat: 'lacteo',   kcal: 61,  p: 3.5,  c: 4.7,  f: 3.3  },
+      { id: 307, name: 'Yogur griego (0% grasa)',           cat: 'lacteo',   kcal: 57,  p: 10.2, c: 4.0,  f: 0.4  },
+      { id: 308, name: 'Yogur griego (entero)',             cat: 'lacteo',   kcal: 97,  p: 9.0,  c: 3.6,  f: 5.0  },
+      { id: 309, name: 'Queso fresco (tipo Burgos)',        cat: 'lacteo',   kcal: 98,  p: 11.1, c: 2.8,  f: 4.4  },
+      { id: 310, name: 'Queso manchego semicurado',         cat: 'lacteo',   kcal: 390, p: 26.0, c: 0.5,  f: 31.5 },
+      { id: 311, name: 'Mozzarella fresca',                 cat: 'lacteo',   kcal: 253, p: 17.1, c: 2.7,  f: 19.9 },
+      { id: 312, name: 'Queso cottage (bajo en grasa)',     cat: 'lacteo',   kcal: 72,  p: 12.4, c: 2.7,  f: 1.0  },
+      { id: 313, name: 'Requesón',                          cat: 'lacteo',   kcal: 98,  p: 11.1, c: 3.3,  f: 4.3  },
+      { id: 314, name: 'Nata para cocinar (18% MG)',        cat: 'lacteo',   kcal: 179, p: 2.7,  c: 3.4,  f: 17.5 },
+      // ── CEREALES ──
+      { id: 401, name: 'Arroz blanco (cocido)',             cat: 'cereal',   kcal: 130, p: 2.7,  c: 28.2, f: 0.3  },
+      { id: 402, name: 'Arroz integral (cocido)',           cat: 'cereal',   kcal: 123, p: 2.6,  c: 25.6, f: 1.0  },
+      { id: 403, name: 'Pasta blanca (cocida)',             cat: 'cereal',   kcal: 158, p: 5.8,  c: 30.9, f: 0.9  },
+      { id: 404, name: 'Pasta integral (cocida)',           cat: 'cereal',   kcal: 124, p: 5.3,  c: 26.0, f: 1.1  },
+      { id: 405, name: 'Avena en copos',                    cat: 'cereal',   kcal: 374, p: 13.2, c: 63.1, f: 7.1  },
+      { id: 406, name: 'Pan blanco de molde',               cat: 'cereal',   kcal: 265, p: 8.0,  c: 50.4, f: 3.3  },
+      { id: 407, name: 'Pan integral de molde',             cat: 'cereal',   kcal: 247, p: 9.2,  c: 41.3, f: 4.0  },
+      { id: 408, name: 'Pan de barra (baguette)',           cat: 'cereal',   kcal: 270, p: 8.9,  c: 52.7, f: 1.6  },
+      { id: 409, name: 'Tortita de arroz (1 unidad, ~10g)',  cat: 'cereal',   kcal: 39,  p: 0.7,  c: 8.5,  f: 0.3  },
+      { id: 410, name: 'Quinoa (cocida)',                   cat: 'cereal',   kcal: 120, p: 4.4,  c: 21.3, f: 1.9  },
+      { id: 411, name: 'Patata (hervida con piel)',         cat: 'cereal',   kcal: 87,  p: 1.9,  c: 20.1, f: 0.1  },
+      { id: 412, name: 'Boniato (asado)',                   cat: 'cereal',   kcal: 103, p: 2.3,  c: 24.0, f: 0.1  },
+      // ── LEGUMBRES ──
+      { id: 501, name: 'Lentejas (cocidas)',                cat: 'legumbre', kcal: 116, p: 9.0,  c: 20.1, f: 0.4  },
+      { id: 502, name: 'Garbanzos (cocidos)',               cat: 'legumbre', kcal: 164, p: 8.9,  c: 27.4, f: 2.6  },
+      { id: 503, name: 'Alubias blancas (cocidas)',         cat: 'legumbre', kcal: 127, p: 8.7,  c: 22.8, f: 0.5  },
+      { id: 504, name: 'Edamame (cocido)',                  cat: 'legumbre', kcal: 121, p: 11.9, c: 8.9,  f: 5.2  },
+      // ── VERDURAS ──
+      { id: 601, name: 'Brócoli (cocido)',                  cat: 'verdura',  kcal: 35,  p: 2.4,  c: 7.2,  f: 0.4  },
+      { id: 602, name: 'Espinacas (crudas)',                cat: 'verdura',  kcal: 23,  p: 2.9,  c: 3.6,  f: 0.4  },
+      { id: 603, name: 'Lechuga (variada)',                 cat: 'verdura',  kcal: 15,  p: 1.4,  c: 2.9,  f: 0.2  },
+      { id: 604, name: 'Tomate (crudo)',                    cat: 'verdura',  kcal: 18,  p: 0.9,  c: 3.9,  f: 0.2  },
+      { id: 605, name: 'Pepino (crudo)',                    cat: 'verdura',  kcal: 16,  p: 0.7,  c: 3.6,  f: 0.1  },
+      { id: 606, name: 'Pimiento rojo (crudo)',             cat: 'verdura',  kcal: 31,  p: 1.0,  c: 7.3,  f: 0.3  },
+      { id: 607, name: 'Zanahoria (cruda)',                 cat: 'verdura',  kcal: 41,  p: 0.9,  c: 9.6,  f: 0.2  },
+      { id: 608, name: 'Cebolla (cruda)',                   cat: 'verdura',  kcal: 40,  p: 1.1,  c: 9.3,  f: 0.1  },
+      { id: 609, name: 'Calabacín (cocido)',                cat: 'verdura',  kcal: 17,  p: 1.1,  c: 3.5,  f: 0.2  },
+      { id: 610, name: 'Berenjena (asada)',                 cat: 'verdura',  kcal: 35,  p: 0.8,  c: 8.6,  f: 0.2  },
+      { id: 611, name: 'Champiñones (salteados)',           cat: 'verdura',  kcal: 29,  p: 3.6,  c: 4.4,  f: 0.4  },
+      { id: 612, name: 'Aguacate',                          cat: 'verdura',  kcal: 160, p: 2.0,  c: 8.5,  f: 14.7 },
+      // ── FRUTAS ──
+      { id: 701, name: 'Plátano',                           cat: 'fruta',    kcal: 89,  p: 1.1,  c: 22.8, f: 0.3  },
+      { id: 702, name: 'Manzana',                           cat: 'fruta',    kcal: 52,  p: 0.3,  c: 13.8, f: 0.2  },
+      { id: 703, name: 'Naranja',                           cat: 'fruta',    kcal: 47,  p: 0.9,  c: 11.8, f: 0.1  },
+      { id: 704, name: 'Pera',                              cat: 'fruta',    kcal: 57,  p: 0.4,  c: 15.2, f: 0.1  },
+      { id: 705, name: 'Fresas',                            cat: 'fruta',    kcal: 32,  p: 0.7,  c: 7.7,  f: 0.3  },
+      { id: 706, name: 'Uvas',                              cat: 'fruta',    kcal: 69,  p: 0.7,  c: 18.1, f: 0.2  },
+      { id: 707, name: 'Kiwi',                              cat: 'fruta',    kcal: 61,  p: 1.1,  c: 14.7, f: 0.5  },
+      { id: 708, name: 'Sandía',                            cat: 'fruta',    kcal: 30,  p: 0.6,  c: 7.6,  f: 0.2  },
+      { id: 709, name: 'Melocotón',                         cat: 'fruta',    kcal: 39,  p: 0.9,  c: 9.5,  f: 0.3  },
+      { id: 710, name: 'Arándanos',                         cat: 'fruta',    kcal: 57,  p: 0.7,  c: 14.5, f: 0.3  },
+      { id: 711, name: 'Mandarina',                         cat: 'fruta',    kcal: 53,  p: 0.8,  c: 13.3, f: 0.3  },
+      // ── FRUTOS SECOS ──
+      { id: 801, name: 'Almendras (crudas)',                cat: 'seco',     kcal: 579, p: 21.2, c: 21.6, f: 49.9 },
+      { id: 802, name: 'Nueces',                            cat: 'seco',     kcal: 654, p: 15.2, c: 13.7, f: 65.2 },
+      { id: 803, name: 'Cacahuetes (tostados sin sal)',     cat: 'seco',     kcal: 585, p: 23.7, c: 21.5, f: 49.7 },
+      { id: 804, name: 'Mantequilla de cacahuete (1 cda)',  cat: 'seco',     kcal: 94,  p: 3.8,  c: 3.4,  f: 7.9  },
+      { id: 805, name: 'Semillas de chía (1 cda)',          cat: 'seco',     kcal: 58,  p: 2.0,  c: 5.0,  f: 3.7  },
+      { id: 806, name: 'Semillas de lino (1 cda)',          cat: 'seco',     kcal: 55,  p: 1.9,  c: 3.0,  f: 4.3  },
+      { id: 807, name: 'Pipas de girasol (sin sal)',        cat: 'seco',     kcal: 584, p: 20.8, c: 20.0, f: 51.5 },
+      { id: 808, name: 'Anacardos (tostados)',              cat: 'seco',     kcal: 574, p: 15.3, c: 32.7, f: 46.4 },
+      // ── ACEITES Y GRASAS ──
+      { id: 901, name: 'Aceite de oliva virgen extra (1 cda)', cat: 'grasa', kcal: 90,  p: 0,    c: 0,    f: 10.0 },
+      { id: 902, name: 'Mantequilla (10g)',                 cat: 'grasa',    kcal: 74,  p: 0.1,  c: 0,    f: 8.2  },
+      // ── BEBIDAS ──
+      { id: 1001, name: 'Leche de avena sin azúcar (200ml)', cat: 'bebida', kcal: 80,  p: 1.4,  c: 14.0, f: 1.6  },
+      { id: 1002, name: 'Leche de almendras sin azúcar (200ml)', cat: 'bebida', kcal: 28, p: 1.0, c: 0.8, f: 2.0 },
+      { id: 1003, name: 'Zumo de naranja natural (200ml)', cat: 'bebida',   kcal: 88,  p: 1.4,  c: 20.6, f: 0.4  },
+      { id: 1004, name: 'Café solo (sin azúcar)',           cat: 'bebida',   kcal: 2,   p: 0.3,  c: 0,    f: 0    },
+      { id: 1005, name: 'Proteína whey (30g)',              cat: 'bebida',   kcal: 113, p: 24.0, c: 3.0,  f: 1.5  },
+      // ── OTROS ──
+      { id: 1101, name: 'Hummus (comercial)',               cat: 'otro',     kcal: 177, p: 7.9,  c: 14.3, f: 9.6  },
+      { id: 1102, name: 'Tortilla española (ración 150g)',  cat: 'otro',     kcal: 218, p: 10.5, c: 12.8, f: 14.5 },
+      { id: 1103, name: 'Aceitunas verdes (10 unidades)',   cat: 'otro',     kcal: 42,  p: 0.3,  c: 0.5,  f: 4.4  },
+      { id: 1104, name: 'Mayonesa (1 cda)',                 cat: 'otro',     kcal: 99,  p: 0.2,  c: 0.3,  f: 11.0 },
+      { id: 1105, name: 'Tomate frito (2 cdas)',            cat: 'otro',     kcal: 27,  p: 0.5,  c: 4.2,  f: 1.0  },
+      { id: 1106, name: 'Chocolate negro 70%',              cat: 'otro',     kcal: 598, p: 7.8,  c: 45.9, f: 42.6 },
     ];
 
     var REVIEWS_INITIAL = [
@@ -2143,10 +2239,10 @@
 
     // ─── MEALS ───
     var MEAL_DEFS = [
-      { key: 'desayuno', label: 'Desayuno', emoji: '☀️' },
-      { key: 'almuerzo', label: 'Almuerzo', emoji: '🥗' },
-      { key: 'snacks', label: 'Snacks', emoji: '🍎' },
-      { key: 'cena', label: 'Cena', emoji: '🌙' },
+      { key: 'desayuno', label: 'Desayuno' },
+      { key: 'almuerzo', label: 'Almuerzo' },
+      { key: 'snacks',   label: 'Snacks'   },
+      { key: 'cena',     label: 'Cena'     },
     ];
     function renderMeals() {
       var container = document.getElementById('mealSections');
@@ -2155,7 +2251,7 @@
         var items = state.meals[m.key] || [];
         var total = items.reduce(function (a, i) { return a + i.kcal }, 0);
         var html = '<div class="meal-section"><div class="meal-header" onclick="toggleMeal(\'' + m.key + '\')">';
-        html += '<div class="meal-header-left"><span>' + m.emoji + '</span><span>' + m.label + '</span>';
+        html += '<div class="meal-header-left"><span>' + m.label + '</span>';
         if (total > 0) html += '<span class="meal-kcal-badge">' + total + ' kcal</span>';
         html += '</div>';
         html += '<button class="meal-add-btn" onclick="event.stopPropagation();openAddModal(\'' + m.key + '\')">+</button>';
@@ -2164,7 +2260,7 @@
           html += '<div class="meal-items" id="meal-' + m.key + '">';
           items.forEach(function (item, idx) {
             html += '<div class="meal-item">';
-            html += '<div class="meal-item-left"><div class="meal-item-name">' + item.emoji + ' ' + item.name + '</div>';
+            html += '<div class="meal-item-left"><div class="meal-item-name">' + item.name + '</div>';
             html += '<div class="meal-item-macros">P:' + item.p + 'g C:' + item.c + 'g G:' + item.f + 'g</div></div>';
             html += '<div class="meal-item-kcal">' + item.kcal + '</div>';
             html += '<button class="meal-item-del" onclick="removeItem(\'' + m.key + '\',' + idx + ')">×</button>';
@@ -2260,7 +2356,7 @@
       var html = '';
       list.forEach(function (f) {
         html += '<div class="food-item" onclick="addFood(' + f.id + ')">';
-        html += '<div><div class="food-item-name">' + f.emoji + ' ' + f.name + '</div>';
+        html += '<div><div class="food-item-name">' + f.name + '</div>';
         html += '<div class="food-item-info">P:' + f.p + 'g C:' + f.c + 'g G:' + f.f + 'g</div></div>';
         html += '<div class="food-item-kcal">' + f.kcal + ' kcal</div>';
         html += '</div>';
@@ -2274,7 +2370,7 @@
       state.meals[meal].push(JSON.parse(JSON.stringify(food)));
       closeModal();
       renderMeals();
-      showToast(food.emoji + ' ' + food.name + ' añadido a ' + meal);
+      showToast(food.name + ' añadido a ' + meal);
     }
 
     // ─── FOODS LIST ───
@@ -2283,7 +2379,8 @@
       var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
       var html = '';
       list.forEach(function (f) {
-        html += '<div class="food-card"><div class="food-card-emoji">' + f.emoji + '</div>';
+        var dotColor = (FOOD_CAT_COLOR && FOOD_CAT_COLOR[f.cat]) ? FOOD_CAT_COLOR[f.cat] : '#6b7280';
+        html += '<div class="food-card"><div class="food-card-cat" style="background:' + dotColor + '"></div>';
         html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
         html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
         html += '<div class="food-card-kcal">' + f.kcal + '</div>';
@@ -2307,7 +2404,8 @@
       var recent = [FOODS[0], FOODS[6], FOODS[3]];
       var html = '';
       recent.forEach(function (f) {
-        html += '<div class="food-card"><div class="food-card-emoji">' + f.emoji + '</div>';
+        var dotColor = (FOOD_CAT_COLOR && FOOD_CAT_COLOR[f.cat]) ? FOOD_CAT_COLOR[f.cat] : '#6b7280';
+        html += '<div class="food-card"><div class="food-card-cat" style="background:' + dotColor + '"></div>';
         html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
         html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
         html += '<div class="food-card-kcal">' + f.kcal + '</div>';
