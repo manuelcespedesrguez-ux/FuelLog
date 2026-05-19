@@ -2520,7 +2520,7 @@
         FuelLog
       </div>
       <div class="header-right" style="display:flex;align-items:center;gap:8px">
-        <div class="user-badge hidden" id="userBadge" onclick="showAuthModal()">
+        <div class="user-badge hidden" id="userBadge" onclick="showTab('perfil',null)">
           <div class="user-badge-dot"></div>
           <span id="userBadgeEmail">cuenta</span>
         </div>
@@ -2748,15 +2748,11 @@
           </div>
         </div>
         <div class="form-group" id="vipSection">
-          <div class="form-label">Acceso VIP <span style="font-size:11px;font-weight:400;color:var(--gray-400)">(beta testers)</span></div>
-          <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">Introduce tu email de tester o código de acceso para activar escaneos ilimitados.</div>
-          <div style="margin-bottom:8px">
-            <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Email</div>
-            <input class="form-input" type="email" id="pEmail" placeholder="tu@email.com" autocomplete="email">
-          </div>
+          <div class="form-label">Acceso VIP <span style="font-size:11px;font-weight:400;color:var(--gray-400)">(Solo para los beta testers)</span></div>
+          <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">Introduce tu código de acceso para activar la versión premium.</div>
           <div>
             <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Código de acceso</div>
-            <input class="form-input" type="text" id="pVipCode" placeholder="Ej: FUELLOG2026" autocomplete="off" style="text-transform:uppercase;letter-spacing:.05em">
+            <input class="form-input" type="text" id="pVipCode" autocomplete="off" style="text-transform:uppercase;letter-spacing:.05em">
           </div>
           <div id="vipStatus" style="margin-top:8px;font-size:12px;display:none"></div>
         </div>
@@ -3245,6 +3241,7 @@
     function updateUserUI() {
       var badge = document.getElementById('userBadge');
       var emailEl = document.getElementById('userBadgeEmail');
+      var planBadge = document.getElementById('planBadge');
       var logoutSec = document.getElementById('logoutSection');
       var loginSec  = document.getElementById('loginSection');
       if (!badge) return;
@@ -3252,10 +3249,12 @@
         badge.classList.remove('hidden');
         var short = sbUser.email ? sbUser.email.split('@')[0] : 'cuenta';
         emailEl.textContent = short;
+        if (planBadge) planBadge.style.display = 'none';
         if (logoutSec) logoutSec.style.display = '';
         if (loginSec)  loginSec.style.display  = 'none';
       } else {
         badge.classList.add('hidden');
+        if (planBadge) planBadge.style.display = '';
         if (logoutSec) logoutSec.style.display = 'none';
         if (loginSec)  loginSec.style.display  = '';
       }
@@ -5030,6 +5029,8 @@
     function updatePremiumBadge() {
       var badge = document.getElementById('planBadge');
       if (!badge) return;
+      // Si hay sesión activa, el planBadge está oculto — no lo mostramos
+      if (sbUser) return;
       if (state.isPremium) {
         badge.textContent = '★ Premium';
         badge.classList.remove('free');
