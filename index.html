@@ -4049,18 +4049,17 @@
     function filterModal(q) {
       clearTimeout(modalSearchTimer);
       var listEl = document.getElementById('modalFoodList');
-      // Solo base USDA (no _fromOFF, no myFoods) + resultados OFF que ya estén cacheados
-      var local = FOODS.filter(function(f){
-        if (f._myFood) return false; // excluir alimentos del usuario
-        if (!q) return !f._fromOFF;  // sin query: solo USDA
-        return f.name.toLowerCase().includes(q.toLowerCase());
-      });
-      listEl.innerHTML = '';
       if (!q) {
-        local.slice(0, 12).forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
+        // Sin query: mostrar primeros 12 de USDA
+        var base = FOODS.filter(function(f){ return !f._myFood && !f._fromOFF; });
+        listEl.innerHTML = '';
+        base.slice(0, 12).forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
         return;
       }
-      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+      // Búsqueda inteligente: USDA + OFF cacheados, sin myFoods
+      var results = smartSearch(q, { excludeMyFood: true });
+      listEl.innerHTML = '';
+      if (results.length) { results.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
       else { listEl.innerHTML = '<div class="foods-empty">Buscando en base de datos...</div>'; }
       if (q.length < 2) return;
       document.getElementById('modalSpinner').classList.add('visible');
@@ -4453,6 +4452,106 @@
     var foodSearchTimer = null;
     var offCache = {}; // cache búsquedas ya realizadas
 
+    // ─── CAPA 4: Inteligencia de búsqueda ───
+    var SYNONYMS = {
+      // Marcas → genérico
+      'cola cao':       'cacao soluble',
+      'colacao':        'cacao soluble',
+      'nesquik':        'cacao soluble',
+      'nocilla':        'crema de cacao',
+      'nutella':        'crema de cacao',
+      'actimel':        'yogur liquido',
+      'danone':         'yogur',
+      'philadelphia':   'queso crema',
+      'mercadona':      '',
+      'hacendado':      '',
+      // Abreviaturas / coloquial
+      'pechuga':        'pechuga de pollo',
+      'salmon':         'salmon atlantico',
+      'atun':           'atun en lata',
+      'tuna':           'atun en lata',
+      'egg':            'huevo',
+      'eggs':           'huevo',
+      'chicken':        'pollo',
+      'beef':           'ternera',
+      'rice':           'arroz',
+      'oats':           'avena',
+      'pasta':          'pasta cocida',
+      'bread':          'pan',
+      // Sinónimos nutrición
+      'proteina':       'proteinas',
+      'whey':           'proteina whey',
+      'creatine':       'creatina',
+      'casein':         'caseina',
+    };
+
+    // Normaliza un texto: minúsculas, sin acentos, sin puntuación extra
+    function normalizeStr(s) {
+      return (s || '').toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar acentos
+        .replace(/[^a-z0-9 ]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Expande una query con sus sinónimos
+    function expandQuery(q) {
+      var norm = normalizeStr(q);
+      var expanded = [norm];
+      // Buscar sinónimo exacto
+      if (SYNONYMS[norm]) expanded.push(normalizeStr(SYNONYMS[norm]));
+      // Buscar si la query contiene alguna clave de sinónimo
+      Object.keys(SYNONYMS).forEach(function(key) {
+        if (norm.includes(key) && SYNONYMS[key]) {
+          expanded.push(normalizeStr(norm.replace(key, SYNONYMS[key])));
+        }
+      });
+      return expanded;
+    }
+
+    // Puntúa qué tan bien coincide un alimento con la query
+    function scoreFood(food, terms) {
+      var name = normalizeStr(food.name);
+      var brand = normalizeStr(food.brand || '');
+      var score = 0;
+      terms.forEach(function(term) {
+        if (name === term) score += 100;          // coincidencia exacta
+        else if (name.startsWith(term)) score += 60; // empieza por
+        else if (name.includes(term)) score += 30;   // contiene
+        if (brand.includes(term)) score += 10;
+      });
+      return score;
+    }
+
+    // Busca en FOODS con inteligencia: sinónimos + normalización + ranking
+    function smartSearch(q, opts) {
+      opts = opts || {};
+      var excludeMyFood = opts.excludeMyFood || false;
+      var excludeOFF    = opts.excludeOFF    || false;
+      var onlyMyFood    = opts.onlyMyFood    || false;
+      if (!q) return [];
+      var terms = expandQuery(q);
+      var results = FOODS.filter(function(f) {
+        if (excludeMyFood && f._myFood) return false;
+        if (excludeOFF && f._fromOFF) return false;
+        if (onlyMyFood && !f._myFood) return false;
+        var name = normalizeStr(f.name);
+        return terms.some(function(t) { return name.includes(t); });
+      });
+      // Ordenar por puntuación
+      results.sort(function(a, b) {
+        return scoreFood(b, terms) - scoreFood(a, terms);
+      });
+      // Eliminar duplicados por nombre normalizado (local gana sobre OFF)
+      var seen = {};
+      return results.filter(function(f) {
+        var key = normalizeStr(f.name).slice(0, 20);
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+    }
+
     // Crea un food-row como elemento DOM con listeners reales (no outerHTML)
     function createFoodRow(f) {
       var brand = f.brand ? f.brand + (f.qty ? ', ' + f.qty : '') : (f.qty || '');
@@ -4500,13 +4599,10 @@
         return;
       }
       if (chip) chip.textContent = 'Resultados';
-      // Solo base USDA local — sin OFF, sin alimentos del usuario
-      var local = FOODS.filter(function(f){
-        return !f._fromOFF && !f._myFood && f.name.toLowerCase().includes(q.toLowerCase());
-      });
+      var results = smartSearch(q, { excludeMyFood: true, excludeOFF: true });
       var listEl = document.getElementById('foodsList');
       listEl.innerHTML = '';
-      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+      if (results.length) { results.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
       else { listEl.innerHTML = '<div class="foods-empty">Sin resultados en la base local</div>'; }
     }
 
@@ -4559,29 +4655,40 @@
     }
 
     function renderOFFResults(products, listEl) {
-      if (!products.length) {
-        listEl.innerHTML = '<div class="foods-empty">Sin resultados</div>';
-        return;
-      }
-      // Renderiza con DOM para que los listeners funcionen
-      listEl.innerHTML = '';
+      // Los resultados locales ya están en el listEl — añadir OFF sin duplicar
+      var existingNames = [];
+      listEl.querySelectorAll('.food-row').forEach(function(row) {
+        var nameEl = row.querySelector('.food-name');
+        if (nameEl) existingNames.push(normalizeStr(nameEl.textContent).slice(0, 20));
+      });
+
+      var added = 0;
       products.forEach(function(p) {
         var n = p.nutriments || {};
+        var rawName = p.product_name || 'Producto';
+        // Deduplicar por nombre normalizado contra los ya mostrados
+        if (existingNames.indexOf(normalizeStr(rawName).slice(0, 20)) !== -1) return;
         var food = {
-          id: 'off_' + p.product_name + (p.brands || ''),
-          name: p.product_name || 'Producto',
+          id: 'off_' + normalizeStr(rawName + (p.brands || '')).replace(/ /g,'_').slice(0, 40),
+          name: rawName,
           brand: p.brands ? p.brands.split(',')[0].trim() : '',
           qty: p.quantity || '',
-          emoji: '📦',
+          _fromOFF: true,
           kcal: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
           p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
           c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
           f: Math.round((n['fat_100g'] || 0) * 10) / 10
         };
-        if (!FOODS.find(function(x){ return x.id === food.id; })) { FOODS.unshift(food); }
-        else { food = FOODS.find(function(x){ return x.id === food.id; }); }
+        if (!food.kcal) return; // descartar si no tiene kcal
+        if (!FOODS.find(function(x){ return x.id === food.id; })) FOODS.unshift(food);
+        else food = FOODS.find(function(x){ return x.id === food.id; });
         listEl.appendChild(createFoodRow(food));
+        added++;
       });
+
+      if (!listEl.children.length) {
+        listEl.innerHTML = '<div class="foods-empty">Sin resultados</div>';
+      }
     }
 
     // ─── SCANNER PIPS ───
