@@ -2964,9 +2964,9 @@
 
       <!-- Pestañas -->
       <div class="modal-tabs">
-        <button class="modal-tab active" id="mtab-biblioteca" onclick="switchModalTab('biblioteca')">🔍 Biblioteca</button>
         <button class="modal-tab" id="mtab-mis-alimentos" onclick="switchModalTab('mis-alimentos')">⭐ Mis alimentos</button>
         <button class="modal-tab" id="mtab-mis-recetas" onclick="switchModalTab('mis-recetas')">🍳 Mis recetas</button>
+        <button class="modal-tab active" id="mtab-biblioteca" onclick="switchModalTab('biblioteca')">🔍 Biblioteca</button>
       </div>
 
       <!-- Panel: Biblioteca (búsqueda OFF) -->
@@ -4049,14 +4049,22 @@
     function filterModal(q) {
       clearTimeout(modalSearchTimer);
       var listEl = document.getElementById('modalFoodList');
-      // Show local instantly
-      var local = FOODS.filter(function(f){ return !q || f.name.toLowerCase().includes(q.toLowerCase()); });
+      // Solo base USDA (no _fromOFF, no myFoods) + resultados OFF que ya estén cacheados
+      var local = FOODS.filter(function(f){
+        if (f._myFood) return false; // excluir alimentos del usuario
+        if (!q) return !f._fromOFF;  // sin query: solo USDA
+        return f.name.toLowerCase().includes(q.toLowerCase());
+      });
       listEl.innerHTML = '';
-      if (local.length === 0) { listEl.innerHTML = '<div class="foods-empty">Escribe para buscar</div>'; }
-      else { local.slice(0, 10).forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
-      if (!q || q.length < 2) return;
+      if (!q) {
+        local.slice(0, 12).forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
+        return;
+      }
+      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+      else { listEl.innerHTML = '<div class="foods-empty">Buscando en base de datos...</div>'; }
+      if (q.length < 2) return;
       document.getElementById('modalSpinner').classList.add('visible');
-      modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 180);
+      modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 300);
     }
     // ─── QUANTITY PANEL ───
     var qtyFood = null;
@@ -4167,12 +4175,12 @@
         id: 'my_' + Date.now(),
         name: name,
         brand: brand,
-        emoji: '🍽️',
         kcal: Math.round(kcal),
         p: Math.round(p * 10) / 10,
         c: Math.round(c * 10) / 10,
         f: Math.round(f * 10) / 10,
-        isCustom: true
+        isCustom: true,
+        _myFood: true
       };
       myFoods.unshift(food);
       // También en FOODS para que esté disponible globalmente
@@ -4485,7 +4493,6 @@
     }
 
     function filterFoods(q) {
-      clearTimeout(foodSearchTimer);
       var chip = document.getElementById('foodsChip');
       if (!q) {
         if (chip) chip.textContent = 'Frecuentes';
@@ -4493,21 +4500,14 @@
         return;
       }
       if (chip) chip.textContent = 'Resultados';
-      // Search local first instantly
-      var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
+      // Solo base USDA local — sin OFF, sin alimentos del usuario
+      var local = FOODS.filter(function(f){
+        return !f._fromOFF && !f._myFood && f.name.toLowerCase().includes(q.toLowerCase());
+      });
       var listEl = document.getElementById('foodsList');
-      if (local.length) {
-        listEl.innerHTML = '';
-        local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
-      } else {
-        listEl.innerHTML = '<div class="foods-empty">Buscando...</div>';
-      }
-      // Then hit Open Food Facts after 500ms debounce
-      if (q.length < 2) return;
-      document.getElementById('foodSpinner').classList.add('visible');
-      foodSearchTimer = setTimeout(function() {
-        searchOFF(q, false);
-      }, 250);
+      listEl.innerHTML = '';
+      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+      else { listEl.innerHTML = '<div class="foods-empty">Sin resultados en la base local</div>'; }
     }
 
     var _offController = null; // AbortController activo
@@ -5482,8 +5482,8 @@
         var mf = JSON.parse(localStorage.getItem('fl_myfoods') || 'null');
         if (mf && mf.length) {
           myFoods = mf;
-          // Reintegrar en FOODS para búsqueda global
           mf.forEach(function(f){
+            f._myFood = true;
             if (!FOODS.find(function(x){ return x.id === f.id; })) FOODS.unshift(f);
           });
         }
