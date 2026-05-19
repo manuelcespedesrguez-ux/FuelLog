@@ -5458,6 +5458,21 @@
             document.getElementById('pWeight').value = prof.weight || '';
             document.getElementById('pHeight').value = prof.height || '';
           } catch(e) {}
+          // Sincronizar botones visuales con los valores guardados
+          try {
+            // Sexo
+            document.querySelectorAll('.seg-opt[onclick*="setSex"]').forEach(function(b){ b.classList.remove('active'); });
+            var sexBtn = document.querySelector('.seg-opt[onclick*="setSex(\'' + state.sex + '\'"]');
+            if (sexBtn) sexBtn.classList.add('active');
+            // Actividad
+            document.querySelectorAll('.act-opt').forEach(function(b){ b.classList.remove('active'); });
+            var actBtn = document.querySelector('.act-opt[onclick*="setActivity(' + state.activity + '"]');
+            if (actBtn) actBtn.classList.add('active');
+            // Objetivo
+            document.querySelectorAll('.seg-opt[onclick*="setGoal"]').forEach(function(b){ b.classList.remove('active'); });
+            var goalBtn = document.querySelector('.seg-opt[onclick*="setGoal(\'' + state.goal + '\'"]');
+            if (goalBtn) goalBtn.classList.add('active');
+          } catch(e) {}
         }
         // Mis alimentos propios
         var mf = JSON.parse(localStorage.getItem('fl_myfoods') || 'null');
