@@ -1,69 +1,70 @@
 // ─── FuelLog Service Worker ───
 // Cambia este string en cada deploy → fuerza actualización automática en todos los dispositivos
-const CACHE = 'fuellog-v4';
+var CACHE = 'fuellog-v5';
 
-const PRECACHE = [
+var PRECACHE = [
   '/',
   '/index.html',
+  '/app.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
 ];
 
 // ── Instalación: precachea los assets críticos ──
-self.addEventListener('install', event => {
+self.addEventListener('install', function(event) {
   event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(PRECACHE))
+    caches.open(CACHE).then(function(cache) { return cache.addAll(PRECACHE); })
   );
-  // Actívate inmediatamente sin esperar a que se cierren pestañas
   self.skipWaiting();
 });
 
 // ── Activación: borra cachés viejos y toma el control de todos los clientes ──
-self.addEventListener('activate', event => {
+self.addEventListener('activate', function(event) {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
+    caches.keys().then(function(keys) {
+      return Promise.all(
         keys
-          .filter(key => key !== CACHE)
-          .map(key => caches.delete(key))
-      )
-    )
+          .filter(function(key) { return key !== CACHE; })
+          .map(function(key) { return caches.delete(key); })
+      );
+    })
   );
-  // Toma el control inmediato de todas las pestañas/ventanas abiertas
   self.clients.claim();
 });
 
-// ── Fetch: Network-first para index.html, Cache-first para el resto ──
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+// ── Fetch: Network-first para HTML, Cache-first para el resto ──
+self.addEventListener('fetch', function(event) {
+  var url = new URL(event.request.url);
 
   // Peticiones externas (OFF API, Quagga CDN…) → siempre red, sin cachear
   if (url.origin !== self.location.origin) return;
 
-  // index.html → Network-first: intenta red primero para pillar versión nueva,
-  // cae a caché solo si no hay conexión
-  if (url.pathname === '/' || url.pathname === '/index.html') {
+  // index.html y app.html → Network-first
+  if (
+    url.pathname === '/' ||
+    url.pathname === '/index.html' ||
+    url.pathname === '/app.html'
+  ) {
     event.respondWith(
       fetch(event.request)
-        .then(response => {
-          // Guarda la versión fresca en caché
-          const clone = response.clone();
-          caches.open(CACHE).then(cache => cache.put(event.request, clone));
+        .then(function(response) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(cache) { cache.put(event.request, clone); });
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(function() { return caches.match(event.request); })
     );
     return;
   }
 
   // Resto de assets (iconos, manifest…) → Cache-first
   event.respondWith(
-    caches.match(event.request).then(cached => {
+    caches.match(event.request).then(function(cached) {
       if (cached) return cached;
-      return fetch(event.request).then(response => {
-        const clone = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, clone));
+      return fetch(event.request).then(function(response) {
+        var clone = response.clone();
+        caches.open(CACHE).then(function(cache) { cache.put(event.request, clone); });
         return response;
       });
     })
