@@ -2453,6 +2453,24 @@
 
 <body>
 
+  <!-- SPLASH SCREEN -->
+  <div id="splashScreen" style="position:fixed;inset:0;background:#0d0d0f;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity .4s ease">
+    <div style="width:72px;height:72px;background:linear-gradient(135deg,#a855f7 0%,#7c3aed 100%);border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(168,85,247,.35)">
+      <svg width="38" height="38" viewBox="0 0 100 100" fill="none"><path d="M55 18L28 55h22l-5 27 29-37H52l3-27z" fill="white"/></svg>
+    </div>
+    <div style="text-align:center">
+      <div style="font-family:'Sora',sans-serif;font-size:26px;font-weight:700;color:#f0f0f2;letter-spacing:-.03em">FuelLog</div>
+      <div style="font-family:'Sora',sans-serif;font-size:13px;color:#6b7280;margin-top:4px" id="splashMsg">Cargando...</div>
+    </div>
+    <svg width="36" height="36" viewBox="0 0 36 36" style="animation:splashSpin 1s linear infinite">
+      <circle cx="18" cy="18" r="14" fill="none" stroke="#252528" stroke-width="3"/>
+      <circle cx="18" cy="18" r="14" fill="none" stroke="#a855f7" stroke-width="3" stroke-dasharray="22 66" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+    </svg>
+  </div>
+  <style>
+    @keyframes splashSpin { to { transform: rotate(360deg); } }
+  </style>
+
   <!-- ONBOARDING -->
   <div class="onboarding-overlay hidden" id="onboarding">
     <div style="padding: 20px 24px 0; display:flex; justify-content:flex-end;">
@@ -2547,6 +2565,7 @@
         <button class="tab" onclick="showTab('premium',this)">⭐ Premium</button>
         <button class="tab" onclick="showTab('resenas',this)">💬 Reseñas</button>
         <button class="tab" onclick="showTab('feedback',this)">📝 Feedback</button>
+        <button class="tab" id="adminTab" style="display:none" onclick="showTab('admin',this)">🛠 Admin</button>
       </div>
       <button class="tabs-arrow right" id="tabArrowRight" onclick="scrollTabs(1)">›</button>
     </div>
@@ -2849,9 +2868,14 @@
       </div>
     </div>
 
-  </div>
+    <!-- ADMIN -->
+    <div class="screen" id="screen-admin">
+      <div id="adminContent">
+        <div style="font-size:13px;color:var(--gray-400);text-align:center;padding:40px 0">Cargando feedbacks...</div>
+      </div>
+    </div>
 
-  <!-- ADD FOOD MODAL -->
+  </div>
   <!-- QUANTITY PANEL -->
   <div class="qty-overlay" id="qtyOverlay" onclick="if(event.target===this)closeQty()">
     <div class="qty-panel" id="qtyPanel">
@@ -3147,6 +3171,20 @@
     var sb = null;
     var sbUser = null;     // usuario actual (null = no logueado)
     var sbSyncing = false; // evitar sync simultáneos
+    var ADMIN_EMAIL = 'manuelcespedesrguez@gmail.com';
+
+    function hideSplash() {
+      var s = document.getElementById('splashScreen');
+      if (!s) return;
+      s.style.opacity = '0';
+      setTimeout(function() { s.style.display = 'none'; }, 420);
+    }
+
+    function updateAdminTab() {
+      var tab = document.getElementById('adminTab');
+      if (!tab) return;
+      tab.style.display = (sbUser && sbUser.email === ADMIN_EMAIL) ? '' : 'none';
+    }
 
     // Inicializar cliente Supabase
     function initSupabase() {
@@ -3156,14 +3194,16 @@
         sb.auth.onAuthStateChange(function(event, session) {
           sbUser = session ? session.user : null;
           updateUserUI();
+          updateAdminTab();
           if (event === 'SIGNED_IN') {
-            showToast('✅ Sesión iniciada — sincronizando...');
+            showToast('Sesión iniciada — sincronizando...');
             closeAuthModal();
             syncFromCloud(); // descargar datos del servidor al entrar
           }
           if (event === 'SIGNED_OUT') {
             sbUser = null;
             updateUserUI();
+            updateAdminTab();
             showToast('Sesión cerrada');
           }
         });
@@ -3172,14 +3212,17 @@
           if (res.data && res.data.session) {
             sbUser = res.data.session.user;
             updateUserUI();
+            updateAdminTab();
           } else {
             // Primera vez: mostrar modal de auth (después de 1.5s para no interrumpir carga)
             var skipped = localStorage.getItem('fl_auth_skipped');
             if (!skipped) setTimeout(showAuthModal, 1500);
           }
+          hideSplash();
         });
       } catch(e) {
         console.error('Supabase init error:', e);
+        hideSplash();
       }
     }
 
@@ -3569,6 +3612,44 @@
       if (tab === 'historial') renderHistorial();
       if (tab === 'scanner') stopQuagga();
       if (tab === 'feedback') initFeedbackStars();
+      if (tab === 'admin') renderAdmin();
+    }
+
+    // ─── ADMIN ───
+    async function renderAdmin() {
+      var el = document.getElementById('adminContent');
+      if (!el) return;
+      if (!sb || !sbUser || sbUser.email !== ADMIN_EMAIL) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:40px 0">Acceso denegado</div>';
+        return;
+      }
+      el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:40px 0">Cargando...</div>';
+      try {
+        var res = await sb.from('feedbacks').select('*').order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        if (!rows.length) {
+          el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:40px 0">Sin feedbacks aún</div>';
+          return;
+        }
+        var html = '<div style="font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">' + rows.length + ' feedbacks</div>';
+        rows.forEach(function(r) {
+          var stars = '';
+          for (var i = 0; i < 5; i++) stars += i < r.stars ? '★' : '☆';
+          var date = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '';
+          html += '<div style="background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+          html += '<span style="color:var(--amber);font-size:15px;letter-spacing:1px">' + stars + '</span>';
+          html += '<span style="font-size:11px;color:var(--gray-400)">' + date + '</span>';
+          html += '</div>';
+          if (r.email) html += '<div style="font-size:11px;color:var(--accent);margin-bottom:6px">' + r.email + '</div>';
+          if (r.text) html += '<div style="font-size:13px;color:var(--gray-800);line-height:1.5">' + r.text + '</div>';
+          html += '</div>';
+        });
+        el.innerHTML = html;
+      } catch(e) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:40px 0">Error al cargar feedbacks</div>';
+      }
     }
 
     // ─── MEALS ───
