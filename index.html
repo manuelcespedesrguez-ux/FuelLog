@@ -5223,7 +5223,11 @@
     // ─── TOAST ───
     function showToast(msg) {
       var t = document.getElementById('toast');
-      t.textContent = msg; t.classList.add('show');
+      t.textContent = msg;
+      t.style.background = '#1e1e24';
+      t.style.color = '#f0f0f2';
+      t.style.webkitTextFillColor = '#f0f0f2';
+      t.classList.add('show');
       setTimeout(function () { t.classList.remove('show') }, 2500);
     }
 
