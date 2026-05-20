@@ -1963,10 +1963,51 @@
     <div class="modal">
       <div class="modal-handle"></div>
       <div class="modal-title" id="modalTitle">Añadir alimento</div>
-      <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)"
-        id="modalSearch">
-      <div class="food-list" id="modalFoodList"></div>
-      <button class="modal-close" onclick="closeModal()">Cancelar</button>
+
+      <!-- Panel 1: búsqueda -->
+      <div id="modalPanelSearch">
+        <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)"
+          id="modalSearch">
+        <div class="food-list" id="modalFoodList"></div>
+      </div>
+
+      <!-- Panel 2: configurar gramos -->
+      <div id="modalPanelGrams" style="display:none">
+        <div style="margin-bottom:14px">
+          <div id="gramsName" style="font-size:14px;font-weight:600;margin-bottom:4px"></div>
+          <div id="gramsMacrosBase" style="font-size:11px;color:var(--gray-400);font-family:var(--mono)"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <label style="font-size:13px;font-weight:500;white-space:nowrap">Cantidad (g)</label>
+          <input id="gramsInput" type="number" min="1" max="2000" value="100"
+            oninput="updateGramsPreview()"
+            style="flex:1;padding:10px 12px;border:1px solid var(--gray-100);border-radius:var(--radius-sm);font-size:16px;font-family:var(--mono);font-weight:700;background:var(--bg);color:var(--black);text-align:center">
+          <span style="font-size:13px;color:var(--gray-400)">g</span>
+        </div>
+        <!-- Preview macros recalculados -->
+        <div id="gramsPreview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px">
+          <div style="text-align:center;background:var(--bg);border-radius:var(--radius-sm);padding:8px 4px">
+            <div id="prevKcal" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent)">100</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">kcal</div>
+          </div>
+          <div style="text-align:center;background:var(--bg);border-radius:var(--radius-sm);padding:8px 4px">
+            <div id="prevProt" style="font-size:16px;font-weight:700;font-family:var(--mono)">0g</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">prot</div>
+          </div>
+          <div style="text-align:center;background:var(--bg);border-radius:var(--radius-sm);padding:8px 4px">
+            <div id="prevCarb" style="font-size:16px;font-weight:700;font-family:var(--mono)">0g</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">carbs</div>
+          </div>
+          <div style="text-align:center;background:var(--bg);border-radius:var(--radius-sm);padding:8px 4px">
+            <div id="prevFat" style="font-size:16px;font-weight:700;font-family:var(--mono)">0g</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-top:2px">grasa</div>
+          </div>
+        </div>
+        <button onclick="confirmAddFood()" style="width:100%;padding:13px;background:var(--black);color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px">Añadir al diario</button>
+        <button onclick="backToSearch()" style="width:100%;padding:11px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:13px;cursor:pointer">Volver</button>
+      </div>
+
+      <button class="modal-close" id="modalCancelBtn" onclick="closeModal()">Cancelar</button>
     </div>
   </div>
 
@@ -2257,8 +2298,7 @@
         html += '<button class="meal-add-btn" onclick="event.stopPropagation();openAddModal(\'' + m.key + '\')">+</button>';
         html += '</div>';
         if (items.length > 0) {
-          var openState = (!state._mealOpen || state._mealOpen[m.key] !== false);
-          html += '<div class="meal-items" id="meal-' + m.key + '"' + (openState ? '' : ' style="display:none"') + '>';
+          html += '<div class="meal-items" id="meal-' + m.key + '">';
           items.forEach(function (item, idx) {
             html += '<div class="meal-item">';
             html += '<div class="meal-item-left"><div class="meal-item-name">' + item.name + '</div>';
@@ -2278,12 +2318,7 @@
     }
     function toggleMeal(key) {
       var el = document.getElementById('meal-' + key);
-      if (!el) return;
-      var isHidden = el.style.display === 'none';
-      el.style.display = isHidden ? '' : 'none';
-      // Guardar estado para que renderMeals lo respete
-      if (!state._mealOpen) state._mealOpen = {};
-      state._mealOpen[key] = isHidden; // true = abierto
+      if (el) { el.style.display = el.style.display === 'none' ? '' : 'none'; }
     }
     function removeItem(meal, idx) {
       state.meals[meal].splice(idx, 1);
@@ -2349,19 +2384,69 @@
     }
 
     // ─── MODAL ───
+    var _pendingFood = null;
+
     function openAddModal(meal) {
       state.currentMealTarget = meal;
       document.getElementById('modalTitle').textContent = meal ? 'Añadir a ' + meal : 'Añadir alimento';
       document.getElementById('modalSearch').value = '';
       filterModal('');
+      backToSearch();
       document.getElementById('addModal').classList.add('open');
     }
-    function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+    function closeModal() {
+      document.getElementById('addModal').classList.remove('open');
+      _pendingFood = null;
+    }
+    function backToSearch() {
+      document.getElementById('modalPanelSearch').style.display = '';
+      document.getElementById('modalPanelGrams').style.display  = 'none';
+      document.getElementById('modalCancelBtn').style.display   = '';
+    }
+    function openGramsPanel(id) {
+      var food = FOODS.find(function(f){ return f.id === id; });
+      if (!food) return;
+      _pendingFood = food;
+      document.getElementById('gramsName').textContent      = food.name;
+      document.getElementById('gramsMacrosBase').textContent = 'por 100g — P:' + food.p + 'g · C:' + food.c + 'g · G:' + food.f + 'g · ' + food.kcal + ' kcal';
+      document.getElementById('gramsInput').value = '100';
+      document.getElementById('modalPanelSearch').style.display = 'none';
+      document.getElementById('modalPanelGrams').style.display  = '';
+      document.getElementById('modalCancelBtn').style.display   = 'none';
+      updateGramsPreview();
+      setTimeout(function(){ document.getElementById('gramsInput').focus(); document.getElementById('gramsInput').select(); }, 100);
+    }
+    function updateGramsPreview() {
+      if (!_pendingFood) return;
+      var g     = parseFloat(document.getElementById('gramsInput').value) || 0;
+      var ratio = g / 100;
+      document.getElementById('prevKcal').textContent = Math.round(_pendingFood.kcal * ratio);
+      document.getElementById('prevProt').textContent = Math.round(_pendingFood.p    * ratio * 10) / 10 + 'g';
+      document.getElementById('prevCarb').textContent = Math.round(_pendingFood.c    * ratio * 10) / 10 + 'g';
+      document.getElementById('prevFat').textContent  = Math.round(_pendingFood.f    * ratio * 10) / 10 + 'g';
+    }
+    function confirmAddFood() {
+      if (!_pendingFood) return;
+      var g     = parseFloat(document.getElementById('gramsInput').value) || 100;
+      var ratio = g / 100;
+      var meal  = state.currentMealTarget || 'desayuno';
+      var entry = {
+        id: _pendingFood.id, name: _pendingFood.name, cat: _pendingFood.cat || 'otro', grams: g,
+        kcal: Math.round(_pendingFood.kcal * ratio),
+        p:    Math.round(_pendingFood.p    * ratio * 10) / 10,
+        c:    Math.round(_pendingFood.c    * ratio * 10) / 10,
+        f:    Math.round(_pendingFood.f    * ratio * 10) / 10,
+      };
+      state.meals[meal].push(entry);
+      closeModal();
+      renderMeals();
+      showToast(g + 'g de ' + entry.name + ' añadido a ' + meal);
+    }
     function filterModal(q) {
-      var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
+      var list = FOODS.filter(function(f){ return !q || f.name.toLowerCase().includes(q.toLowerCase()); });
       var html = '';
-      list.forEach(function (f) {
-        html += '<div class="food-item" onclick="addFood(' + f.id + ')">';
+      list.forEach(function(f) {
+        html += '<div class="food-item" onclick="openGramsPanel(' + JSON.stringify(f.id) + ')">';
         html += '<div><div class="food-item-name">' + f.name + '</div>';
         html += '<div class="food-item-info">P:' + f.p + 'g C:' + f.c + 'g G:' + f.f + 'g</div></div>';
         html += '<div class="food-item-kcal">' + f.kcal + ' kcal</div>';
@@ -2370,7 +2455,8 @@
       document.getElementById('modalFoodList').innerHTML = html;
     }
     function addFood(id) {
-      var food = FOODS.find(function (f) { return f.id === id });
+      // Compatibilidad con escáner y llamadas directas — añade 100g
+      var food = FOODS.find(function(f){ return f.id === id; });
       if (!food) return;
       var meal = state.currentMealTarget || 'desayuno';
       state.meals[meal].push(JSON.parse(JSON.stringify(food)));
