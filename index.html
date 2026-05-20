@@ -1203,113 +1203,6 @@
       margin-bottom: 8px
     }
 
-    /* ─── AUTH MODAL ─── */
-    .auth-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.72);
-      z-index: 300;
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
-      display: none;
-    }
-    .auth-overlay.open { display: flex; }
-    .auth-card {
-      background: var(--white);
-      border: 1px solid var(--gray-100);
-      border-radius: 20px;
-      padding: 28px 24px;
-      width: 100%;
-      max-width: 360px;
-    }
-    .auth-logo {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 20px;
-    }
-    .auth-logo-icon {
-      width: 38px; height: 38px;
-      background: linear-gradient(135deg, #a855f7, #7c3aed);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .auth-logo-name {
-      font-size: 20px; font-weight: 800; color: var(--black);
-    }
-    .auth-title {
-      font-size: 17px; font-weight: 700; color: var(--black);
-      margin-bottom: 4px;
-    }
-    .auth-sub {
-      font-size: 13px; color: var(--gray-400);
-      margin-bottom: 20px;
-    }
-    .auth-tabs {
-      display: flex; gap: 0;
-      background: var(--gray-100);
-      border-radius: 10px; padding: 3px;
-      margin-bottom: 18px;
-    }
-    .auth-tab {
-      flex: 1; padding: 7px;
-      border: none; background: transparent;
-      border-radius: 8px;
-      font-size: 13px; font-weight: 600;
-      color: var(--gray-400);
-      cursor: pointer;
-      font-family: var(--font);
-      transition: all .15s;
-      -webkit-appearance: none; appearance: none;
-    }
-    .auth-tab.active {
-      background: var(--white);
-      color: var(--black);
-      box-shadow: 0 1px 4px rgba(0,0,0,.15);
-    }
-    .auth-field { margin-bottom: 12px; }
-    .auth-field label {
-      display: block; font-size: 11px;
-      font-weight: 600; color: var(--gray-400);
-      text-transform: uppercase; letter-spacing: .06em;
-      margin-bottom: 5px;
-    }
-    .auth-input {
-      width: 100%; padding: 11px 13px;
-      background: var(--gray-100);
-      border: 1.5px solid var(--gray-200);
-      border-radius: 10px;
-      font-size: 14px; font-family: var(--font);
-      color: var(--black);
-      -webkit-text-fill-color: var(--black);
-      outline: none; box-sizing: border-box;
-      transition: border-color .15s;
-      -webkit-appearance: none; appearance: none;
-    }
-    .auth-input:focus { border-color: var(--accent); }
-    .auth-submit {
-      width: 100%; padding: 13px;
-      background: var(--accent);
-      border: none; border-radius: 10px;
-      color: white; -webkit-text-fill-color: white;
-      font-size: 14px; font-weight: 700;
-      font-family: var(--font); cursor: pointer;
-      -webkit-appearance: none; appearance: none;
-      margin-top: 4px;
-      box-shadow: 0 0 20px rgba(168,85,247,.35);
-      transition: opacity .15s;
-    }
-    .auth-submit:active { opacity: .85; }
-    .auth-err {
-      font-size: 12px; color: #ef4444;
-      margin-top: 8px; text-align: center;
-      min-height: 18px;
-    }
-    .auth-skip {
-      text-align: center; margin-top: 14px;
-      font-size: 12px; color: var(--gray-400);
-    }
-    .auth-skip span {
-      color: var(--accent); cursor: pointer;
-      text-decoration: underline;
-    }
     /* Badge usuario en header */
     .user-avatar {
       width: 30px; height: 30px;
@@ -2363,6 +2256,85 @@
     .hist-empty { text-align:center; padding:32px 16px; color:var(--gray-400); }
     .hist-empty-icon { font-size:40px; margin-bottom:8px; }
     .hist-empty-text { font-size:13px; }
+
+    /* ── MACRO-POR-DÍA CHART (Premium) ── */
+    .hist-macro-chart { display:flex; align-items:flex-end; gap:3px; height:100px; }
+    .hist-macro-col {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      gap:0; height:100%; justify-content:flex-end;
+    }
+    .hist-macro-stack {
+      width:100%; border-radius:3px 3px 0 0; overflow:hidden;
+      display:flex; flex-direction:column-reverse; cursor:pointer;
+      transition:opacity .15s;
+      position:relative;
+    }
+    .hist-macro-stack:hover { opacity:.85; }
+    .hist-macro-seg { width:100%; transition:height .6s ease; }
+    .hist-macro-date { font-size:9px; color:var(--gray-400); margin-top:4px; font-weight:500; flex-shrink:0; }
+    .hist-macro-stack:hover::after {
+      content: attr(data-tip);
+      position:absolute; bottom:calc(100%+5px); left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,.85); color:#fff;
+      font-size:9px; padding:4px 7px; border-radius:5px;
+      white-space:nowrap; z-index:10; font-family:var(--mono);
+      pointer-events:none;
+    }
+    /* Leyenda colores */
+    .hist-macro-legend {
+      display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;
+    }
+    .hist-macro-legend-item {
+      display:flex; align-items:center; gap:4px;
+      font-size:10px; color:var(--gray-400);
+    }
+    .hist-macro-legend-dot {
+      width:8px; height:8px; border-radius:2px; flex-shrink:0;
+    }
+
+    /* ── PREMIUM GATE (tarjeta bloqueada) ── */
+    .premium-gate {
+      position:relative; overflow:hidden;
+      border-radius:var(--radius); margin-bottom:12px;
+    }
+    .premium-gate-blur {
+      filter:blur(4px); pointer-events:none; user-select:none;
+      opacity:.45;
+    }
+    .premium-gate-overlay {
+      position:absolute; inset:0;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:10px; padding:20px;
+      background:linear-gradient(180deg, transparent 0%, rgba(13,13,15,.7) 40%, rgba(13,13,15,.92) 100%);
+      border-radius:var(--radius);
+      text-align:center;
+    }
+    .premium-gate-badge {
+      background:linear-gradient(135deg,#fbbf24,#f59e0b);
+      color:#0a0a0a; font-size:10px; font-weight:700;
+      padding:3px 10px; border-radius:20px;
+      letter-spacing:.05em;
+    }
+    .premium-gate-title {
+      font-size:14px; font-weight:700; color:var(--black);
+    }
+    .premium-gate-sub {
+      font-size:11px; color:var(--gray-400); line-height:1.5;
+    }
+    .premium-gate-btn {
+      padding:9px 22px;
+      background:linear-gradient(135deg,#a855f7,#7c3aed);
+      border:none; border-radius:10px;
+      color:white; -webkit-text-fill-color:white;
+      font-size:13px; font-weight:700;
+      font-family:var(--font); cursor:pointer;
+      box-shadow:0 4px 16px rgba(168,85,247,.35);
+      transition:opacity .15s;
+      -webkit-appearance:none; appearance:none;
+    }
+    .premium-gate-btn:active { opacity:.85; }
 
     /* SCANNER QUAGGA */
     #quaggaTarget { width:100%; height:100%; position:relative; overflow:hidden; border-radius:14px; }
@@ -4932,6 +4904,67 @@
         return '<div class="dist-row"><span class="dist-dot" style="background:'+m.color+'"></span><span class="dist-name">'+m.name+'</span><div class="dist-bar-track"><div class="dist-bar-fill" style="width:'+m.pct+'%;background:'+m.color+';height:100%"></div></div><span class="dist-val">'+m.pct+'%</span></div>';
       }).join('') : '<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px">Sin datos suficientes</div>';
 
+      // ── Macro-por-día chart (últimos 14 días) ──────────────────
+      var macroChartData = data.slice(-14);
+      var macroChartMax = macroChartData.reduce(function(a, d) {
+        // max kcal calórica de macros (para escalar barras)
+        return Math.max(a, d.p * 4 + d.c * 4 + d.f * 9);
+      }, 1);
+
+      var macroBarHtml = macroChartData.map(function(d) {
+        var totalKcalMacro = d.p * 4 + d.c * 4 + d.f * 9;
+        var colH = totalKcalMacro > 0 ? Math.max(Math.round(totalKcalMacro / macroChartMax * 100), 4) : 2;
+        var hP = totalKcalMacro > 0 ? Math.round(d.p * 4 / totalKcalMacro * 100) : 0;
+        var hC = totalKcalMacro > 0 ? Math.round(d.c * 4 / totalKcalMacro * 100) : 0;
+        var hF = 100 - hP - hC; // resto a grasas para que sume 100%
+        var label = d.date.getDate() + ' ' + months[d.date.getMonth()];
+        var tip = !d.hasData ? (label + ': sin datos') :
+          label + ': P ' + d.p + 'g · C ' + d.c + 'g · G ' + d.f + 'g';
+        return '<div class="hist-macro-col">' +
+          '<div class="hist-macro-stack" style="height:' + colH + '%;width:100%" data-tip="' + tip + '">' +
+            (d.hasData ? (
+              '<div class="hist-macro-seg" style="height:' + hP + '%;background:#4ade80;min-height:' + (hP > 0 ? 2 : 0) + 'px"></div>' +
+              '<div class="hist-macro-seg" style="height:' + hC + '%;background:#fbbf24;min-height:' + (hC > 0 ? 2 : 0) + 'px"></div>' +
+              '<div class="hist-macro-seg" style="height:' + hF + '%;background:#818cf8;min-height:' + (hF > 0 ? 2 : 0) + 'px"></div>'
+            ) : '<div style="height:100%;background:var(--gray-100);border-radius:3px 3px 0 0"></div>') +
+          '</div>' +
+          '<div class="hist-macro-date">' + d.date.getDate() + '</div>' +
+        '</div>';
+      }).join('');
+
+      var macroChartCardHtml = state.isPremium
+        ? '<div class="hist-chart-card">' +
+            '<div class="hist-chart-title">Macros por día <span class="hist-chart-subtitle">últimos 14 días</span></div>' +
+            '<div class="hist-macro-chart">' + macroBarHtml + '</div>' +
+            '<div class="hist-macro-legend">' +
+              '<div class="hist-macro-legend-item"><div class="hist-macro-legend-dot" style="background:#4ade80"></div>Proteínas</div>' +
+              '<div class="hist-macro-legend-item"><div class="hist-macro-legend-dot" style="background:#fbbf24"></div>Carbos</div>' +
+              '<div class="hist-macro-legend-item"><div class="hist-macro-legend-dot" style="background:#818cf8"></div>Grasas</div>' +
+            '</div>' +
+          '</div>'
+        : '<div class="premium-gate hist-chart-card">' +
+            // Versión borrosa de fondo (siempre renderizamos algo para que se vea el blur)
+            '<div class="premium-gate-blur">' +
+              '<div class="hist-chart-title">Macros por día <span class="hist-chart-subtitle">últimos 14 días</span></div>' +
+              '<div class="hist-macro-chart" style="height:100px">' +
+                // Barras placeholder decorativas
+                [0.6,0.8,0.4,1,0.7,0.5,0.9,0.3,0.75,0.55,0.85,0.45,0.65,0.9].map(function(h) {
+                  return '<div class="hist-macro-col"><div class="hist-macro-stack" style="height:' + Math.round(h*100) + '%;width:100%">' +
+                    '<div class="hist-macro-seg" style="height:25%;background:#4ade80"></div>' +
+                    '<div class="hist-macro-seg" style="height:50%;background:#fbbf24"></div>' +
+                    '<div class="hist-macro-seg" style="height:25%;background:#818cf8"></div>' +
+                  '</div><div class="hist-macro-date">—</div></div>';
+                }).join('') +
+              '</div>' +
+            '</div>' +
+            '<div class="premium-gate-overlay">' +
+              '<div class="premium-gate-badge">★ PREMIUM</div>' +
+              '<div class="premium-gate-title">Macros por día desglosados</div>' +
+              '<div class="premium-gate-sub">Visualiza la distribución exacta de proteínas, carbos y grasas por día.<br>Disponible en Premium.</div>' +
+              '<button class="premium-gate-btn" onclick="showTab(\'premium\',null)">Desbloquear por 10€/año →</button>' +
+            '</div>' +
+          '</div>';
+
       el.innerHTML =
         // Period tabs
         '<div class="hist-period-tabs">' +
@@ -4952,7 +4985,7 @@
             '<div class="hist-stat-delta" style="color:var(--gray-400)">'+Math.round(daysWithData.length/days*100)+'% adherencia</div>' +
           '</div>' +
         '</div>' +
-        // Chart
+        // Calories chart
         '<div class="hist-chart-card">' +
           '<div class="hist-chart-title">Calorías diarias <span class="hist-chart-subtitle">últimos 14 días</span></div>' +
           '<div class="hist-bar-chart">'+barHtml+'</div>' +
@@ -4962,6 +4995,8 @@
             '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#fbbf24;display:inline-block"></span>Por debajo</span>' +
           '</div>' +
         '</div>' +
+        // ── Macros por día (Premium gate) ──
+        macroChartCardHtml +
         // Macro distribution
         '<div class="hist-chart-card">' +
           '<div class="hist-chart-title">Distribución de macros <span class="hist-chart-subtitle">promedio del periodo</span></div>' +
