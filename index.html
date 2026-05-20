@@ -4593,10 +4593,12 @@
         state.meals[meal].push(entry);
         names.push(food.name);
       });
-      saveDay();
+      saveDayData();
       clearModalSelection();
       closeModal();
       renderMeals();
+      updateHeroRing();
+      updateMacros();
       showToast('✅ ' + names.length + ' alimentos añadidos a ' + meal + ' (100g c/u)');
     }
 
