@@ -1935,6 +1935,18 @@
           </div>
         </div>
         <button class="save-btn" onclick="saveProfile()">Guardar perfil</button>
+
+        <!-- Registro de peso corporal -->
+        <div style="background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);padding:16px;margin-top:12px;box-shadow:var(--shadow)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px">Peso corporal</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input id="weightTodayInput" type="number" min="30" max="300" step="0.1" placeholder="kg de hoy"
+              style="flex:1;padding:10px 12px;border:1px solid var(--gray-100);border-radius:var(--radius-sm);font-size:15px;font-family:var(--mono);background:var(--bg);color:var(--black)">
+            <span style="font-size:13px;color:var(--gray-400)">kg</span>
+            <button onclick="logWeightToday()" style="background:var(--black);color:white;border:none;border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Guardar</button>
+          </div>
+          <div id="weightTodayStatus" style="font-size:12px;color:var(--gray-400);margin-top:8px"></div>
+        </div>
       </div>
     </div>
 
@@ -2279,6 +2291,7 @@
       renderMeals();
       renderFoods();
       loadRecentFoods();
+      loadWeightLog();
       renderRecentFoods();      renderScanPips();
       renderRecentScans();
       renderReviews();
@@ -2854,6 +2867,12 @@
           calcHB(); updateHeroRing(); updateMacros();
         }
       } catch (e) { }
+      // Precargar peso de hoy si ya fue registrado
+      var todayWeight = _weightLog[new Date().toDateString()];
+      if (todayWeight) {
+        document.getElementById('weightTodayInput').value = todayWeight;
+        document.getElementById('weightTodayStatus').textContent = 'Ya registrado hoy: ' + todayWeight + ' kg';
+      }
     }
 
     // ─── HISTORIAL ───
@@ -2884,6 +2903,77 @@
         else break;
       }
       return streak;
+    }
+
+    // ─── PESO CORPORAL ───
+    var _weightLog = {}; // { 'Mon Jan 01 2025': 75.2, ... }
+
+    function loadWeightLog() {
+      try { _weightLog = JSON.parse(localStorage.getItem('fl_weight') || '{}'); } catch(e) { _weightLog = {}; }
+    }
+    function saveWeightLog() {
+      try { localStorage.setItem('fl_weight', JSON.stringify(_weightLog)); } catch(e) {}
+    }
+    function logWeightToday() {
+      var val = parseFloat(document.getElementById('weightTodayInput').value);
+      var status = document.getElementById('weightTodayStatus');
+      if (!val || val < 30 || val > 300) {
+        status.style.color = 'var(--red)'; status.textContent = 'Introduce un peso válido (30–300 kg)'; return;
+      }
+      var key = new Date().toDateString();
+      _weightLog[key] = val;
+      saveWeightLog();
+      status.style.color = 'var(--green)'; status.textContent = 'Guardado — ' + val + ' kg hoy';
+      setTimeout(function(){ status.textContent = ''; }, 3000);
+    }
+    function getWeightData(days) {
+      var result = [];
+      var today = new Date();
+      for (var i = days - 1; i >= 0; i--) {
+        var d = new Date(today); d.setDate(today.getDate() - i);
+        var key = d.toDateString();
+        result.push({ date: d, weight: _weightLog[key] || null });
+      }
+      return result;
+    }
+    function renderWeightChart(days) {
+      var data    = getWeightData(days);
+      var vals    = data.map(function(d){ return d.weight; }).filter(function(v){ return v !== null; });
+      if (vals.length < 2) return '<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:16px">Registra al menos 2 días para ver la gráfica</div>';
+      var minW    = Math.floor(Math.min.apply(null, vals) - 1);
+      var maxW    = Math.ceil(Math.max.apply(null, vals) + 1);
+      var range   = maxW - minW || 1;
+      var months  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      var points  = [];
+      var W = 300, H = 80, padL = 28, padR = 8, padT = 8, padB = 20;
+      var chartW  = W - padL - padR;
+      var chartH  = H - padT - padB;
+      var withVal = data.filter(function(d){ return d.weight !== null; });
+      withVal.forEach(function(d, i) {
+        var x = padL + (i / Math.max(withVal.length - 1, 1)) * chartW;
+        var y = padT + (1 - (d.weight - minW) / range) * chartH;
+        points.push({ x: x, y: y, w: d.weight, label: d.date.getDate() + ' ' + months[d.date.getMonth()] });
+      });
+      var polyline = points.map(function(p){ return p.x + ',' + p.y; }).join(' ');
+      // Área bajo la curva
+      var areaPoints = points.map(function(p){ return p.x + ',' + p.y; }).join(' ') +
+        ' ' + points[points.length-1].x + ',' + (padT+chartH) + ' ' + points[0].x + ',' + (padT+chartH);
+      // Etiquetas eje Y
+      var yLabels = [minW, Math.round((minW+maxW)/2), maxW].map(function(v) {
+        var y = padT + (1 - (v - minW) / range) * chartH;
+        return '<text x="' + (padL-4) + '" y="' + (y+3) + '" font-size="8" fill="var(--gray-400)" text-anchor="end">' + v + '</text>';
+      }).join('');
+      // Puntos y tooltips
+      var dots = points.map(function(p) {
+        return '<circle cx="' + p.x + '" cy="' + p.y + '" r="3" fill="var(--accent)" stroke="white" stroke-width="1.5"><title>' + p.label + ': ' + p.w + ' kg</title></circle>';
+      }).join('');
+      return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:80px">' +
+        '<defs><linearGradient id="wGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>' +
+        yLabels +
+        '<polygon points="' + areaPoints + '" fill="url(#wGrad)"/>' +
+        '<polyline points="' + polyline + '" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+        dots +
+        '</svg>';
     }
 
     function renderHistorial() {
@@ -2980,6 +3070,11 @@
         '<div class="hist-chart-card">' +
           '<div class="hist-chart-title">Últimos registros</div>' +
           listHtml +
+        '</div>' +
+        // Weight chart
+        '<div class="hist-chart-card">' +
+          '<div class="hist-chart-title">Peso corporal <span class="hist-chart-subtitle">últimos ' + days + ' días</span></div>' +
+          renderWeightChart(days) +
         '</div>';
     }
 
