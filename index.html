@@ -1179,191 +1179,6 @@
     }
 
     /* SCANNER SCREEN */
-    .scanner-hero {
-      background: var(--surf);
-      border: 1px solid var(--gray-100);
-      border-radius: 20px;
-      padding: 24px;
-      text-align: center;
-      margin-bottom: 16px;
-      color: var(--black);
-      position: relative;
-      overflow: hidden
-    }
-
-    .scanner-viewfinder {
-      width: 200px;
-      height: 200px;
-      border-radius: 16px;
-      background: #0a0a0c;
-      margin: 0 auto 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      border: 1px solid #2a2a2e;
-      overflow: hidden
-    }
-
-    .scanner-corner {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      border-color: var(--accent);
-      border-style: solid
-    }
-
-    .scanner-corner.tl {
-      top: 8px;
-      left: 8px;
-      border-width: 2px 0 0 2px;
-      border-radius: 2px 0 0 0
-    }
-
-    .scanner-corner.tr {
-      top: 8px;
-      right: 8px;
-      border-width: 2px 2px 0 0;
-      border-radius: 0 2px 0 0
-    }
-
-    .scanner-corner.bl {
-      bottom: 8px;
-      left: 8px;
-      border-width: 0 0 2px 2px;
-      border-radius: 0 0 0 2px
-    }
-
-    .scanner-corner.br {
-      bottom: 8px;
-      right: 8px;
-      border-width: 0 2px 2px 0;
-      border-radius: 0 0 2px 0
-    }
-
-    .scanner-line {
-      position: absolute;
-      width: 80%;
-      height: 1.5px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      animation: scanLine 2s ease-in-out infinite
-    }
-
-    @keyframes scanLine {
-      0% {
-        top: 20px;
-        opacity: 0
-      }
-
-      20% {
-        opacity: 1
-      }
-
-      80% {
-        opacity: 1
-      }
-
-      100% {
-        top: calc(100% - 20px);
-        opacity: 0
-      }
-    }
-
-    .scanner-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 6px
-    }
-
-    .scanner-sub {
-      font-size: 12px;
-      color: var(--gray-400);
-      margin-bottom: 20px
-    }
-
-    .scanner-btn {
-      padding: 12px 28px;
-      background: var(--accent);
-      border: none;
-      border-radius: 12px;
-      color: white;
-      -webkit-text-fill-color: white;
-      -webkit-appearance: none;
-      appearance: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: var(--font);
-      transition: opacity .15s;
-      box-shadow: 0 0 16px rgba(168,85,247,.35)
-    }
-
-    .scanner-btn:hover {
-      opacity: .85
-    }
-
-    .scan-limit {
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .scan-limit-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .scan-limit-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--black);
-      letter-spacing: .02em;
-      text-transform: uppercase;
-    }
-
-    .scan-limit-count {
-      font-size: 14px;
-      font-weight: 700;
-      font-family: var(--mono);
-      color: var(--accent);
-      background: var(--accent-bg);
-      padding: 2px 10px;
-      border-radius: 20px;
-      border: 1px solid rgba(168,85,247,.25);
-    }
-
-    .scan-pips {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
-
-    .pip {
-      flex: 1;
-      min-width: 0;
-      height: 6px;
-      border-radius: 3px;
-      background: var(--gray-200);
-      transition: background .25s;
-    }
-
-    .pip.used {
-      background: var(--accent);
-      box-shadow: 0 0 6px rgba(168,85,247,.40);
-    }
-
-    .recent-scans-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--gray-800);
-      margin-bottom: 10px
-    }
-
     /* PROFILE SCREEN */
     .profile-form {
       display: flex;
@@ -2695,7 +2510,6 @@
       <button class="tabs-arrow left hidden" id="tabArrowLeft" onclick="scrollTabs(-1)">‹</button>
       <div class="tabs" id="tabsRow">
         <button class="tab active" onclick="showTab('diario',this)">📋 Diario</button>
-        <button class="tab" onclick="showTab('scanner',this)">📷 Escáner</button>
         <button class="tab" onclick="showTab('alimentos',this)">🥗 Alimentos</button>
         <button class="tab" onclick="showTab('historial',this)">📈 Historial</button>
         <button class="tab" onclick="showTab('perfil',this)">👤 Perfil</button>
@@ -2782,37 +2596,6 @@
     </div>
 
     <!-- SCANNER -->
-    <div class="screen" id="screen-scanner">
-      <div class="scanner-hero">
-        <div class="scanner-viewfinder" id="scannerViewfinder">
-          <div class="scanner-corner tl"></div>
-          <div class="scanner-corner tr"></div>
-          <div class="scanner-corner bl"></div>
-          <div class="scanner-corner br"></div>
-          <div class="scanner-line" id="scannerLine"></div>
-          <div id="quaggaTarget" style="display:none;width:100%;height:100%;position:absolute;inset:0;border-radius:14px;overflow:hidden"></div>
-          <svg id="scannerIcon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5">
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-          </svg>
-        </div>
-        <div class="scanner-title">Escanear producto</div>
-        <div class="scanner-sub" id="scannerSub">Abre la cámara o introduce el código manualmente</div>
-        <button class="scanner-btn" id="scannerCamBtn" onclick="toggleCamera()">📷 Abrir cámara</button>
-      </div>
-      <input type="hidden" id="barcodeInput">
-      <div id="scanResultCard" style="display:none;background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)"></div>
-      <div class="scan-limit">
-        <div class="scan-limit-top"><span class="scan-limit-label">Escaneos este mes</span><span
-            class="scan-limit-count" id="scanCount">0 / 10</span></div>
-        <div class="scan-pips" id="scanPips"></div>
-      </div>
-      <div class="recent-scans-title">Escaneados recientemente</div>
-      <div id="recentScans" class="foods-list"></div>
-    </div>
-
     <!-- ALIMENTOS -->
     <div class="screen" id="screen-alimentos">
       <div class="foods-search">
@@ -3734,7 +3517,6 @@
           } else {
             state.scansUsed = 0;
           }
-          renderScanPips();
         }
 
         saveAll(); // actualizar localStorage con datos del servidor
@@ -3776,8 +3558,6 @@
       updateDateLabel();
       renderMeals();
       renderFoods();
-      renderScanPips();
-      renderRecentScans();
       renderReviews();
       renderWeek();
       renderPremium();
@@ -3830,7 +3610,6 @@
       if (tab === 'semana') renderWeek();
       if (tab === 'premium') renderPremium();
       if (tab === 'historial') renderHistorial();
-      if (tab === 'scanner') stopQuagga();
       if (tab === 'feedback') initFeedbackStars();
       if (tab === 'admin') renderAdmin();
     }
@@ -4885,181 +4664,6 @@
       });
     }
 
-    // ─── SCANNER PIPS ───
-    function renderScanPips() {
-      var max = state.isPremium ? 10 : state.maxScans;
-      var html = '';
-      for (var i = 0; i < max; i++) {
-        html += '<div class="pip' + (i < Math.min(state.scansUsed, max) ? ' used' : '') + '"></div>';
-      }
-      document.getElementById('scanPips').innerHTML = html;
-      document.getElementById('scanCount').textContent = state.isPremium ? '∞ ilimitados' : (state.scansUsed + ' / ' + state.maxScans);
-    }
-    function renderRecentScans() {
-      var el = document.getElementById('recentScans');
-      if (!scanHistory.length) {
-        el.innerHTML = '<div style="text-align:center;padding:18px 0;color:var(--gray-400);font-size:13px">Aún no has escaneado ningún producto este mes.</div>';
-        return;
-      }
-      var html = '';
-      scanHistory.slice(0, 5).forEach(function(f) {
-        html += '<div class="food-card"><div class="food-card-emoji">' + (f.emoji || '📦') + '</div>';
-        html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
-        html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
-        html += '<div class="food-card-kcal">' + f.kcal + '</div>';
-        html += '<button class="food-card-add" onclick="addFood(\'' + f.id + '\');showTab(\'diario\',null)">+</button></div>';
-      });
-      el.innerHTML = html;
-    }
-
-    // ─── QUAGGA SCANNER ───
-    var quaggaRunning = false;
-    var lastDetectedCode = null;
-
-    function toggleCamera() {
-      if (quaggaRunning) { stopQuagga(); return; }
-      if (state.scansUsed >= state.maxScans && !state.isPremium) {
-        showToast('⚠️ Límite alcanzado. Hazte Premium ⭐');
-        return;
-      }
-      if (typeof Quagga === 'undefined') {
-        showToast('⚠️ Escáner no disponible. Usa el código manual.');
-        return;
-      }
-      var target = document.getElementById('quaggaTarget');
-      var icon = document.getElementById('scannerIcon');
-      var line = document.getElementById('scannerLine');
-      target.style.display = 'block';
-      icon.style.display = 'none';
-      if (line) line.style.display = 'none';
-      document.getElementById('scannerCamBtn').textContent = '⏹ Detener cámara';
-      document.getElementById('scannerSub').textContent = 'Apunta al código de barras del producto';
-
-      Quagga.init({
-        inputStream: {
-          name: 'Live',
-          type: 'LiveStream',
-          target: target,
-          constraints: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
-        },
-        decoder: {
-          readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader', 'code_128_reader', 'code_39_reader']
-        },
-        locate: true
-      }, function(err) {
-        if (err) {
-          showToast('⚠️ No se pudo acceder a la cámara. Usa el código manual.');
-          target.style.display = 'none';
-          if (icon) icon.style.display = 'block';
-          if (line) line.style.display = 'block';
-          document.getElementById('scannerCamBtn').textContent = '📷 Abrir cámara';
-          return;
-        }
-        Quagga.start();
-        quaggaRunning = true;
-      });
-
-      Quagga.onDetected(function(result) {
-        var code = result.codeResult.code;
-        if (code === lastDetectedCode) return;
-        lastDetectedCode = code;
-        // Flash visual
-        var flash = document.createElement('div');
-        flash.className = 'scan-detect-flash';
-        target.appendChild(flash);
-        setTimeout(function(){ flash.remove(); }, 400);
-        stopQuagga();
-        document.getElementById('barcodeInput').value = code;
-        lookupBarcode();
-      });
-    }
-
-    function stopQuagga() {
-      if (!quaggaRunning) return;
-      try { Quagga.stop(); } catch(e){}
-      quaggaRunning = false;
-      lastDetectedCode = null;
-      var target = document.getElementById('quaggaTarget');
-      var icon = document.getElementById('scannerIcon');
-      var line = document.getElementById('scannerLine');
-      if (target) target.style.display = 'none';
-      if (icon) icon.style.display = 'block';
-      if (line) line.style.display = 'block';
-      var btn = document.getElementById('scannerCamBtn');
-      if (btn) btn.textContent = '📷 Abrir cámara';
-    }
-
-    async function lookupBarcode() {
-      var code = document.getElementById('barcodeInput').value.trim();
-      if (!code) { showToast('Introduce un código de barras'); return; }
-      if (state.scansUsed >= state.maxScans && !state.isPremium) {
-        showToast('⚠️ Límite alcanzado. Hazte Premium ⭐');
-        return;
-      }
-      var resultCard = document.getElementById('scanResultCard');
-      resultCard.style.display = 'block';
-      resultCard.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:10px">🔍 Buscando en Open Food Facts...</div>';
-      try {
-        var res = await fetch('https://world.openfoodfacts.org/api/v0/product/' + code + '.json');
-        var data = await res.json();
-        if (data.status !== 1) {
-          resultCard.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:10px">❌ Producto no encontrado. Prueba otro código.</div>';
-          return;
-        }
-        var p = data.product;
-        var n = p.nutriments || {};
-        var food = {
-          id: Date.now(),
-          name: p.product_name || p.product_name_es || 'Producto ' + code,
-          emoji: '📦',
-          kcal: Math.round(n['energy-kcal_100g'] || (n['energy_100g'] ? n['energy_100g'] / 4.184 : 0)),
-          p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
-          c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
-          f: Math.round((n['fat_100g'] || 0) * 10) / 10
-        };
-        state.scansUsed++;
-        // Guardar en historial real de escaneos
-        if (!scanHistory.find(function(x){ return x.id === food.id; })) scanHistory.unshift(food);
-        else { scanHistory = scanHistory.filter(function(x){ return x.id !== food.id; }); scanHistory.unshift(food); }
-        saveAll();
-        renderScanPips();
-        renderRecentScans();
-        if (!FOODS.find(function(f){ return f.name === food.name; })) FOODS.unshift(food);
-
-        var nutriScore = p.nutriscore_grade ? p.nutriscore_grade.toUpperCase() : null;
-        var nsColors = { A:'#1a9e3f', B:'#8cb84c', C:'#f5c518', D:'#e07b39', E:'#e63946' };
-        var nsHtml = nutriScore ? '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px"><span style="font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em">Nutri-Score</span><span style="background:' + (nsColors[nutriScore]||'#999') + ';color:white;font-weight:800;font-size:14px;padding:2px 10px;border-radius:6px">' + nutriScore + '</span></div>' : '';
-
-        resultCard.innerHTML =
-          '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + food.name + '</div>' +
-          nsHtml +
-          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">' +
-            '<div style="text-align:center;background:var(--accent-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent)">' + food.kcal + '</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">kcal</div></div>' +
-            '<div style="text-align:center;background:var(--green-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:#4ade80">' + food.p + 'g</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">prot</div></div>' +
-            '<div style="text-align:center;background:var(--amber-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--amber)">' + food.c + 'g</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">carbos</div></div>' +
-            '<div style="text-align:center;background:var(--blue-bg);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--blue)">' + food.f + 'g</div><div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;margin-top:2px">grasas</div></div>' +
-          '</div>' +
-          '<div style="display:flex;gap:8px">' +
-            '<button onclick="addScannedFood(' + food.id + ')" style="flex:1;padding:10px;background:var(--black);border:none;border-radius:10px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Añadir al diario</button>' +
-            '<button onclick="document.getElementById(\'scanResultCard\').style.display=\'none\'" style="padding:10px 14px;background:var(--gray-100);border:none;border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--font)">Cerrar</button>' +
-          '</div>' +
-          ((!state.isPremium && (state.maxScans - state.scansUsed) <= 2 && (state.maxScans - state.scansUsed) > 0) ?
-            '<div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:8px;font-size:11px;color:var(--amber);font-weight:500">Te quedan ' + (state.maxScans - state.scansUsed) + ' escaneos este mes · <span style="cursor:pointer;text-decoration:underline" onclick="showTab(\'premium\',null)">Ver Premium →</span></div>' : '');
-        document.getElementById('barcodeInput').value = '';
-        if (!state.isPremium && state.scansUsed >= state.maxScans) setTimeout(function(){ showTab('premium', null); }, 1500);
-      } catch(e) {
-        resultCard.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:10px">❌ Error de conexión. Comprueba tu internet.</div>';
-      }
-    }
-
-    function addScannedFood(id) {
-      var food = FOODS.find(function(f){ return f.id === id; });
-      if (!food) return;
-      openAddModal('almuerzo');
-      setTimeout(function(){ addFood(food.id); }, 100);
-      document.getElementById('scanResultCard').style.display = 'none';
-    }
-
     // ─── PROFILE ───
     function setSex(g, el) {
       state.sex = g;
@@ -5426,7 +5030,6 @@
       try { localStorage.setItem('fl_premium', 'true'); } catch(e){}
       var badge = document.getElementById('planBadge');
       if (badge) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
-      renderScanPips();
       renderPremium();
       showToast('🎉 ¡Bienvenido a Premium! Todas las funciones desbloqueadas.');
     }
@@ -5438,7 +5041,6 @@
       try { localStorage.removeItem('fl_premium'); } catch(e){}
       var badge = document.getElementById('planBadge');
       if (badge) { badge.textContent = 'Free · ' + (state.maxScans - state.scansUsed) + ' escaneos'; badge.classList.add('free'); }
-      renderScanPips();
       renderPremium();
       showToast('Suscripción cancelada');
     }
