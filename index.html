@@ -3145,6 +3145,25 @@
         <button class="auth-btn secondary" onclick="switchAuthPanel('login')">Volver al inicio de sesión</button>
       </div>
 
+      <!-- NUEVA CONTRASEÑA (tras clic en enlace de email) -->
+      <div id="authPanelNewpassword" style="display:none">
+        <div class="auth-title">Nueva contraseña</div>
+        <div class="auth-sub">Elige una contraseña nueva para tu cuenta.</div>
+        <div class="auth-error" id="authNewPassError"></div>
+        <div id="authNewPassSuccess" style="display:none;background:var(--green-bg);border:1px solid var(--green);color:var(--green);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;margin-bottom:12px">
+          Contraseña actualizada. Ya puedes entrar.
+        </div>
+        <div class="auth-field">
+          <label>Nueva contraseña</label>
+          <input class="auth-input" type="password" id="authNewPass1" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <div class="auth-field">
+          <label>Confirmar contraseña</label>
+          <input class="auth-input" type="password" id="authNewPass2" placeholder="Repite la contraseña" autocomplete="new-password">
+        </div>
+        <button class="auth-btn" onclick="doUpdatePassword()">Guardar contraseña</button>
+      </div>
+
     </div>
   </div>
 
@@ -3232,6 +3251,12 @@
           sbUser = session ? session.user : null;
           updateUserUI();
           updateAdminTab();
+          if (event === 'PASSWORD_RECOVERY') {
+            // El usuario llegó desde el enlace del email — mostrar panel de nueva contraseña
+            showAuthModal();
+            switchAuthPanel('newpassword');
+            return;
+          }
           if (event === 'SIGNED_IN') {
             showToast('Sesión iniciada — sincronizando...');
             closeAuthModal();
@@ -3285,7 +3310,8 @@
       document.getElementById('authPanelLogin').style.display    = panel === 'login'    ? '' : 'none';
       document.getElementById('authPanelRegister').style.display = panel === 'register' ? '' : 'none';
       document.getElementById('authPanelVerify').style.display   = panel === 'verify'   ? '' : 'none';
-      document.getElementById('authPanelForgot').style.display   = panel === 'forgot'   ? '' : 'none';
+      document.getElementById('authPanelForgot').style.display      = panel === 'forgot'      ? '' : 'none';
+      document.getElementById('authPanelNewpassword').style.display  = panel === 'newpassword'  ? '' : 'none';
       // Limpiar estado del panel forgot al salir
       if (panel !== 'forgot') {
         var errEl = document.getElementById('authForgotError');
@@ -3314,6 +3340,32 @@
         btn.textContent = 'Enviar enlace'; btn.disabled = false;
         if (res.error) { errEl.textContent = translateAuthError(res.error.message); errEl.style.display = 'block'; return; }
         okEl.style.display = 'block';
+      } catch(e) {
+        errEl.textContent = 'Error de conexión. Inténtalo de nuevo.'; errEl.style.display = 'block';
+      }
+    }
+
+    // ─── Actualizar contraseña (tras recovery link) ───
+    async function doUpdatePassword() {
+      var pass1  = document.getElementById('authNewPass1').value;
+      var pass2  = document.getElementById('authNewPass2').value;
+      var errEl  = document.getElementById('authNewPassError');
+      var okEl   = document.getElementById('authNewPassSuccess');
+      errEl.style.display = 'none'; errEl.textContent = '';
+      okEl.style.display  = 'none';
+      if (!pass1) { errEl.textContent = 'Introduce una contraseña'; errEl.style.display = 'block'; return; }
+      if (pass1.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres'; errEl.style.display = 'block'; return; }
+      if (pass1 !== pass2) { errEl.textContent = 'Las contraseñas no coinciden'; errEl.style.display = 'block'; return; }
+      try {
+        var btn = document.querySelector('#authPanelNewpassword .auth-btn');
+        btn.textContent = 'Guardando...'; btn.disabled = true;
+        var res = await sb.auth.updateUser({ password: pass1 });
+        btn.textContent = 'Guardar contraseña'; btn.disabled = false;
+        if (res.error) { errEl.textContent = translateAuthError(res.error.message); errEl.style.display = 'block'; return; }
+        okEl.style.display = 'block';
+        document.getElementById('authNewPass1').value = '';
+        document.getElementById('authNewPass2').value = '';
+        setTimeout(function() { closeAuthModal(); }, 2000);
       } catch(e) {
         errEl.textContent = 'Error de conexión. Inténtalo de nuevo.'; errEl.style.display = 'block';
       }
@@ -4049,17 +4101,18 @@
     function filterModal(q) {
       clearTimeout(modalSearchTimer);
       var listEl = document.getElementById('modalFoodList');
+      // Solo base USDA (no _fromOFF, no myFoods) + resultados OFF que ya estén cacheados
+      var local = FOODS.filter(function(f){
+        if (f._myFood) return false; // excluir alimentos del usuario
+        if (!q) return !f._fromOFF;  // sin query: solo USDA
+        return f.name.toLowerCase().includes(q.toLowerCase());
+      });
+      listEl.innerHTML = '';
       if (!q) {
-        // Sin query: mostrar primeros 12 de USDA
-        var base = FOODS.filter(function(f){ return !f._myFood && !f._fromOFF; });
-        listEl.innerHTML = '';
-        base.slice(0, 12).forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
+        local.slice(0, 12).forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
         return;
       }
-      // Búsqueda inteligente: USDA + OFF cacheados, sin myFoods
-      var results = smartSearch(q, { excludeMyFood: true });
-      listEl.innerHTML = '';
-      if (results.length) { results.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
       else { listEl.innerHTML = '<div class="foods-empty">Buscando en base de datos...</div>'; }
       if (q.length < 2) return;
       document.getElementById('modalSpinner').classList.add('visible');
@@ -4452,106 +4505,6 @@
     var foodSearchTimer = null;
     var offCache = {}; // cache búsquedas ya realizadas
 
-    // ─── CAPA 4: Inteligencia de búsqueda ───
-    var SYNONYMS = {
-      // Marcas → genérico
-      'cola cao':       'cacao soluble',
-      'colacao':        'cacao soluble',
-      'nesquik':        'cacao soluble',
-      'nocilla':        'crema de cacao',
-      'nutella':        'crema de cacao',
-      'actimel':        'yogur liquido',
-      'danone':         'yogur',
-      'philadelphia':   'queso crema',
-      'mercadona':      '',
-      'hacendado':      '',
-      // Abreviaturas / coloquial
-      'pechuga':        'pechuga de pollo',
-      'salmon':         'salmon atlantico',
-      'atun':           'atun en lata',
-      'tuna':           'atun en lata',
-      'egg':            'huevo',
-      'eggs':           'huevo',
-      'chicken':        'pollo',
-      'beef':           'ternera',
-      'rice':           'arroz',
-      'oats':           'avena',
-      'pasta':          'pasta cocida',
-      'bread':          'pan',
-      // Sinónimos nutrición
-      'proteina':       'proteinas',
-      'whey':           'proteina whey',
-      'creatine':       'creatina',
-      'casein':         'caseina',
-    };
-
-    // Normaliza un texto: minúsculas, sin acentos, sin puntuación extra
-    function normalizeStr(s) {
-      return (s || '').toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar acentos
-        .replace(/[^a-z0-9 ]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    // Expande una query con sus sinónimos
-    function expandQuery(q) {
-      var norm = normalizeStr(q);
-      var expanded = [norm];
-      // Buscar sinónimo exacto
-      if (SYNONYMS[norm]) expanded.push(normalizeStr(SYNONYMS[norm]));
-      // Buscar si la query contiene alguna clave de sinónimo
-      Object.keys(SYNONYMS).forEach(function(key) {
-        if (norm.includes(key) && SYNONYMS[key]) {
-          expanded.push(normalizeStr(norm.replace(key, SYNONYMS[key])));
-        }
-      });
-      return expanded;
-    }
-
-    // Puntúa qué tan bien coincide un alimento con la query
-    function scoreFood(food, terms) {
-      var name = normalizeStr(food.name);
-      var brand = normalizeStr(food.brand || '');
-      var score = 0;
-      terms.forEach(function(term) {
-        if (name === term) score += 100;          // coincidencia exacta
-        else if (name.startsWith(term)) score += 60; // empieza por
-        else if (name.includes(term)) score += 30;   // contiene
-        if (brand.includes(term)) score += 10;
-      });
-      return score;
-    }
-
-    // Busca en FOODS con inteligencia: sinónimos + normalización + ranking
-    function smartSearch(q, opts) {
-      opts = opts || {};
-      var excludeMyFood = opts.excludeMyFood || false;
-      var excludeOFF    = opts.excludeOFF    || false;
-      var onlyMyFood    = opts.onlyMyFood    || false;
-      if (!q) return [];
-      var terms = expandQuery(q);
-      var results = FOODS.filter(function(f) {
-        if (excludeMyFood && f._myFood) return false;
-        if (excludeOFF && f._fromOFF) return false;
-        if (onlyMyFood && !f._myFood) return false;
-        var name = normalizeStr(f.name);
-        return terms.some(function(t) { return name.includes(t); });
-      });
-      // Ordenar por puntuación
-      results.sort(function(a, b) {
-        return scoreFood(b, terms) - scoreFood(a, terms);
-      });
-      // Eliminar duplicados por nombre normalizado (local gana sobre OFF)
-      var seen = {};
-      return results.filter(function(f) {
-        var key = normalizeStr(f.name).slice(0, 20);
-        if (seen[key]) return false;
-        seen[key] = true;
-        return true;
-      });
-    }
-
     // Crea un food-row como elemento DOM con listeners reales (no outerHTML)
     function createFoodRow(f) {
       var brand = f.brand ? f.brand + (f.qty ? ', ' + f.qty : '') : (f.qty || '');
@@ -4599,10 +4552,13 @@
         return;
       }
       if (chip) chip.textContent = 'Resultados';
-      var results = smartSearch(q, { excludeMyFood: true, excludeOFF: true });
+      // Solo base USDA local — sin OFF, sin alimentos del usuario
+      var local = FOODS.filter(function(f){
+        return !f._fromOFF && !f._myFood && f.name.toLowerCase().includes(q.toLowerCase());
+      });
       var listEl = document.getElementById('foodsList');
       listEl.innerHTML = '';
-      if (results.length) { results.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
       else { listEl.innerHTML = '<div class="foods-empty">Sin resultados en la base local</div>'; }
     }
 
@@ -4655,40 +4611,29 @@
     }
 
     function renderOFFResults(products, listEl) {
-      // Los resultados locales ya están en el listEl — añadir OFF sin duplicar
-      var existingNames = [];
-      listEl.querySelectorAll('.food-row').forEach(function(row) {
-        var nameEl = row.querySelector('.food-name');
-        if (nameEl) existingNames.push(normalizeStr(nameEl.textContent).slice(0, 20));
-      });
-
-      var added = 0;
+      if (!products.length) {
+        listEl.innerHTML = '<div class="foods-empty">Sin resultados</div>';
+        return;
+      }
+      // Renderiza con DOM para que los listeners funcionen
+      listEl.innerHTML = '';
       products.forEach(function(p) {
         var n = p.nutriments || {};
-        var rawName = p.product_name || 'Producto';
-        // Deduplicar por nombre normalizado contra los ya mostrados
-        if (existingNames.indexOf(normalizeStr(rawName).slice(0, 20)) !== -1) return;
         var food = {
-          id: 'off_' + normalizeStr(rawName + (p.brands || '')).replace(/ /g,'_').slice(0, 40),
-          name: rawName,
+          id: 'off_' + p.product_name + (p.brands || ''),
+          name: p.product_name || 'Producto',
           brand: p.brands ? p.brands.split(',')[0].trim() : '',
           qty: p.quantity || '',
-          _fromOFF: true,
+          emoji: '📦',
           kcal: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
           p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
           c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
           f: Math.round((n['fat_100g'] || 0) * 10) / 10
         };
-        if (!food.kcal) return; // descartar si no tiene kcal
-        if (!FOODS.find(function(x){ return x.id === food.id; })) FOODS.unshift(food);
-        else food = FOODS.find(function(x){ return x.id === food.id; });
+        if (!FOODS.find(function(x){ return x.id === food.id; })) { FOODS.unshift(food); }
+        else { food = FOODS.find(function(x){ return x.id === food.id; }); }
         listEl.appendChild(createFoodRow(food));
-        added++;
       });
-
-      if (!listEl.children.length) {
-        listEl.innerHTML = '<div class="foods-empty">Sin resultados</div>';
-      }
     }
 
     // ─── SCANNER PIPS ───
