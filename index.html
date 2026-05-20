@@ -2140,7 +2140,7 @@
       z-index: 10
     }
 
-    .search-input-wrap { position: relative }
+    .search-input-wrap { position: relative; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 
     .search-icon {
       position: absolute;
@@ -2148,7 +2148,93 @@
       top: 50%;
       transform: translateY(-50%);
       color: var(--gray-400);
-      font-size: 14px
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    /* Botón escáner en el buscador del modal */
+    .modal-scan-btn {
+      flex-shrink: 0;
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--gray-200);
+      background: var(--gray-100);
+      color: var(--gray-600);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+      font-size: 18px;
+    }
+    .modal-scan-btn:active, .modal-scan-btn.scanning {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Mini scanner dentro del modal */
+    #modalScannerWrap {
+      display: none;
+      margin-bottom: 10px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      position: relative;
+      height: 140px;
+      background: #000;
+    }
+    #modalScannerWrap.active { display: block; }
+    #modalScannerWrap video, #modalScannerWrap #quaggaModalTarget {
+      width: 100%; height: 100%; object-fit: cover;
+      position: absolute; inset: 0;
+    }
+    .modal-scanner-line {
+      position: absolute; left: 0; right: 0; top: 50%;
+      height: 2px; background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: scanLine 1.6s ease-in-out infinite;
+      z-index: 5;
+    }
+    .modal-scanner-close {
+      position: absolute; top: 6px; right: 6px; z-index: 10;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(0,0,0,.55); border: none; color: white;
+      font-size: 16px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+    }
+    @keyframes scanLine {
+      0%, 100% { top: 20%; }
+      50% { top: 80%; }
+    }
+
+    /* Barra flotante selección múltiple */
+    #modalSelectionBar {
+      position: sticky; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      border-radius: 14px;
+      padding: 13px 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      box-shadow: 0 4px 20px rgba(168,85,247,.40);
+      z-index: 20;
+    }
+    #modalSelectionBar.visible { display: flex; }
+    .sel-bar-label {
+      font-size: 13px; font-weight: 600; color: white;
+    }
+    .sel-bar-actions { display: flex; gap: 8px; }
+    .sel-bar-clear {
+      padding: 7px 12px; border-radius: 10px;
+      background: rgba(255,255,255,.18); border: none;
+      color: white; font-size: 12px; font-weight: 600;
+      font-family: var(--font); cursor: pointer;
+    }
+    .sel-bar-add {
+      padding: 7px 16px; border-radius: 10px;
+      background: white; border: none;
+      color: #7c3aed; font-size: 13px; font-weight: 700;
+      font-family: var(--font); cursor: pointer;
     }
 
     .search-input {
@@ -2167,7 +2253,7 @@
 
     .search-spinner {
       position: absolute;
-      right: 12px;
+      right: 56px; /* desplazado para no tapar el botón escáner */
       top: 50%;
       transform: translateY(-50%);
       width: 14px; height: 14px;
@@ -2196,6 +2282,30 @@
     .food-row:active { background: var(--gray-50); }
 
     .food-row-check { display: none; }
+    /* En el modal, los checks siempre son visibles */
+    #modalFoodList .food-row-check,
+    #myFoodsList .food-row-check {
+      display: flex;
+      width: 20px; height: 20px;
+      border-radius: 5px;
+      border: 1.5px solid var(--gray-200);
+      background: var(--gray-100);
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+    #modalFoodList .food-row.selected .food-row-check,
+    #myFoodsList .food-row.selected .food-row-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    #modalFoodList .food-row.selected .food-row-check::after,
+    #myFoodsList .food-row.selected .food-row-check::after {
+      content: '✓'; color: white;
+      -webkit-text-fill-color: white;
+      font-size: 12px; font-weight: 700; line-height: 1;
+    }
     .food-row-check-hidden {
       width: 20px; height: 20px;
       border: 1.5px solid var(--gray-200);
@@ -2973,10 +3083,31 @@
       <div class="modal-tab-panel active" id="mpanel-biblioteca">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)" id="modalSearch" style="padding-left:34px">
+          <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)" id="modalSearch" style="padding-left:34px;flex:1">
           <div class="search-spinner" id="modalSpinner"></div>
+          <button class="modal-scan-btn" id="modalScanBtn" onclick="toggleModalScanner()" title="Escanear código de barras">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9V6a1 1 0 0 1 1-1h3M15 5h3a1 1 0 0 1 1 1v3M21 15v3a1 1 0 0 1-1 1h-3M9 19H6a1 1 0 0 1-1-1v-3"/>
+              <line x1="7" y1="9" x2="7" y2="15"/><line x1="10" y1="9" x2="10" y2="15"/>
+              <line x1="13" y1="9" x2="13" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Mini escáner integrado -->
+        <div id="modalScannerWrap">
+          <div id="quaggaModalTarget"></div>
+          <div class="modal-scanner-line"></div>
+          <button class="modal-scanner-close" onclick="closeModalScanner()">✕</button>
         </div>
         <div class="food-list" id="modalFoodList"></div>
+        <!-- Barra de selección múltiple -->
+        <div id="modalSelectionBar">
+          <span class="sel-bar-label" id="selBarLabel">0 seleccionados</span>
+          <div class="sel-bar-actions">
+            <button class="sel-bar-clear" onclick="clearModalSelection()">Limpiar</button>
+            <button class="sel-bar-add" onclick="addSelectedFoods()">Añadir →</button>
+          </div>
+        </div>
       </div>
 
       <!-- Panel: Mis alimentos -->
@@ -4096,7 +4227,11 @@
       // Focus al input para teclado inmediato en Android
       setTimeout(function(){ searchInput.focus(); }, 320);
     }
-    function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+    function closeModal() {
+      document.getElementById('addModal').classList.remove('open');
+      clearModalSelection();
+      closeModalScanner();
+    }
     var modalSearchTimer = null;
     function filterModal(q) {
       clearTimeout(modalSearchTimer);
@@ -4109,10 +4244,10 @@
       });
       listEl.innerHTML = '';
       if (!q) {
-        local.slice(0, 12).forEach(function(f){ listEl.appendChild(createFoodRow(f)); });
+        local.slice(0, 12).forEach(function(f){ listEl.appendChild(createFoodRow(f, true)); });
         return;
       }
-      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+      if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f, true)); }); }
       else { listEl.innerHTML = '<div class="foods-empty">Buscando en base de datos...</div>'; }
       if (q.length < 2) return;
       document.getElementById('modalSpinner').classList.add('visible');
@@ -4262,8 +4397,10 @@
         var brand = f.brand ? f.brand : '';
         var row = document.createElement('div');
         row.className = 'food-row';
+        row.dataset.foodId = f.id;
         row.style.position = 'relative';
         row.innerHTML =
+          '<div class="food-row-check"></div>' +
           '<div class="food-row-info">' +
             '<div class="food-row-name">' + f.name + '</div>' +
             (brand ? '<div class="food-row-sub">' + brand + '</div>' : '') +
@@ -4275,12 +4412,11 @@
           '</div>' +
           '<div class="food-row-right">' +
             '<div class="food-row-kcal">' + f.kcal + '</div>' +
-            '<button class="food-row-add">+</button>' +
           '</div>' +
           '<button class="food-row-del-btn" title="Eliminar">✕</button>';
-        row.addEventListener('click', function() { openQty(f.id); });
-        row.querySelector('.food-row-add').addEventListener('click', function(e) {
-          e.stopPropagation(); openQty(f.id);
+        row.addEventListener('click', function() {
+          row.classList.toggle('selected');
+          updateModalSelectionBar();
         });
         row.querySelector('.food-row-del-btn').addEventListener('click', function(e) {
           e.stopPropagation(); deleteMyFood(f.id);
@@ -4506,11 +4642,13 @@
     var offCache = {}; // cache búsquedas ya realizadas
 
     // Crea un food-row como elemento DOM con listeners reales (no outerHTML)
-    function createFoodRow(f) {
+    function createFoodRow(f, inModal) {
       var brand = f.brand ? f.brand + (f.qty ? ', ' + f.qty : '') : (f.qty || '');
       var row = document.createElement('div');
       row.className = 'food-row';
+      row.dataset.foodId = f.id;
       row.innerHTML =
+        '<div class="food-row-check"></div>' +
         '<div class="food-row-info">' +
           '<div class="food-row-name">' + f.name + '</div>' +
           (brand ? '<div class="food-row-sub">' + brand + '</div>' : '') +
@@ -4522,18 +4660,129 @@
         '</div>' +
         '<div class="food-row-right">' +
           '<div class="food-row-kcal">' + f.kcal + '</div>' +
-          '<button class="food-row-add">+</button>' +
+          (inModal ? '' : '<button class="food-row-add">+</button>') +
         '</div>';
-      // Toda la fila (y el botón +) abren directamente el panel de gramos
-      row.addEventListener('click', function() { openQty(f.id); });
-      row.querySelector('.food-row-add').addEventListener('click', function(e) {
-        e.stopPropagation();
-        openQty(f.id);
-      });
+      if (inModal) {
+        // En el modal: toggle selección al tocar la fila
+        row.addEventListener('click', function() {
+          row.classList.toggle('selected');
+          updateModalSelectionBar();
+        });
+      } else {
+        row.addEventListener('click', function() { openQty(f.id); });
+        var addBtn = row.querySelector('.food-row-add');
+        if (addBtn) addBtn.addEventListener('click', function(e) {
+          e.stopPropagation(); openQty(f.id);
+        });
+      }
       return row;
     }
-    // Compatibilidad: devuelve outerHTML para sitios que lo necesiten
-    function foodRowHTML(f) { return createFoodRow(f).outerHTML; }
+
+    /* ─── SELECCIÓN MÚLTIPLE ─── */
+    var _modalSelectedFoods = []; // ids seleccionados
+
+    function updateModalSelectionBar() {
+      var rows = document.querySelectorAll('#modalFoodList .food-row.selected, #myFoodsList .food-row.selected');
+      var n = rows.length;
+      var bar = document.getElementById('modalSelectionBar');
+      var lbl = document.getElementById('selBarLabel');
+      if (!bar) return;
+      if (n > 0) {
+        bar.classList.add('visible');
+        lbl.textContent = n === 1 ? '1 alimento seleccionado' : n + ' alimentos seleccionados';
+      } else {
+        bar.classList.remove('visible');
+      }
+    }
+
+    function clearModalSelection() {
+      document.querySelectorAll('#modalFoodList .food-row.selected, #myFoodsList .food-row.selected').forEach(function(r){
+        r.classList.remove('selected');
+      });
+      updateModalSelectionBar();
+    }
+
+    function addSelectedFoods() {
+      var rows = document.querySelectorAll('#modalFoodList .food-row.selected, #myFoodsList .food-row.selected');
+      if (!rows.length) return;
+      // Si solo hay uno, ir al panel de gramos
+      if (rows.length === 1) {
+        var id = rows[0].dataset.foodId;
+        clearModalSelection();
+        openQty(id);
+        return;
+      }
+      // Varios: añadir todos con 100g por defecto y mostrar toast resumen
+      var meal = state.currentMealTarget || 'desayuno';
+      var names = [];
+      rows.forEach(function(r) {
+        var id = r.dataset.foodId;
+        var food = FOODS.find(function(f){ return f.id == id; });
+        if (!food) return;
+        var g = 100;
+        var entry = {
+          id: food.id, name: food.name, emoji: food.emoji || '📦',
+          brand: food.brand || '', grams: g,
+          kcal: Math.round(food.kcal),
+          p: Math.round(food.p * 10) / 10,
+          c: Math.round(food.c * 10) / 10,
+          f: Math.round(food.f * 10) / 10
+        };
+        state.meals[meal].push(entry);
+        names.push(food.name);
+      });
+      saveDay();
+      clearModalSelection();
+      closeModal();
+      renderMeals();
+      showToast('✅ ' + names.length + ' alimentos añadidos a ' + meal + ' (100g c/u)');
+    }
+
+    /* ─── ESCÁNER EN MODAL ─── */
+    var _modalScannerActive = false;
+
+    function toggleModalScanner() {
+      if (_modalScannerActive) { closeModalScanner(); }
+      else { openModalScanner(); }
+    }
+
+    function openModalScanner() {
+      _modalScannerActive = true;
+      var wrap = document.getElementById('modalScannerWrap');
+      var btn = document.getElementById('modalScanBtn');
+      wrap.classList.add('active');
+      if (btn) btn.classList.add('scanning');
+      // Reutilizar Quagga apuntando al target del modal
+      if (typeof Quagga === 'undefined') { showToast('⚠️ Escáner no disponible'); return; }
+      Quagga.init({
+        inputStream: { name: 'Live', type: 'LiveStream', target: document.getElementById('quaggaModalTarget'),
+          constraints: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 280 } } },
+        decoder: { readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader'] },
+        locate: true
+      }, function(err) {
+        if (err) { showToast('📷 Sin acceso a la cámara'); closeModalScanner(); return; }
+        Quagga.start();
+        Quagga.onDetected(function(result) {
+          var code = result.codeResult.code;
+          if (!code) return;
+          Quagga.stop();
+          closeModalScanner();
+          document.getElementById('modalSearch').value = code;
+          filterModal(code);
+          searchOFF(code, true);
+          showToast('📦 Código: ' + code);
+        });
+      });
+    }
+
+    function closeModalScanner() {
+      _modalScannerActive = false;
+      var wrap = document.getElementById('modalScannerWrap');
+      var btn = document.getElementById('modalScanBtn');
+      wrap.classList.remove('active');
+      if (btn) btn.classList.remove('scanning');
+      try { Quagga.stop(); } catch(e) {}
+    }
 
     function toggleFoodRow(el) { el.classList.toggle('selected'); }
 
@@ -4580,7 +4829,7 @@
       // Cache hit → instantáneo
       var cacheKey = q.toLowerCase().trim();
       if (offCache[cacheKey]) {
-        renderOFFResults(offCache[cacheKey], listEl);
+        renderOFFResults(offCache[cacheKey], listEl, isModal);
         if (spinner) spinner.classList.remove('visible');
         return;
       }
@@ -4598,19 +4847,19 @@
           return p.product_name && (n['energy-kcal_100g'] || n['energy-kcal']);
         });
         offCache[cacheKey] = products;
-        renderOFFResults(products, listEl);
+        renderOFFResults(products, listEl, isModal);
       } catch(e) {
         if (e.name === 'AbortError') return; // petición cancelada, no hacer nada
         var local = FOODS.filter(function(f){ return f.name.toLowerCase().includes(q.toLowerCase()); });
         listEl.innerHTML = '';
-        if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f)); }); }
+        if (local.length) { local.forEach(function(f){ listEl.appendChild(createFoodRow(f, isModal)); }); }
         else { listEl.innerHTML = '<div class="foods-empty">Sin conexión — mostrando resultados locales</div>'; }
       } finally {
         if (!signal.aborted && spinner) spinner.classList.remove('visible');
       }
     }
 
-    function renderOFFResults(products, listEl) {
+    function renderOFFResults(products, listEl, isModal) {
       if (!products.length) {
         listEl.innerHTML = '<div class="foods-empty">Sin resultados</div>';
         return;
@@ -4632,7 +4881,7 @@
         };
         if (!FOODS.find(function(x){ return x.id === food.id; })) { FOODS.unshift(food); }
         else { food = FOODS.find(function(x){ return x.id === food.id; }); }
-        listEl.appendChild(createFoodRow(food));
+        listEl.appendChild(createFoodRow(food, isModal));
       });
     }
 
