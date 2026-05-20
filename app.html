@@ -1451,6 +1451,40 @@
       flex-shrink: 0
     }
 
+    .food-card-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid var(--gray-200);
+      background: var(--white);
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s
+    }
+
+    .food-card-check.checked {
+      background: var(--black);
+      border-color: var(--black)
+    }
+
+    .food-card-check.checked::after {
+      content: '';
+      width: 5px;
+      height: 9px;
+      border: 2px solid white;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translateY(-1px)
+    }
+
+    .food-card.selected {
+      border-color: var(--accent);
+      background: var(--gray-50)
+    }
+
     .food-card-info {
       flex: 1
     }
@@ -1798,7 +1832,24 @@
             id="foodSearch">
         </div>
       </div>
-      <div class="section-chip">Frecuentes</div>
+      <!-- Recientes (solo visible si hay historial) -->
+      <div id="recentSection" style="display:none">
+        <div class="section-chip">Usados recientemente</div>
+        <div class="foods-list" id="recentFoodsList"></div>
+      </div>
+      <div class="section-chip" id="foodsChip">Todos los alimentos</div>
+      <!-- Barra de selección múltiple -->
+      <div id="foodsSelectBar" style="display:none;position:sticky;top:0;z-index:10;background:var(--white);border-bottom:1px solid var(--gray-100);padding:10px 14px;align-items:center;gap:8px">
+        <span id="foodsSelectCount" style="font-size:13px;font-weight:600;flex:1">0 seleccionados</span>
+        <select id="foodsSelectMeal" style="font-size:12px;border:1px solid var(--gray-100);border-radius:6px;padding:4px 8px;background:var(--white);color:var(--black)">
+          <option value="desayuno">Desayuno</option>
+          <option value="almuerzo">Almuerzo</option>
+          <option value="snacks">Snacks</option>
+          <option value="cena">Cena</option>
+        </select>
+        <button onclick="addSelectedFoods()" style="background:var(--black);color:white;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Añadir</button>
+        <button onclick="clearFoodSelection()" style="background:var(--gray-100);border:none;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer">✕</button>
+      </div>
       <div class="foods-list" id="foodsList"></div>
     </div>
 
@@ -2227,7 +2278,8 @@
       updateDateLabel();
       renderMeals();
       renderFoods();
-      renderScanPips();
+      loadRecentFoods();
+      renderRecentFoods();      renderScanPips();
       renderRecentScans();
       renderReviews();
       renderWeek();
@@ -2438,6 +2490,8 @@
         f:    Math.round(_pendingFood.f    * ratio * 10) / 10,
       };
       state.meals[meal].push(entry);
+      saveRecentFood(entry);
+      renderRecentFoods();
       closeModal();
       renderMeals();
       showToast(g + 'g de ' + entry.name + ' añadido a ' + meal);
@@ -2460,12 +2514,103 @@
       if (!food) return;
       var meal = state.currentMealTarget || 'desayuno';
       state.meals[meal].push(JSON.parse(JSON.stringify(food)));
+      saveRecentFood(food);
+      renderRecentFoods();
       closeModal();
       renderMeals();
       showToast(food.name + ' añadido a ' + meal);
     }
 
-    // ─── FOODS LIST ───
+    // ─── SELECCIÓN MÚLTIPLE ───
+    var _selectedFoods = {};
+    var _offSearchTimer = null;
+
+    function toggleFoodSelect(id) {
+      var food = FOODS.find(function(f){ return f.id === id; });
+      if (!food) { food = _recentFoods.find(function(f){ return f.id === id; }); }
+      if (!food) return;
+      if (_selectedFoods[id]) { delete _selectedFoods[id]; } else { _selectedFoods[id] = food; }
+      // Card principal
+      var card  = document.getElementById('fc_' + id);
+      var check = card ? card.querySelector('.food-card-check') : null;
+      if (card)  card.classList.toggle('selected', !!_selectedFoods[id]);
+      if (check) check.classList.toggle('checked',  !!_selectedFoods[id]);
+      // Card recientes
+      var rcard  = document.getElementById('fc_r_' + id);
+      var rcheck = rcard ? rcard.querySelector('.food-card-check') : null;
+      if (rcard)  rcard.classList.toggle('selected', !!_selectedFoods[id]);
+      if (rcheck) rcheck.classList.toggle('checked',  !!_selectedFoods[id]);
+      updateSelectBar();
+    }
+    function updateSelectBar() {
+      var count = Object.keys(_selectedFoods).length;
+      var bar   = document.getElementById('foodsSelectBar');
+      var label = document.getElementById('foodsSelectCount');
+      if (count > 0) { bar.style.display = 'flex'; label.textContent = count + ' seleccionado' + (count !== 1 ? 's' : ''); }
+      else            { bar.style.display = 'none'; }
+    }
+    function addSelectedFoods() {
+      var meal  = document.getElementById('foodsSelectMeal').value;
+      var foods = Object.values(_selectedFoods);
+      if (!foods.length) return;
+      foods.forEach(function(food) {
+        state.meals[meal].push(JSON.parse(JSON.stringify(food)));
+        saveRecentFood(food);
+      });
+      var names = foods.length === 1 ? foods[0].name : foods.length + ' alimentos';
+      showToast(names + ' añadido' + (foods.length !== 1 ? 's' : '') + ' a ' + meal);
+      clearFoodSelection();
+      renderRecentFoods();
+      renderMeals();
+    }
+    function clearFoodSelection() {
+      _selectedFoods = {};
+      document.querySelectorAll('.food-card.selected').forEach(function(el){ el.classList.remove('selected'); });
+      document.querySelectorAll('.food-card-check.checked').forEach(function(el){ el.classList.remove('checked'); });
+      document.getElementById('foodsSelectBar').style.display = 'none';
+    }
+
+    // ─── RECIENTES ───
+    var _recentFoods = []; // array de objetos food, máx 10, más reciente primero
+
+    function loadRecentFoods() {
+      try {
+        var saved = JSON.parse(localStorage.getItem('fl_recent') || '[]');
+        _recentFoods = Array.isArray(saved) ? saved : [];
+      } catch(e) { _recentFoods = []; }
+    }
+
+    function saveRecentFood(food) {
+      // Quitar duplicado anterior si existía
+      _recentFoods = _recentFoods.filter(function(f){ return f.id !== food.id; });
+      // Insertar al principio con los datos base (100g) para poder reusarlo
+      var base = FOODS.find(function(f){ return f.id === food.id; }) || food;
+      _recentFoods.unshift({ id: base.id, name: base.name, cat: base.cat || 'otro', kcal: base.kcal, p: base.p, c: base.c, f: base.f });
+      // Mantener máx 10
+      if (_recentFoods.length > 10) _recentFoods = _recentFoods.slice(0, 10);
+      try { localStorage.setItem('fl_recent', JSON.stringify(_recentFoods)); } catch(e){}
+    }
+
+    function renderRecentFoods() {
+      var section = document.getElementById('recentSection');
+      var list    = document.getElementById('recentFoodsList');
+      if (!section || !list) return;
+      if (_recentFoods.length === 0) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      var html = '';
+      _recentFoods.forEach(function(f) {
+        var dotColor = (FOOD_CAT_COLOR && FOOD_CAT_COLOR[f.cat]) ? FOOD_CAT_COLOR[f.cat] : '#6b7280';
+        var isSelected = !!_selectedFoods[f.id];
+        html += '<div class="food-card' + (isSelected ? ' selected' : '') + '" id="fc_r_' + f.id + '">';
+        html += '<div class="food-card-check' + (isSelected ? ' checked' : '') + '" onclick="toggleFoodSelect(' + JSON.stringify(f.id) + ', true)"></div>';
+        html += '<div class="food-card-cat" style="background:' + dotColor + '"></div>';
+        html += '<div class="food-card-info"><div class="food-card-name">' + f.name + '</div>';
+        html += '<div class="food-card-macros">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.f + 'g</div></div>';
+        html += '<div class="food-card-kcal">' + f.kcal + '</div>';
+        html += '</div>';
+      });
+      list.innerHTML = html;
+    }
     function renderFoods() { filterFoods(''); }
     function filterFoods(q) {
       var list = FOODS.filter(function (f) { return !q || f.name.toLowerCase().includes(q.toLowerCase()) });
