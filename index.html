@@ -1987,34 +1987,121 @@
     }
 
     /* Mini scanner dentro del modal */
-    #modalScannerWrap {
+    /* ── FULLSCREEN SCANNER OVERLAY ── */
+    #fullScanOverlay {
       display: none;
-      margin-bottom: 10px;
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      position: relative;
-      height: 140px;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
       background: #000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 420px;
+      margin: 0 auto;
     }
-    #modalScannerWrap.active { display: block; }
-    #modalScannerWrap video, #modalScannerWrap #quaggaModalTarget {
-      width: 100%; height: 100%; object-fit: cover;
+    #fullScanOverlay.active { display: flex; }
+
+    /* Cámara de fondo, ocupa todo */
+    #quaggaModalTarget {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+    #quaggaModalTarget video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    #quaggaModalTarget canvas {
       position: absolute; inset: 0;
+      width: 100%; height: 100%;
     }
-    .modal-scanner-line {
-      position: absolute; left: 0; right: 0; top: 50%;
-      height: 2px; background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-      animation: scanLine 1.6s ease-in-out infinite;
-      z-index: 5;
+
+    /* Oscurecimiento alrededor del viewfinder */
+    .scan-veil {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 1;
+      /* Recorte: un hueco central usando clip-path con polygon */
+      /* Lo haremos con 4 divs superpuestos */
     }
-    .modal-scanner-close {
-      position: absolute; top: 6px; right: 6px; z-index: 10;
-      width: 28px; height: 28px; border-radius: 50%;
-      background: rgba(0,0,0,.55); border: none; color: white;
-      font-size: 16px; cursor: pointer; display: flex;
-      align-items: center; justify-content: center;
+    .scan-veil-top    { position: absolute; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); z-index: 1; }
+    .scan-veil-bottom { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); z-index: 1; }
+    .scan-veil-left   { position: absolute; left: 0; background: rgba(0,0,0,0.55); z-index: 1; }
+    .scan-veil-right  { position: absolute; right: 0; background: rgba(0,0,0,0.55); z-index: 1; }
+
+    /* Viewfinder (rectángulo blanco con esquinas redondeadas) */
+    .scan-frame {
+      position: absolute;
+      z-index: 2;
+      border: 2.5px solid rgba(255,255,255,0.90);
+      border-radius: 22px;
+      box-shadow: 0 0 0 4000px rgba(0,0,0,0.52);
+      /* dimensiones calculadas en JS al abrir */
+      width: 76vw; max-width: 310px;
+      height: 42vw; max-height: 172px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
     }
+
+    /* Línea de escaneo dentro del frame */
+    .scan-beam {
+      position: absolute;
+      left: 6%; right: 6%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #a855f7, rgba(168,85,247,.9), #a855f7, transparent);
+      box-shadow: 0 0 10px 2px rgba(168,85,247,.7);
+      border-radius: 2px;
+      animation: beamMove 1.8s ease-in-out infinite;
+      z-index: 3;
+    }
+    @keyframes beamMove {
+      0%   { top: 10%; }
+      50%  { top: 85%; }
+      100% { top: 10%; }
+    }
+
+    /* Texto de guía */
+    .scan-hint {
+      position: absolute;
+      bottom: 38%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.75);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      z-index: 4;
+      letter-spacing: .02em;
+    }
+
+    /* Botones inferiores */
+    .scan-controls {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 48px;
+      align-items: center;
+      z-index: 4;
+    }
+    .scan-ctrl-btn {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.92);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+      transition: transform .15s, background .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .scan-ctrl-btn:active { transform: scale(.90); }
+    .scan-ctrl-btn.torch-on { background: #fbbf24; }
+    .scan-ctrl-btn svg { width: 26px; height: 26px; }
+
     @keyframes scanLine {
       0%, 100% { top: 20%; }
       50% { top: 80%; }
@@ -2876,12 +2963,8 @@
             </svg>
           </button>
         </div>
-        <!-- Mini escáner integrado -->
-        <div id="modalScannerWrap">
-          <div id="quaggaModalTarget"></div>
-          <div class="modal-scanner-line"></div>
-          <button class="modal-scanner-close" onclick="closeModalScanner()">✕</button>
-        </div>
+        <!-- Mini escáner integrado → ahora es un overlay fullscreen -->
+        <div id="modalScannerWrap"></div>
         <div class="food-list" id="modalFoodList"></div>
         <!-- Barra de selección múltiple -->
         <div id="modalSelectionBar">
@@ -4525,25 +4608,42 @@
       else { openModalScanner(); }
     }
 
+    var _torchOn = false;
+    var _torchTrack = null;
+
     function openModalScanner() {
       _modalScannerActive = true;
-      var wrap = document.getElementById('modalScannerWrap');
+      var overlay = document.getElementById('fullScanOverlay');
       var btn = document.getElementById('modalScanBtn');
-      wrap.classList.add('active');
+      overlay.classList.add('active');
       if (btn) btn.classList.add('scanning');
-      // Reutilizar Quagga apuntando al target del modal
-      if (typeof Quagga === 'undefined') { showToast('⚠️ Escáner no disponible'); return; }
+      if (typeof Quagga === 'undefined') { showToast('⚠️ Escáner no disponible'); closeModalScanner(); return; }
       Quagga.init({
-        inputStream: { name: 'Live', type: 'LiveStream', target: document.getElementById('quaggaModalTarget'),
-          constraints: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 280 } } },
-        decoder: { readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader'] },
+        inputStream: {
+          name: 'Live', type: 'LiveStream',
+          target: document.getElementById('quaggaModalTarget'),
+          constraints: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+        },
+        decoder: { readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader', 'code_128_reader'] },
         locate: true
       }, function(err) {
         if (err) { showToast('📷 Sin acceso a la cámara'); closeModalScanner(); return; }
         Quagga.start();
+        // Guardar track para la linterna
+        try {
+          var video = document.querySelector('#quaggaModalTarget video');
+          if (video && video.srcObject) {
+            var tracks = video.srcObject.getVideoTracks();
+            if (tracks.length) _torchTrack = tracks[0];
+          }
+        } catch(e) {}
+        var _lastCode = null;
         Quagga.onDetected(function(result) {
           var code = result.codeResult.code;
-          if (!code) return;
+          if (!code || code === _lastCode) return;
+          _lastCode = code;
+          // Vibrar si disponible
+          if (navigator.vibrate) navigator.vibrate(80);
           Quagga.stop();
           closeModalScanner();
           document.getElementById('modalSearch').value = code;
@@ -4556,11 +4656,24 @@
 
     function closeModalScanner() {
       _modalScannerActive = false;
-      var wrap = document.getElementById('modalScannerWrap');
+      var overlay = document.getElementById('fullScanOverlay');
       var btn = document.getElementById('modalScanBtn');
-      wrap.classList.remove('active');
+      overlay.classList.remove('active');
       if (btn) btn.classList.remove('scanning');
+      // Apagar linterna si estaba encendida
+      if (_torchOn) toggleTorch();
+      _torchTrack = null;
       try { Quagga.stop(); } catch(e) {}
+    }
+
+    function toggleTorch() {
+      var btn = document.getElementById('torchBtn');
+      if (!_torchTrack) return;
+      _torchOn = !_torchOn;
+      try {
+        _torchTrack.applyConstraints({ advanced: [{ torch: _torchOn }] });
+      } catch(e) { showToast('💡 Linterna no disponible en este dispositivo'); _torchOn = false; }
+      if (btn) btn.classList.toggle('torch-on', _torchOn);
     }
 
     function toggleFoodRow(el) { el.classList.toggle('selected'); }
@@ -5508,5 +5621,32 @@
       });
     }
   </script>
+  <!-- ── FULLSCREEN SCANNER OVERLAY ── -->
+  <div id="fullScanOverlay">
+    <!-- Cámara -->
+    <div id="quaggaModalTarget"></div>
+    <!-- Viewfinder frame -->
+    <div class="scan-frame">
+      <div class="scan-beam"></div>
+    </div>
+    <!-- Guía -->
+    <div class="scan-hint">Apunta al código de barras</div>
+    <!-- Controles -->
+    <div class="scan-controls">
+      <!-- Cerrar -->
+      <button class="scan-ctrl-btn" onclick="closeModalScanner()" aria-label="Cerrar escáner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <!-- Linterna -->
+      <button class="scan-ctrl-btn" id="torchBtn" onclick="toggleTorch()" aria-label="Linterna">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+          <path d="M7 2h10l-2 7h3l-9 13 2-8H8z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
 </body>
 </html>
