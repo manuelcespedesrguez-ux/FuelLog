@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "@supabase/supabase-js": "2.106.1"
-  }
+    "@supabase/supabase-js": "2.106.1",
+    "name": "admin-supabase",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "cambiar.js"
+}
 }
