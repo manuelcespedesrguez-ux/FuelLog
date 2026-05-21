@@ -35,7 +35,7 @@
     }
 
     :root {
-      /* ── Dark Premium Theme ── */
+      /*  Dark Premium Theme  */
       --bg:       #0d0d0f;
       --white:    #1e1e22;
       --surf:     #161618;
@@ -1203,6 +1203,113 @@
       margin-bottom: 8px
     }
 
+    /*  AUTH MODAL  */
+    .auth-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.72);
+      z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      display: none;
+    }
+    .auth-overlay.open { display: flex; }
+    .auth-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .auth-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .auth-logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-logo-name {
+      font-size: 20px; font-weight: 800; color: var(--black);
+    }
+    .auth-title {
+      font-size: 17px; font-weight: 700; color: var(--black);
+      margin-bottom: 4px;
+    }
+    .auth-sub {
+      font-size: 13px; color: var(--gray-400);
+      margin-bottom: 20px;
+    }
+    .auth-tabs {
+      display: flex; gap: 0;
+      background: var(--gray-100);
+      border-radius: 10px; padding: 3px;
+      margin-bottom: 18px;
+    }
+    .auth-tab {
+      flex: 1; padding: 7px;
+      border: none; background: transparent;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      color: var(--gray-400);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .auth-tab.active {
+      background: var(--white);
+      color: var(--black);
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    }
+    .auth-field { margin-bottom: 12px; }
+    .auth-field label {
+      display: block; font-size: 11px;
+      font-weight: 600; color: var(--gray-400);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+    .auth-input {
+      width: 100%; padding: 11px 13px;
+      background: var(--gray-100);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 14px; font-family: var(--font);
+      color: var(--black);
+      -webkit-text-fill-color: var(--black);
+      outline: none; box-sizing: border-box;
+      transition: border-color .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-submit {
+      width: 100%; padding: 13px;
+      background: var(--accent);
+      border: none; border-radius: 10px;
+      color: white; -webkit-text-fill-color: white;
+      font-size: 14px; font-weight: 700;
+      font-family: var(--font); cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      margin-top: 4px;
+      box-shadow: 0 0 20px rgba(168,85,247,.35);
+      transition: opacity .15s;
+    }
+    .auth-submit:active { opacity: .85; }
+    .auth-err {
+      font-size: 12px; color: #ef4444;
+      margin-top: 8px; text-align: center;
+      min-height: 18px;
+    }
+    .auth-skip {
+      text-align: center; margin-top: 14px;
+      font-size: 12px; color: var(--gray-400);
+    }
+    .auth-skip span {
+      color: var(--accent); cursor: pointer;
+      text-decoration: underline;
+    }
     /* Badge usuario en header */
     .user-avatar {
       width: 30px; height: 30px;
@@ -1226,7 +1333,7 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
 
-    /* ── AUTH MODAL ── */
+    /*  AUTH MODAL  */
     .auth-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,.75);
@@ -1349,7 +1456,7 @@
       background: #22c55e;
       flex-shrink: 0;
     }
-    /* ── FIX iOS: placeholder y autofill en inputs oscuros ── */
+    /*  FIX iOS: placeholder y autofill en inputs oscuros  */
     input, textarea, select {
       color: var(--black);
       -webkit-text-fill-color: var(--black);
@@ -1629,7 +1736,7 @@
     }
 
     .premium-hero::before {
-      content: '★';
+      content: '';
       position: absolute;
       top: -10px;
       right: 10px;
@@ -1880,7 +1987,7 @@
     }
 
     /* Mini scanner dentro del modal */
-    /* ── FULLSCREEN SCANNER OVERLAY ── */
+    /*  FULLSCREEN SCANNER OVERLAY  */
     #fullScanOverlay {
       display: none;
       position: fixed;
@@ -2097,7 +2204,7 @@
     }
     #modalFoodList .food-row.selected .food-row-check::after,
     #myFoodsList .food-row.selected .food-row-check::after {
-      content: '✓'; color: white;
+      content: ''; color: white;
       -webkit-text-fill-color: white;
       font-size: 12px; font-weight: 700; line-height: 1;
     }
@@ -2257,85 +2364,6 @@
     .hist-empty-icon { font-size:40px; margin-bottom:8px; }
     .hist-empty-text { font-size:13px; }
 
-    /* ── MACRO-POR-DÍA CHART (Premium) ── */
-    .hist-macro-chart { display:flex; align-items:flex-end; gap:3px; height:100px; }
-    .hist-macro-col {
-      flex:1; display:flex; flex-direction:column; align-items:center;
-      gap:0; height:100%; justify-content:flex-end;
-    }
-    .hist-macro-stack {
-      width:100%; border-radius:3px 3px 0 0; overflow:hidden;
-      display:flex; flex-direction:column-reverse; cursor:pointer;
-      transition:opacity .15s;
-      position:relative;
-    }
-    .hist-macro-stack:hover { opacity:.85; }
-    .hist-macro-seg { width:100%; transition:height .6s ease; }
-    .hist-macro-date { font-size:9px; color:var(--gray-400); margin-top:4px; font-weight:500; flex-shrink:0; }
-    .hist-macro-stack:hover::after {
-      content: attr(data-tip);
-      position:absolute; bottom:calc(100%+5px); left:50%;
-      transform:translateX(-50%);
-      background:rgba(0,0,0,.85); color:#fff;
-      font-size:9px; padding:4px 7px; border-radius:5px;
-      white-space:nowrap; z-index:10; font-family:var(--mono);
-      pointer-events:none;
-    }
-    /* Leyenda colores */
-    .hist-macro-legend {
-      display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;
-    }
-    .hist-macro-legend-item {
-      display:flex; align-items:center; gap:4px;
-      font-size:10px; color:var(--gray-400);
-    }
-    .hist-macro-legend-dot {
-      width:8px; height:8px; border-radius:2px; flex-shrink:0;
-    }
-
-    /* ── PREMIUM GATE (tarjeta bloqueada) ── */
-    .premium-gate {
-      position:relative; overflow:hidden;
-      border-radius:var(--radius); margin-bottom:12px;
-    }
-    .premium-gate-blur {
-      filter:blur(4px); pointer-events:none; user-select:none;
-      opacity:.45;
-    }
-    .premium-gate-overlay {
-      position:absolute; inset:0;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      gap:10px; padding:20px;
-      background:linear-gradient(180deg, transparent 0%, rgba(13,13,15,.7) 40%, rgba(13,13,15,.92) 100%);
-      border-radius:var(--radius);
-      text-align:center;
-    }
-    .premium-gate-badge {
-      background:linear-gradient(135deg,#fbbf24,#f59e0b);
-      color:#0a0a0a; font-size:10px; font-weight:700;
-      padding:3px 10px; border-radius:20px;
-      letter-spacing:.05em;
-    }
-    .premium-gate-title {
-      font-size:14px; font-weight:700; color:var(--black);
-    }
-    .premium-gate-sub {
-      font-size:11px; color:var(--gray-400); line-height:1.5;
-    }
-    .premium-gate-btn {
-      padding:9px 22px;
-      background:linear-gradient(135deg,#a855f7,#7c3aed);
-      border:none; border-radius:10px;
-      color:white; -webkit-text-fill-color:white;
-      font-size:13px; font-weight:700;
-      font-family:var(--font); cursor:pointer;
-      box-shadow:0 4px 16px rgba(168,85,247,.35);
-      transition:opacity .15s;
-      -webkit-appearance:none; appearance:none;
-    }
-    .premium-gate-btn:active { opacity:.85; }
-
     /* SCANNER QUAGGA */
     #quaggaTarget { width:100%; height:100%; position:relative; overflow:hidden; border-radius:14px; }
     #quaggaTarget video { width:100%; height:100%; object-fit:cover; }
@@ -2431,7 +2459,7 @@
 
     /* FOOD ROW selected state */
     .food-row.selected .food-row-check { background: var(--accent); border-color: var(--accent); }
-    .food-row.selected .food-row-check::after { content: '✓'; display: block; text-align: center; color: white; font-size: 12px; line-height: 17px; }
+    .food-row.selected .food-row-check::after { content: ''; display: block; text-align: center; color: white; font-size: 12px; line-height: 17px; }
   </style>
 </head>
 
@@ -2498,7 +2526,7 @@
     <!-- Slide 1 -->
     <div class="ob-slide active" id="ob-0">
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-        <div class="ob-icon">⚡</div>
+        <div class="ob-icon"></div>
         <div class="ob-title">Controla tu alimentación sin complicaciones</div>
         <div class="ob-desc" style="margin-top:10px;">FuelLog calcula tus macros con Harris-Benedict y te ayuda a registrar lo que comes cada día — sin suscripciones abusivas, sin anuncios.</div>
       </div>
@@ -2508,7 +2536,7 @@
     <!-- Slide 2 -->
     <div class="ob-slide" id="ob-1">
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-        <div class="ob-icon">📷</div>
+        <div class="ob-icon"></div>
         <div class="ob-title">Escanea cualquier producto del súper</div>
         <div class="ob-desc" style="margin-top:10px;">Apunta la cámara al código de barras y en segundos ves las calorías, proteínas, carbos y grasas. Funciona con millones de productos españoles y europeos.</div>
       </div>
@@ -2518,7 +2546,7 @@
     <!-- Slide 3 -->
     <div class="ob-slide" id="ob-2">
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-        <div class="ob-icon">📊</div>
+        <div class="ob-icon"></div>
         <div class="ob-title">Visualiza tu progreso semana a semana</div>
         <div class="ob-desc" style="margin-top:10px;">Gráficos de calorías, distribución de macros, rachas de días consecutivos y comparativa con periodos anteriores. Todo guardado localmente en tu dispositivo.</div>
       </div>
@@ -2528,7 +2556,7 @@
     <!-- Slide 4 -->
     <div class="ob-slide" id="ob-3">
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-        <div class="ob-icon">👤</div>
+        <div class="ob-icon"></div>
         <div class="ob-title">Primero, configura tu perfil</div>
         <div class="ob-desc" style="margin-top:10px;">Necesitamos tu edad, peso, altura y nivel de actividad para calcular tus calorías y macros personalizados. Solo tarda 30 segundos.</div>
       </div>
@@ -2538,7 +2566,7 @@
   </div>
 
   <!-- DOWNLOAD BTN -->
-  <button class="dl-btn" id="installBtn" onclick="triggerInstall()" title="Instalar FuelLog como app">⚡ Instalar app</button>
+  <button class="dl-btn" id="installBtn" onclick="triggerInstall()" title="Instalar FuelLog como app">Instalar app</button>
 
   <!-- HEADER -->
   <div class="app-header">
@@ -2659,7 +2687,7 @@
     <div class="screen" id="screen-alimentos">
       <div class="foods-search">
         <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon"></span>
           <input class="search-input" type="text" placeholder="Buscar alimento..." oninput="filterFoods(this.value)" id="foodSearch">
           <div class="search-spinner" id="foodSpinner"></div>
         </div>
@@ -2760,13 +2788,11 @@
         </div>
         <button class="save-btn" onclick="saveProfile()">Guardar perfil</button>
         <div id="logoutSection" style="display:none;margin-top:12px">
-          <button onclick="doLogout()" style="width:100%;padding:11px;background:transparent;border:1.5px solid var(--gray-200);border-radius:var(--radius);color:var(--gray-400);font-size:13px;font-family:var(--font);cursor:pointer;-webkit-appearance:none;appearance:none">
-            Cerrar sesión
-          </button>
+          <button onclick="doLogout()" style="width:100%;padding:11px;background:transparent;border:1.5px solid var(--gray-200);border-radius:var(--radius);color:var(--gray-400);font-size:13px;font-family:var(--font);cursor:pointer;-webkit-appearance:none;appearance:none">Cerrar sesión</button>
         </div>
         <div id="loginSection" style="margin-top:12px">
           <button onclick="showAuthModal()" style="width:100%;padding:11px;background:var(--accent-bg);border:1.5px solid var(--accent);border-radius:var(--radius);color:var(--accent);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(--accent)">
-            ☁️ Iniciar sesión / Crear cuenta
+             Iniciar sesión / Crear cuenta
           </button>
           <button onclick="doGoogleLogin()" style="width:100%;padding:11px;margin-top:8px;background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:var(--radius);color:var(--black);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(--black);display:flex;align-items:center;justify-content:center;gap:8px">
             <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -2818,11 +2844,11 @@
       <div class="add-review">
         <div class="add-review-title">Dejar una reseña</div>
         <div class="star-rating" id="starRating">
-          <button class="star-btn" onclick="setStars(1)">★</button>
-          <button class="star-btn" onclick="setStars(2)">★</button>
-          <button class="star-btn" onclick="setStars(3)">★</button>
-          <button class="star-btn" onclick="setStars(4)">★</button>
-          <button class="star-btn" onclick="setStars(5)">★</button>
+          <button class="star-btn" onclick="setStars(1)"></button>
+          <button class="star-btn" onclick="setStars(2)"></button>
+          <button class="star-btn" onclick="setStars(3)"></button>
+          <button class="star-btn" onclick="setStars(4)"></button>
+          <button class="star-btn" onclick="setStars(5)"></button>
         </div>
         <textarea class="review-textarea" id="reviewText" placeholder="Cuéntanos qué te parece FuelLog..."></textarea>
         <input class="form-input" style="margin-top:8px" type="text" id="reviewName" placeholder="Tu nombre">
@@ -2837,11 +2863,11 @@
         <h3>Cuéntanos qué piensas</h3>
         <p>Tu opinión nos ayuda a mejorar FuelLog. ¡Gracias por estar en la beta!</p>
         <div class="feedback-stars" id="feedbackStars">
-          <span class="feedback-star" data-val="1">★</span>
-          <span class="feedback-star" data-val="2">★</span>
-          <span class="feedback-star" data-val="3">★</span>
-          <span class="feedback-star" data-val="4">★</span>
-          <span class="feedback-star" data-val="5">★</span>
+          <span class="feedback-star" data-val="1"></span>
+          <span class="feedback-star" data-val="2"></span>
+          <span class="feedback-star" data-val="3"></span>
+          <span class="feedback-star" data-val="4"></span>
+          <span class="feedback-star" data-val="5"></span>
         </div>
         <textarea class="feedback-textarea" id="feedbackText" placeholder="¿Qué te ha gustado? ¿Qué mejorarías? ¿Algún bug?"></textarea>
         <button class="feedback-submit" onclick="submitFeedback()">Enviar feedback</button>
@@ -2854,7 +2880,7 @@
         <button class="admin-itab active" onclick="switchAdminTab('resumen',this)">Resumen</button>
         <button class="admin-itab" onclick="switchAdminTab('usuarios',this)">Usuarios</button>
         <button class="admin-itab" onclick="switchAdminTab('feedbacks',this)">Feedbacks</button>
-        <button class="admin-itab" onclick="switchAdminTab('alimentos',this)">Alimentos</button>
+        <button class="admin-itab" onclick="switchAdminTab('alimentos',this)">🥗 Alimentos</button>
         <button class="admin-itab" onclick="switchAdminTab('vip',this)">VIP</button>
       </div>
       <div id="adminPanelResumen"></div>
@@ -2916,15 +2942,15 @@
 
       <!-- Pestañas -->
       <div class="modal-tabs">
-        <button class="modal-tab" id="mtab-mis-alimentos" onclick="switchModalTab('mis-alimentos')">⭐ Mis alimentos</button>
-        <button class="modal-tab" id="mtab-mis-recetas" onclick="switchModalTab('mis-recetas')">🍳 Mis recetas</button>
-        <button class="modal-tab active" id="mtab-biblioteca" onclick="switchModalTab('biblioteca')">🔍 Biblioteca</button>
+        <button class="modal-tab" id="mtab-mis-alimentos" onclick="switchModalTab('mis-alimentos')">Mis alimentos</button>
+        <button class="modal-tab" id="mtab-mis-recetas" onclick="switchModalTab('mis-recetas')">Mis recetas</button>
+        <button class="modal-tab active" id="mtab-biblioteca" onclick="switchModalTab('biblioteca')">Biblioteca</button>
       </div>
 
       <!-- Panel: Biblioteca (búsqueda OFF) -->
       <div class="modal-tab-panel active" id="mpanel-biblioteca">
         <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon"></span>
           <input class="modal-input" type="text" placeholder="Buscar alimento..." oninput="filterModal(this.value)" id="modalSearch" style="padding-left:34px;flex:1">
           <div class="search-spinner" id="modalSpinner"></div>
           <button class="modal-scan-btn" id="modalScanBtn" onclick="toggleModalScanner()" title="Escanear código de barras">
@@ -3039,7 +3065,7 @@
   <div class="auth-overlay hidden" id="authOverlay">
     <div class="auth-card">
       <div class="auth-logo">
-        <div class="auth-logo-icon">⚡</div>
+        <div class="auth-logo-icon"></div>
         <div class="auth-logo-name">FuelLog</div>
       </div>
 
@@ -3091,7 +3117,7 @@
 
       <!-- VERIFICACIÓN EMAIL -->
       <div id="authPanelVerify" style="display:none; text-align:center; padding: 10px 0">
-        <div style="font-size:40px;margin-bottom:16px">📧</div>
+        <div style="font-size:40px;margin-bottom:16px"></div>
         <div class="auth-title">Revisa tu email</div>
         <div class="auth-sub">Te hemos enviado un enlace de confirmación. Ábrelo y vuelve aquí para iniciar sesión.</div>
         <button class="auth-btn secondary" onclick="switchAuthPanel('login')">Ya lo confirmé → Iniciar sesión</button>
@@ -3139,7 +3165,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ─── STATE ───
+    //  STATE 
     var state = {
       profile: null, sex: 'H', activity: 1.2, goal: 'perder',
       meals: { desayuno: [], almuerzo: [], snacks: [], cena: [] },
@@ -3149,28 +3175,28 @@
       histPeriod: 30
     };
 
-    // ─── FOOD DB ───
+    //  FOOD DB 
     var FOODS = [
-      { id: 1, name: 'Pollo a la plancha', emoji: '🍗', kcal: 165, p: 31, c: 0, f: 3.6 },
-      { id: 2, name: 'Arroz blanco', emoji: '🍚', kcal: 130, p: 2.7, c: 28, f: 0.3 },
-      { id: 3, name: 'Huevo entero', emoji: '🥚', kcal: 78, p: 6.3, c: 0.6, f: 5.3 },
-      { id: 4, name: 'Avena', emoji: '🌾', kcal: 389, p: 17, c: 66, f: 7 },
-      { id: 5, name: 'Plátano', emoji: '🍌', kcal: 89, p: 1.1, c: 23, f: 0.3 },
-      { id: 6, name: 'Leche entera', emoji: '🥛', kcal: 61, p: 3.2, c: 4.8, f: 3.3 },
-      { id: 7, name: 'Salmón', emoji: '🐟', kcal: 208, p: 20, c: 0, f: 13 },
-      { id: 8, name: 'Brócoli', emoji: '🥦', kcal: 34, p: 2.8, c: 7, f: 0.4 },
-      { id: 9, name: 'Almendras', emoji: '🫘', kcal: 579, p: 21, c: 22, f: 50 },
-      { id: 10, name: 'Yogur griego', emoji: '🫙', kcal: 59, p: 10, c: 3.6, f: 0.4 },
-      { id: 11, name: 'Pan integral', emoji: '🍞', kcal: 247, p: 9, c: 41, f: 4 },
-      { id: 12, name: 'Pechuga de pavo', emoji: '🦃', kcal: 135, p: 30, c: 0, f: 1 },
-      { id: 13, name: 'Lentejas cocidas', emoji: '🫘', kcal: 116, p: 9, c: 20, f: 0.4 },
-      { id: 14, name: 'Atún en lata', emoji: '🐟', kcal: 116, p: 26, c: 0, f: 1 },
-      { id: 15, name: 'Manzana', emoji: '🍎', kcal: 52, p: 0.3, c: 14, f: 0.2 },
-      { id: 16, name: 'Pasta integral', emoji: '🍝', kcal: 124, p: 5, c: 26, f: 0.9 },
-      { id: 17, name: 'Aceite de oliva (1 cda)', emoji: '🫒', kcal: 119, p: 0, c: 0, f: 13.5 },
-      { id: 18, name: 'Queso fresco', emoji: '🧀', kcal: 98, p: 11, c: 3, f: 4 },
-      { id: 19, name: 'Batata/Boniato', emoji: '🍠', kcal: 86, p: 1.6, c: 20, f: 0.1 },
-      { id: 20, name: 'Naranja', emoji: '🍊', kcal: 47, p: 0.9, c: 12, f: 0.1 },
+      { id: 1, name: 'Pollo a la plancha', emoji: '', kcal: 165, p: 31, c: 0, f: 3.6 },
+      { id: 2, name: 'Arroz blanco', emoji: '', kcal: 130, p: 2.7, c: 28, f: 0.3 },
+      { id: 3, name: 'Huevo entero', emoji: '', kcal: 78, p: 6.3, c: 0.6, f: 5.3 },
+      { id: 4, name: 'Avena', emoji: '', kcal: 389, p: 17, c: 66, f: 7 },
+      { id: 5, name: 'Plátano', emoji: '', kcal: 89, p: 1.1, c: 23, f: 0.3 },
+      { id: 6, name: 'Leche entera', emoji: '', kcal: 61, p: 3.2, c: 4.8, f: 3.3 },
+      { id: 7, name: 'Salmón', emoji: '', kcal: 208, p: 20, c: 0, f: 13 },
+      { id: 8, name: 'Brócoli', emoji: '', kcal: 34, p: 2.8, c: 7, f: 0.4 },
+      { id: 9, name: 'Almendras', emoji: '', kcal: 579, p: 21, c: 22, f: 50 },
+      { id: 10, name: 'Yogur griego', emoji: '', kcal: 59, p: 10, c: 3.6, f: 0.4 },
+      { id: 11, name: 'Pan integral', emoji: '', kcal: 247, p: 9, c: 41, f: 4 },
+      { id: 12, name: 'Pechuga de pavo', emoji: '', kcal: 135, p: 30, c: 0, f: 1 },
+      { id: 13, name: 'Lentejas cocidas', emoji: '', kcal: 116, p: 9, c: 20, f: 0.4 },
+      { id: 14, name: 'Atún en lata', emoji: '', kcal: 116, p: 26, c: 0, f: 1 },
+      { id: 15, name: 'Manzana', emoji: '', kcal: 52, p: 0.3, c: 14, f: 0.2 },
+      { id: 16, name: 'Pasta integral', emoji: '', kcal: 124, p: 5, c: 26, f: 0.9 },
+      { id: 17, name: 'Aceite de oliva (1 cda)', emoji: '', kcal: 119, p: 0, c: 0, f: 13.5 },
+      { id: 18, name: 'Queso fresco', emoji: '', kcal: 98, p: 11, c: 3, f: 4 },
+      { id: 19, name: 'Batata/Boniato', emoji: '', kcal: 86, p: 1.6, c: 20, f: 0.1 },
+      { id: 20, name: 'Naranja', emoji: '', kcal: 47, p: 0.9, c: 12, f: 0.1 },
     ];
 
     var REVIEWS_INITIAL = [
@@ -3181,16 +3207,16 @@
     ];
     var reviews = [...REVIEWS_INITIAL];
 
-    // ─── MIS ALIMENTOS & MIS RECETAS ───
+    //  MIS ALIMENTOS & MIS RECETAS 
     var myFoods = [];   // alimentos creados manualmente por el usuario
     var myRecipes = []; // recetas personalizadas
     var scanHistory = []; // historial real de escaneos
 
-    // ─── INIT ───
+    //  INIT 
 
-    // ═══════════════════════════════════════════════════════
-    // ─── SUPABASE — Auth + Sync ───
-    // ═══════════════════════════════════════════════════════
+    // 
+    //  SUPABASE — Auth + Sync 
+    // 
     var SUPA_URL = 'https://wsevpblhjugnszwagcyz.supabase.co';
     var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZXZwYmxoanVnbnN6d2FnY3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTc3NzksImV4cCI6MjA5NDM5Mzc3OX0._nU5mCHUKwAIKl4Kqh4c4NG8jzX17g_4k_93ikSANpI';
     var sb = null;
@@ -3257,7 +3283,7 @@
       }
     }
 
-    // ─── UI de auth ───
+    //  UI de auth 
     function showAuthModal() {
       document.getElementById('authOverlay').classList.remove('hidden');
       switchAuthPanel('login');
@@ -3292,7 +3318,7 @@
       }
     }
 
-    // ─── Recuperar contraseña ───
+    //  Recuperar contraseña 
     async function doForgotPassword() {
       var email = document.getElementById('authForgotEmail').value.trim();
       var errEl = document.getElementById('authForgotError');
@@ -3314,7 +3340,7 @@
       }
     }
 
-    // ─── Actualizar contraseña (tras recovery link) ───
+    //  Actualizar contraseña (tras recovery link) 
     async function doUpdatePassword() {
       var pass1  = document.getElementById('authNewPass1').value;
       var pass2  = document.getElementById('authNewPass2').value;
@@ -3340,7 +3366,7 @@
       }
     }
 
-    // ─── Registro ───
+    //  Registro 
     async function doRegister() {
       var email = document.getElementById('authRegEmail').value.trim();
       var pass  = document.getElementById('authRegPass').value;
@@ -3360,7 +3386,7 @@
       }
     }
 
-    // ─── Login ───
+    //  Login 
     async function doLogin() {
       var email = document.getElementById('authLoginEmail').value.trim();
       var pass  = document.getElementById('authLoginPass').value;
@@ -3379,7 +3405,7 @@
       }
     }
 
-    // ─── Logout ───
+    //  Logout 
     async function doLogout() {
       if (!sb) return;
       await sb.auth.signOut();
@@ -3393,7 +3419,7 @@
       return msg;
     }
 
-    // ─── UI: actualizar header según sesión ───
+    //  UI: actualizar header según sesión 
     function updateUserUI() {
       var badge = document.getElementById('userBadge');
       var emailEl = document.getElementById('userBadgeEmail');
@@ -3416,9 +3442,9 @@
       }
     }
 
-    // ═══════════════════════════════════════════════════════
-    // ─── SYNC — subir datos al servidor ───
-    // ═══════════════════════════════════════════════════════
+    // 
+    //  SYNC — subir datos al servidor 
+    // 
 
     async function syncToCloud() {
       if (!sb || !sbUser || sbSyncing) return;
@@ -3502,7 +3528,7 @@
       sbSyncing = false;
     }
 
-    // ─── SYNC — descargar datos del servidor ───
+    //  SYNC — descargar datos del servidor 
     async function syncFromCloud() {
       if (!sb || !sbUser) return;
       try {
@@ -3575,13 +3601,13 @@
         }
 
         saveAll(); // actualizar localStorage con datos del servidor
-        showToast('☁️ Datos sincronizados');
+        showToast(' Datos sincronizados');
       } catch(e) {
         console.error('syncFromCloud error:', e);
       }
     }
 
-    // ─── Helpers de fecha ───
+    //  Helpers de fecha 
     function toDateKey(d) {
       return d.toDateString();
     }
@@ -3592,7 +3618,7 @@
       return y + '-' + m + '-' + day;
     }
 
-    // ─── Feedback a Supabase ───
+    //  Feedback a Supabase 
     async function submitFeedbackToCloud(stars, text) {
       if (!sb) return;
       try {
@@ -3622,13 +3648,13 @@
         updateMacros();
       }
       var badge = document.getElementById('planBadge');
-      if (badge && state.isPremium) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
+      if (badge && state.isPremium) { badge.textContent = 'Premium'; badge.classList.remove('free'); }
       checkOnboarding();
       // Inicializar Supabase después de cargar la UI
       initSupabase();
     }
 
-    // ─── DATE ───
+    //  DATE 
     function updateDateLabel() {
       var d = state.currentDate;
       var today = new Date();
@@ -3651,7 +3677,7 @@
       updateHeroRing();
     }
 
-    // ─── TABS ───
+    //  TABS 
     function showTab(tab, btn) {
       document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
       document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
@@ -3669,8 +3695,8 @@
       if (tab === 'admin') renderAdmin();
     }
 
-    // ─── ADMIN ───
-    // ─── ADMIN: tab switcher ───
+    //  ADMIN 
+    //  ADMIN: tab switcher 
     var adminCurrentTab = 'resumen';
     function switchAdminTab(tab, btn) {
       adminCurrentTab = tab;
@@ -3691,7 +3717,7 @@
       switchAdminTab('resumen', document.querySelector('.admin-itab'));
     }
 
-    // ── RESUMEN ──
+    //  RESUMEN 
     async function adminRenderResumen() {
       var el = document.getElementById('adminPanelResumen');
       el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
@@ -3722,7 +3748,7 @@
       }
     }
 
-    // ── USUARIOS ──
+    //  USUARIOS 
     async function adminRenderUsuarios() {
       var el = document.getElementById('adminPanelUsuarios');
       el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
@@ -3771,7 +3797,7 @@
       btn.disabled = false;
     }
 
-    // ── FEEDBACKS ──
+    //  FEEDBACKS 
     async function adminRenderFeedbacks() {
       var el = document.getElementById('adminPanelFeedbacks');
       el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
@@ -3786,13 +3812,13 @@
         html += '<button class="admin-toggle-btn on" id="fbFilterAll" onclick="adminFbFilter(0,this)">Todos (' + rows.length + ')</button>';
         [1,2,3,4,5].forEach(function(s){
           var cnt = rows.filter(function(r){ return r.stars===s; }).length;
-          if (cnt) html += '<button class="admin-toggle-btn" id="fbFilter' + s + '" onclick="adminFbFilter(' + s + ',this)">' + s + '★ (' + cnt + ')</button>';
+          if (cnt) html += '<button class="admin-toggle-btn" id="fbFilter' + s + '" onclick="adminFbFilter(' + s + ',this)">' + s + ' (' + cnt + ')</button>';
         });
         html += '</div>';
         html += '<div id="fbList">';
         rows.forEach(function(r) {
           var stars = '';
-          for (var i = 0; i < 5; i++) stars += i < r.stars ? '★' : '☆';
+          for (var i = 0; i < 5; i++) stars += i < r.stars ? '' : '';
           var date = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '';
           html += '<div class="admin-fb-row" data-stars="' + (r.stars||0) + '">';
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
@@ -3818,7 +3844,7 @@
       });
     }
 
-    // ── ALIMENTOS ──
+    //  ALIMENTOS 
     async function adminRenderAlimentos() {
       var el = document.getElementById('adminPanelAlimentos');
       el.innerHTML = '<div style="font-size:13px;color:var(--gray-400);text-align:center;padding:30px 0">Cargando...</div>';
@@ -3859,7 +3885,7 @@
       }
     }
 
-    // ── VIP ──
+    //  VIP 
     var VIP_CODES = ['FUELLOG2026','BETA-VIP-01','BETA-VIP-02','BETA-VIP-03','FUELBETA'];
 
     function adminRenderVip() {
@@ -3912,7 +3938,7 @@
       }
     }
 
-    // ─── MEALS ───
+    //  MEALS 
     var MEAL_DEFS = [
       { key: 'desayuno', label: 'Desayuno', emoji: '☀️' },
       { key: 'almuerzo', label: 'Almuerzo', emoji: '🥗' },
@@ -3990,7 +4016,7 @@
     }
     function loadDayData() { /* handled by loadAll() */ }
 
-    // ─── TOTALS ───
+    //  TOTALS 
     function getTotals() {
       var t = { kcal: 0, p: 0, c: 0, f: 0 };
       Object.values(state.meals).forEach(function (items) {
@@ -4035,7 +4061,7 @@
       }
     }
 
-    // ─── MODAL 3 PESTAÑAS ───
+    //  MODAL 3 PESTAÑAS 
     var activeModalTab = 'biblioteca';
 
     function switchModalTab(tab) {
@@ -4048,7 +4074,7 @@
       if (tab === 'mis-recetas') renderMyRecipesList();
     }
 
-    // ─── MODAL ───
+    //  MODAL 
     function openAddModal(meal) {
       state.currentMealTarget = meal;
       document.getElementById('modalTitle').textContent = meal ? 'Añadir a ' + meal : 'Añadir alimento';
@@ -4087,7 +4113,7 @@
       document.getElementById('modalSpinner').classList.add('visible');
       modalSearchTimer = setTimeout(function(){ searchOFF(q, true); }, 300);
     }
-    // ─── QUANTITY PANEL ───
+    //  QUANTITY PANEL 
     var qtyFood = null;
 
     function openQty(id) {
@@ -4153,7 +4179,7 @@
       var g = parseFloat(document.getElementById('qtyGrams').value) || 100;
       var factor = g / 100;
       var entry = {
-        id: qtyFood.id, name: qtyFood.name, emoji: qtyFood.emoji || '📦',
+        id: qtyFood.id, name: qtyFood.name, emoji: qtyFood.emoji || '',
         brand: qtyFood.brand || '', grams: g,
         kcal: Math.round(qtyFood.kcal * factor),
         p: Math.round(qtyFood.p * factor * 10) / 10,
@@ -4165,13 +4191,13 @@
       closeQty();
       closeModal();
       renderMeals();
-      showToast('✅ ' + entry.name + ' · ' + g + 'g añadido a ' + meal);
+      showToast(' ' + entry.name + ' · ' + g + 'g añadido a ' + meal);
     }
 
     function addFoodFromModal(id) { openQty(id); }
     function addFood(id) { openQty(id); }
 
-    // ─── MIS ALIMENTOS — funciones ───
+    //  MIS ALIMENTOS — funciones 
     function toggleCustomFoodForm() {
       var form = document.getElementById('customFoodForm');
       form.classList.toggle('open');
@@ -4186,7 +4212,7 @@
 
     function saveCustomFood() {
       var name = document.getElementById('cff-name').value.trim();
-      if (!name) { showToast('⚠️ Escribe un nombre para el alimento'); return; }
+      if (!name) { showToast(' Escribe un nombre para el alimento'); return; }
       var brand = document.getElementById('cff-brand').value.trim();
       var kcal = parseFloat(document.getElementById('cff-kcal').value) || 0;
       var p    = parseFloat(document.getElementById('cff-p').value) || 0;
@@ -4209,7 +4235,7 @@
       saveAll();
       toggleCustomFoodForm();
       renderMyFoodsList();
-      showToast('✅ ' + name + ' guardado en Mis alimentos');
+      showToast(' ' + name + ' guardado en Mis alimentos');
     }
 
     function deleteMyFood(id) {
@@ -4217,7 +4243,7 @@
       FOODS = FOODS.filter(function(f){ return f.id !== id; });
       saveAll();
       renderMyFoodsList();
-      showToast('🗑️ Alimento eliminado');
+      showToast(' Alimento eliminado');
     }
 
     function renderMyFoodsList() {
@@ -4247,7 +4273,7 @@
           '<div class="food-row-right">' +
             '<div class="food-row-kcal">' + f.kcal + '</div>' +
           '</div>' +
-          '<button class="food-row-del-btn" title="Eliminar">✕</button>';
+          '<button class="food-row-del-btn" title="Eliminar"></button>';
         row.addEventListener('click', function() {
           row.classList.toggle('selected');
           updateModalSelectionBar();
@@ -4261,8 +4287,8 @@
       el.appendChild(fragment);
     }
 
-    // ─── MIS RECETAS — funciones ───
-    // ─── RECETAS — formulario ───
+    //  MIS RECETAS — funciones 
+    //  RECETAS — formulario 
     var rffIngredients = []; // [{name, kcal, p, c, f}]
     var rffStarRating = 5;
 
@@ -4355,7 +4381,7 @@
 
     function saveNewRecipe() {
       var name = (document.getElementById('rffName').value || '').trim();
-      if (!name) { showToast('⚠️ Pon un nombre a la receta'); return; }
+      if (!name) { showToast(' Pon un nombre a la receta'); return; }
 
       // Recoger ingredientes desde el DOM
       var rows = document.querySelectorAll('.rff-ingredient-row');
@@ -4370,7 +4396,7 @@
           totKcal += ingKcal;
         }
       });
-      if (!ings.length) { showToast('⚠️ Añade al menos un ingrediente'); return; }
+      if (!ings.length) { showToast(' Añade al menos un ingrediente'); return; }
 
       var recipe = {
         id: 'r' + Date.now(),
@@ -4382,7 +4408,7 @@
       saveAll();
       toggleRecipeForm();
       renderMyRecipesList();
-      showToast('✅ Receta "' + name + '" guardada');
+      showToast(' Receta "' + name + '" guardada');
     }
 
     function renderMyRecipesList() {
@@ -4454,7 +4480,7 @@
       var totC = recipe.ingredients.reduce(function(acc, ing){ return acc + ing.c; }, 0);
       var totF = recipe.ingredients.reduce(function(acc, ing){ return acc + ing.f; }, 0);
       var entry = {
-        id: recipe.id, name: recipe.name, emoji: '🍳',
+        id: recipe.id, name: recipe.name, emoji: '',
         brand: '', grams: null,
         kcal: Math.round(totKcal),
         p: Math.round(totP * 10) / 10,
@@ -4468,10 +4494,10 @@
       renderMeals();
       updateHeroRing();
       updateMacros();
-      showToast('✅ ' + recipe.name + ' añadido a ' + meal);
+      showToast(' ' + recipe.name + ' añadido a ' + meal);
     }
 
-    // ─── FOODS LIST — Open Food Facts ───
+    //  FOODS LIST — Open Food Facts 
     var foodSearchTimer = null;
     var offCache = {}; // cache búsquedas ya realizadas
 
@@ -4512,7 +4538,7 @@
       return row;
     }
 
-    /* ─── SELECCIÓN MÚLTIPLE ─── */
+    /*  SELECCIÓN MÚLTIPLE  */
     var _modalSelectedFoods = []; // ids seleccionados
 
     function updateModalSelectionBar() {
@@ -4555,7 +4581,7 @@
         if (!food) return;
         var g = 100;
         var entry = {
-          id: food.id, name: food.name, emoji: food.emoji || '📦',
+          id: food.id, name: food.name, emoji: food.emoji || '',
           brand: food.brand || '', grams: g,
           kcal: Math.round(food.kcal),
           p: Math.round(food.p * 10) / 10,
@@ -4571,10 +4597,10 @@
       renderMeals();
       updateHeroRing();
       updateMacros();
-      showToast('✅ ' + names.length + ' alimentos añadidos a ' + meal + ' (100g c/u)');
+      showToast(' ' + names.length + ' alimentos añadidos a ' + meal + ' (100g c/u)');
     }
 
-    /* ─── ESCÁNER EN MODAL ─── */
+    /*  ESCÁNER EN MODAL  */
     var _modalScannerActive = false;
 
     function toggleModalScanner() {
@@ -4591,7 +4617,7 @@
       var btn = document.getElementById('modalScanBtn');
       overlay.classList.add('active');
       if (btn) btn.classList.add('scanning');
-      if (typeof Quagga === 'undefined') { showToast('⚠️ Escáner no disponible'); closeModalScanner(); return; }
+      if (typeof Quagga === 'undefined') { showToast(' Escáner no disponible'); closeModalScanner(); return; }
       Quagga.init({
         inputStream: {
           name: 'Live', type: 'LiveStream',
@@ -4601,7 +4627,7 @@
         decoder: { readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader', 'code_128_reader'] },
         locate: true
       }, function(err) {
-        if (err) { showToast('📷 Sin acceso a la cámara'); closeModalScanner(); return; }
+        if (err) { showToast(' Sin acceso a la cámara'); closeModalScanner(); return; }
         Quagga.start();
         // Guardar track para la linterna
         try {
@@ -4623,7 +4649,7 @@
           document.getElementById('modalSearch').value = code;
           filterModal(code);
           searchOFF(code, true);
-          showToast('📦 Código: ' + code);
+          showToast(' Código: ' + code);
         });
       });
     }
@@ -4646,7 +4672,7 @@
       _torchOn = !_torchOn;
       try {
         _torchTrack.applyConstraints({ advanced: [{ torch: _torchOn }] });
-      } catch(e) { showToast('💡 Linterna no disponible en este dispositivo'); _torchOn = false; }
+      } catch(e) { showToast(' Linterna no disponible en este dispositivo'); _torchOn = false; }
       if (btn) btn.classList.toggle('torch-on', _torchOn);
     }
 
@@ -4739,7 +4765,7 @@
           name: p.product_name || 'Producto',
           brand: p.brands ? p.brands.split(',')[0].trim() : '',
           qty: p.quantity || '',
-          emoji: '📦',
+          emoji: '',
           kcal: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
           p: Math.round((n['proteins_100g'] || 0) * 10) / 10,
           c: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
@@ -4751,7 +4777,7 @@
       });
     }
 
-    // ─── PROFILE ───
+    //  PROFILE 
     function setSex(g, el) {
       state.sex = g;
       document.querySelectorAll('.seg-opt[onclick*="setSex"]').forEach(function(b){ b.classList.remove('active'); });
@@ -4775,8 +4801,12 @@
       var w = parseFloat(document.getElementById('pWeight').value);
       var h = parseFloat(document.getElementById('pHeight').value);
       if (!age || !w || !h) return;
-      var bmr = state.sex === 'H' ? (88.362 + 13.397 * w + 4.799 * h - 5.677 * age) : (447.593 + 9.247 * w + 3.098 * h - 4.330 * age);
-      var tdee = Math.round(bmr * state.activity);
+      // Harris-Benedict revisado
+      var bmr = state.sex === 'H'
+        ? (88.362 + 13.397 * w + 4.799 * h - 5.677 * age)
+        : (447.593 + 9.247 * w + 3.098 * h - 4.330 * age);
+      // TDEE = BMR × factor actividad × 1.10 (Efecto Térmico de los Alimentos ~10%)
+      var tdee = Math.round(bmr * state.activity * 1.10);
       var adj = state.goal === 'perder' ? -300 : state.goal === 'ganar' ? 300 : 0;
       var kcal = tdee + adj;
       var prot = Math.round(w * 2);
@@ -4807,19 +4837,19 @@
       if (vipStatus) {
         if (state.isPremium) {
           vipStatus.style.display = 'block';
-          vipStatus.innerHTML = '<span style="color:#a855f7;font-weight:600">⚡ Acceso VIP activo — escaneos ilimitados</span>';
+          vipStatus.innerHTML = '<span style="color:#a855f7;font-weight:600"> Acceso VIP activo — escaneos ilimitados</span>';
         }
       }
       saveAll();
       updateHeroRing();
       updateMacros();
       updatePremiumBadge();
-      showToast('✅ Perfil guardado');
+      showToast(' Perfil guardado');
       setTimeout(function () { showTab('diario', null); }, 800);
     }
     function loadProfile() { /* handled by loadAll() */ }
 
-    // ─── HISTORIAL ───
+    //  HISTORIAL 
     function getHistorialData(days) {
       var result = [];
       var today = new Date();
@@ -4882,7 +4912,7 @@
       // Days list (last 10)
       var listData = data.filter(function(d){ return d.hasData; }).slice(-10).reverse();
       var listHtml = listData.length === 0
-        ? '<div class="hist-empty"><div class="hist-empty-icon">📭</div><div class="hist-empty-text">Aún no hay registros en este periodo.<br>¡Empieza a registrar tus comidas!</div></div>'
+        ? '<div class="hist-empty"><div class="hist-empty-icon"></div><div class="hist-empty-text">Aún no hay registros en este periodo.<br>¡Empieza a registrar tus comidas!</div></div>'
         : listData.map(function(d) {
             var pct = target > 0 ? Math.min(d.kcal / target * 100, 100) : 50;
             var color = d.kcal > target * 1.1 ? '#ef4444' : d.kcal >= target * 0.9 ? '#6366f1' : '#fbbf24';
@@ -4904,67 +4934,6 @@
         return '<div class="dist-row"><span class="dist-dot" style="background:'+m.color+'"></span><span class="dist-name">'+m.name+'</span><div class="dist-bar-track"><div class="dist-bar-fill" style="width:'+m.pct+'%;background:'+m.color+';height:100%"></div></div><span class="dist-val">'+m.pct+'%</span></div>';
       }).join('') : '<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px">Sin datos suficientes</div>';
 
-      // ── Macro-por-día chart (últimos 14 días) ──────────────────
-      var macroChartData = data.slice(-14);
-      var macroChartMax = macroChartData.reduce(function(a, d) {
-        // max kcal calórica de macros (para escalar barras)
-        return Math.max(a, d.p * 4 + d.c * 4 + d.f * 9);
-      }, 1);
-
-      var macroBarHtml = macroChartData.map(function(d) {
-        var totalKcalMacro = d.p * 4 + d.c * 4 + d.f * 9;
-        var colH = totalKcalMacro > 0 ? Math.max(Math.round(totalKcalMacro / macroChartMax * 100), 4) : 2;
-        var hP = totalKcalMacro > 0 ? Math.round(d.p * 4 / totalKcalMacro * 100) : 0;
-        var hC = totalKcalMacro > 0 ? Math.round(d.c * 4 / totalKcalMacro * 100) : 0;
-        var hF = 100 - hP - hC; // resto a grasas para que sume 100%
-        var label = d.date.getDate() + ' ' + months[d.date.getMonth()];
-        var tip = !d.hasData ? (label + ': sin datos') :
-          label + ': P ' + d.p + 'g · C ' + d.c + 'g · G ' + d.f + 'g';
-        return '<div class="hist-macro-col">' +
-          '<div class="hist-macro-stack" style="height:' + colH + '%;width:100%" data-tip="' + tip + '">' +
-            (d.hasData ? (
-              '<div class="hist-macro-seg" style="height:' + hP + '%;background:#4ade80;min-height:' + (hP > 0 ? 2 : 0) + 'px"></div>' +
-              '<div class="hist-macro-seg" style="height:' + hC + '%;background:#fbbf24;min-height:' + (hC > 0 ? 2 : 0) + 'px"></div>' +
-              '<div class="hist-macro-seg" style="height:' + hF + '%;background:#818cf8;min-height:' + (hF > 0 ? 2 : 0) + 'px"></div>'
-            ) : '<div style="height:100%;background:var(--gray-100);border-radius:3px 3px 0 0"></div>') +
-          '</div>' +
-          '<div class="hist-macro-date">' + d.date.getDate() + '</div>' +
-        '</div>';
-      }).join('');
-
-      var macroChartCardHtml = state.isPremium
-        ? '<div class="hist-chart-card">' +
-            '<div class="hist-chart-title">Macros por día <span class="hist-chart-subtitle">últimos 14 días</span></div>' +
-            '<div class="hist-macro-chart">' + macroBarHtml + '</div>' +
-            '<div class="hist-macro-legend">' +
-              '<div class="hist-macro-legend-item"><div class="hist-macro-legend-dot" style="background:#4ade80"></div>Proteínas</div>' +
-              '<div class="hist-macro-legend-item"><div class="hist-macro-legend-dot" style="background:#fbbf24"></div>Carbos</div>' +
-              '<div class="hist-macro-legend-item"><div class="hist-macro-legend-dot" style="background:#818cf8"></div>Grasas</div>' +
-            '</div>' +
-          '</div>'
-        : '<div class="premium-gate hist-chart-card">' +
-            // Versión borrosa de fondo (siempre renderizamos algo para que se vea el blur)
-            '<div class="premium-gate-blur">' +
-              '<div class="hist-chart-title">Macros por día <span class="hist-chart-subtitle">últimos 14 días</span></div>' +
-              '<div class="hist-macro-chart" style="height:100px">' +
-                // Barras placeholder decorativas
-                [0.6,0.8,0.4,1,0.7,0.5,0.9,0.3,0.75,0.55,0.85,0.45,0.65,0.9].map(function(h) {
-                  return '<div class="hist-macro-col"><div class="hist-macro-stack" style="height:' + Math.round(h*100) + '%;width:100%">' +
-                    '<div class="hist-macro-seg" style="height:25%;background:#4ade80"></div>' +
-                    '<div class="hist-macro-seg" style="height:50%;background:#fbbf24"></div>' +
-                    '<div class="hist-macro-seg" style="height:25%;background:#818cf8"></div>' +
-                  '</div><div class="hist-macro-date">—</div></div>';
-                }).join('') +
-              '</div>' +
-            '</div>' +
-            '<div class="premium-gate-overlay">' +
-              '<div class="premium-gate-badge">★ PREMIUM</div>' +
-              '<div class="premium-gate-title">Macros por día desglosados</div>' +
-              '<div class="premium-gate-sub">Visualiza la distribución exacta de proteínas, carbos y grasas por día.<br>Disponible en Premium.</div>' +
-              '<button class="premium-gate-btn" onclick="showTab(\'premium\',null)">Desbloquear por 10€/año →</button>' +
-            '</div>' +
-          '</div>';
-
       el.innerHTML =
         // Period tabs
         '<div class="hist-period-tabs">' +
@@ -4974,8 +4943,8 @@
         '</div>' +
         // Streak
         (streak > 0 ?
-          '<div class="hist-streak"><div class="hist-streak-num">'+streak+'</div><div class="hist-streak-info"><div class="hist-streak-label">días de racha 🔥</div><div class="hist-streak-sub">Sigue así, lo estás haciendo muy bien</div></div></div>' :
-          '<div style="background:var(--amber-bg);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--amber);font-weight:500">⚡ Empieza tu racha registrando hoy</div>') +
+          '<div class="hist-streak"><div class="hist-streak-num">'+streak+'</div><div class="hist-streak-info"><div class="hist-streak-label">días de racha </div><div class="hist-streak-sub">Sigue así, lo estás haciendo muy bien</div></div></div>' :
+          '<div style="background:var(--amber-bg);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--amber);font-weight:500"> Empieza tu racha registrando hoy</div>') +
         // Stats
         '<div class="hist-stat-row">' +
           '<div class="hist-stat"><div class="hist-stat-val">'+( avgKcal || '—')+'</div><div class="hist-stat-lbl">Media kcal/día</div>' +
@@ -4985,7 +4954,7 @@
             '<div class="hist-stat-delta" style="color:var(--gray-400)">'+Math.round(daysWithData.length/days*100)+'% adherencia</div>' +
           '</div>' +
         '</div>' +
-        // Calories chart
+        // Chart
         '<div class="hist-chart-card">' +
           '<div class="hist-chart-title">Calorías diarias <span class="hist-chart-subtitle">últimos 14 días</span></div>' +
           '<div class="hist-bar-chart">'+barHtml+'</div>' +
@@ -4995,8 +4964,6 @@
             '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#fbbf24;display:inline-block"></span>Por debajo</span>' +
           '</div>' +
         '</div>' +
-        // ── Macros por día (Premium gate) ──
-        macroChartCardHtml +
         // Macro distribution
         '<div class="hist-chart-card">' +
           '<div class="hist-chart-title">Distribución de macros <span class="hist-chart-subtitle">promedio del periodo</span></div>' +
@@ -5009,7 +4976,7 @@
         '</div>';
     }
 
-    // ─── WEEK ───
+    //  WEEK 
     function renderWeek() {
       var days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       var today = new Date();
@@ -5053,7 +5020,7 @@
       document.getElementById('weekMacros').innerHTML = mHtml;
     }
 
-    // ─── PREMIUM ───
+    //  PREMIUM 
     function renderPremium() {
       var el = document.getElementById('premiumContent');
       if (!el) return;
@@ -5061,33 +5028,33 @@
       if (state.isPremium) {
         el.innerHTML =
           '<div class="premium-hero" style="text-align:center">' +
-            '<div style="font-size:48px;margin-bottom:10px">👑</div>' +
+            '<div style="font-size:48px;margin-bottom:10px"></div>' +
             '<div class="premium-badge">ACTIVO</div>' +
             '<div style="font-size:20px;font-weight:700;margin:10px 0 4px">Eres usuario Premium</div>' +
             '<div style="font-size:13px;opacity:.6;margin-bottom:20px">Todas las funciones desbloqueadas</div>' +
           '</div>' +
           '<div class="premium-feats">' +
-            ['♾️ Escaneos ilimitados','📅 Historial sin límite','🔄 Sincronización','📊 Estadísticas avanzadas','🚀 Futuras funciones'].map(function(f){
-              return '<div class="premium-feat"><div class="premium-feat-icon" style="background:var(--green-bg)">' + f.split(' ')[0] + '</div><div class="premium-feat-text"><div class="title" style="color:var(--green)">✓ ' + f.split(' ').slice(1).join(' ') + '</div></div></div>';
+            [' Escaneos ilimitados',' Historial sin límite',' Sincronización',' Estadísticas avanzadas',' Futuras funciones'].map(function(f){
+              return '<div class="premium-feat"><div class="premium-feat-icon" style="background:var(--green-bg)">' + f.split(' ')[0] + '</div><div class="premium-feat-text"><div class="title" style="color:var(--green)"> ' + f.split(' ').slice(1).join(' ') + '</div></div></div>';
             }).join('') +
           '</div>' +
           '<button onclick="cancelPremium()" style="width:100%;padding:12px;background:var(--red-bg);border:1px solid var(--red);border-radius:var(--radius);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px">Cancelar suscripción</button>';
         var badge = document.getElementById('planBadge');
-        if (badge) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
+        if (badge) { badge.textContent = 'Premium'; badge.classList.remove('free'); }
       } else {
         el.innerHTML =
           '<div class="premium-hero">' +
-            '<div class="premium-badge">★ PREMIUM</div>' +
+            '<div class="premium-badge">PREMIUM</div>' +
             '<div class="premium-price">10€</div>' +
             '<div class="premium-period">al año · menos de 1€/mes</div>' +
             '<button class="premium-cta" onclick="startPayment()">Activar Premium ahora →</button>' +
           '</div>' +
           '<div class="premium-feats">' +
-            [['♾️','var(--green-bg)','Escaneos ilimitados','Sin límite mensual de escaneos'],
-             ['📅','var(--accent-bg)','Historial sin límite','Accede a todos tus registros para siempre'],
-             ['🔄','var(--blue-bg)','Sincronización','Tus datos en todos tus dispositivos'],
-             ['📊','var(--amber-bg)','Estadísticas avanzadas','Tendencias, rachas y análisis detallado'],
-             ['🚀','var(--red-bg)','Futuras funciones','Acceso anticipado a todo lo que añadamos']
+            [['','var(--green-bg)','Escaneos ilimitados','Sin límite mensual de escaneos'],
+             ['','var(--accent-bg)','Historial sin límite','Accede a todos tus registros para siempre'],
+             ['','var(--blue-bg)','Sincronización','Tus datos en todos tus dispositivos'],
+             ['','var(--amber-bg)','Estadísticas avanzadas','Tendencias, rachas y análisis detallado'],
+             ['','var(--red-bg)','Futuras funciones','Acceso anticipado a todo lo que añadamos']
             ].map(function(f){
               return '<div class="premium-feat"><div class="premium-feat-icon" style="background:' + f[1] + '">' + f[0] + '</div><div class="premium-feat-text"><div class="title">' + f[2] + '</div><div class="desc">' + f[3] + '</div></div></div>';
             }).join('') +
@@ -5096,7 +5063,7 @@
       }
     }
 
-    // ─── STRIPE PAYMENT ───
+    //  STRIPE PAYMENT 
     // Configura tu clave pública de Stripe aquí cuando la tengas:
     // var stripe = Stripe('pk_live_TU_CLAVE_PUBLICA_AQUI');
     var STRIPE_CONFIGURED = false; // Cambiar a true cuando Stripe esté listo
@@ -5118,7 +5085,7 @@
             '<div id="stripe-card-element" style="padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;margin-bottom:16px"></div>' +
             '<div id="stripe-errors" style="color:#ef4444;font-size:12px;margin-bottom:10px;display:none"></div>' :
             // Formulario simulado mientras Stripe no está configurado
-            '<div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:#92400e">🔧 Modo demo — integra tu clave de Stripe en el código para pagos reales</div>' +
+            '<div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:#92400e"> Modo demo — integra tu clave de Stripe en el código para pagos reales</div>' +
             '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:16px">' +
               '<div style="font-size:12px;color:#9ca3af;margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Datos de pago</div>' +
               '<input placeholder="Número de tarjeta" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;margin-bottom:8px;font-family:var(--font);outline:none" oninput="this.value=this.value.replace(/\\D/g,\'\').replace(/(.{4})/g,\'$1 \').trim().substring(0,19)">' +
@@ -5129,7 +5096,7 @@
             '</div>') +
           '<button id="payBtn" onclick="processPayment(this)" style="width:100%;padding:14px;background:#fbbf24;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);margin-bottom:8px">Pagar 10€ y activar Premium</button>' +
           '<button onclick="document.getElementById(\'payModal\').remove()" style="width:100%;padding:12px;background:#f3f4f6;border:none;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font)">Cancelar</button>' +
-          '<div style="text-align:center;font-size:11px;color:#9ca3af;margin-top:12px">🔒 Pago seguro · Sin permanencia · Cancela cuando quieras</div>' +
+          '<div style="text-align:center;font-size:11px;color:#9ca3af;margin-top:12px"> Pago seguro · Sin permanencia · Cancela cuando quieras</div>' +
         '</div>';
       document.body.appendChild(modal);
 
@@ -5161,7 +5128,7 @@
         //         else { activatePremium(); }
         //       });
         //   });
-        showToast('⚙️ Configura el backend de Stripe para pagos reales');
+        showToast(' Configura el backend de Stripe para pagos reales');
         btn.textContent = 'Pagar 10€ y activar Premium';
         btn.disabled = false;
       } else {
@@ -5179,9 +5146,9 @@
       state.maxScans = 9999;
       try { localStorage.setItem('fl_premium', 'true'); } catch(e){}
       var badge = document.getElementById('planBadge');
-      if (badge) { badge.textContent = '★ Premium'; badge.classList.remove('free'); }
+      if (badge) { badge.textContent = 'Premium'; badge.classList.remove('free'); }
       renderPremium();
-      showToast('🎉 ¡Bienvenido a Premium! Todas las funciones desbloqueadas.');
+      showToast(' ¡Bienvenido a Premium! Todas las funciones desbloqueadas.');
     }
 
     function cancelPremium() {
@@ -5195,11 +5162,11 @@
       showToast('Suscripción cancelada');
     }
 
-    // ─── REVIEWS ───
+    //  REVIEWS 
     function renderReviews() {
       var html = '';
       reviews.forEach(function (r) {
-        var stars = '★'.repeat(r.stars) + '☆'.repeat(5 - r.stars);
+        var stars = ''.repeat(r.stars) + ''.repeat(5 - r.stars);
         html += '<div class="review-card"><div class="review-stars">' + stars + '</div>';
         html += '<p class="review-text">"' + r.text + '"</p>';
         html += '<div class="review-author"><div class="review-av" style="background:' + (r.color || '#6366f1') + '">' + r.name.substring(0, 2) + '</div>';
@@ -5222,10 +5189,10 @@
       setStars(5);
       renderReviews();
       saveAll();
-      showToast('✅ Reseña publicada. ¡Gracias!');
+      showToast(' Reseña publicada. ¡Gracias!');
     }
 
-    // ─── FEEDBACK ───
+    //  FEEDBACK 
     var feedbackStarVal = 5;
 
     function initFeedbackStars() {
@@ -5255,7 +5222,7 @@
 
     function submitFeedback() {
       var text = (document.getElementById('feedbackText').value || '').trim();
-      if (!text) { showToast('⚠️ Escribe algo antes de enviar'); return; }
+      if (!text) { showToast(' Escribe algo antes de enviar'); return; }
 
       // Enviar a Supabase
       submitFeedbackToCloud(feedbackStarVal, text);
@@ -5269,11 +5236,11 @@
 
       // Mostrar estado enviado
       var card = document.getElementById('feedbackFormCard');
-      card.innerHTML = '<div class="feedback-sent"><span class="fb-check">✅</span><strong>¡Gracias por tu feedback!</strong><br><br>Tu opinión ayuda a hacer FuelLog mejor cada día.</div>';
-      showToast('✅ Feedback enviado. ¡Gracias!');
+      card.innerHTML = '<div class="feedback-sent"><span class="fb-check"></span><strong>¡Gracias por tu feedback!</strong><br><br>Tu opinión ayuda a hacer FuelLog mejor cada día.</div>';
+      showToast(' Feedback enviado. ¡Gracias!');
     }
 
-    // ─── TOAST ───
+    //  TOAST 
     function showToast(msg) {
       var t = document.getElementById('toast');
       t.textContent = msg;
@@ -5284,7 +5251,7 @@
       setTimeout(function () { t.classList.remove('show') }, 2500);
     }
 
-    // ─── TABS SCROLL ───
+    //  TABS SCROLL 
     function scrollTabs(dir) {
       var row = document.getElementById('tabsRow');
       if (!row) return;
@@ -5309,7 +5276,7 @@
       updateTabArrows();
     }
 
-    // ─── ONBOARDING ───
+    //  ONBOARDING 
     function obNext(slide) {
       document.querySelectorAll('.ob-slide').forEach(function(s){ s.classList.remove('active'); });
       var el = document.getElementById('ob-' + slide);
@@ -5336,8 +5303,8 @@
       } catch(e) {}
     }
 
-    // ─── DOWNLOAD APP ───
-    // ─── PWA INSTALL ───
+    //  DOWNLOAD APP 
+    //  PWA INSTALL 
     var _installPrompt = null;
 
     // Captura el evento antes de que Chrome lo muestre automáticamente
@@ -5354,7 +5321,7 @@
       _installPrompt = null;
       var btn = document.getElementById('installBtn');
       if (btn) btn.classList.remove('visible');
-      showToast('✅ ¡FuelLog instalada correctamente!');
+      showToast(' ¡FuelLog instalada correctamente!');
     });
 
     // Si ya está en modo standalone (app instalada), ocultar siempre el botón
@@ -5371,21 +5338,21 @@
         _installPrompt.prompt();
         _installPrompt.userChoice.then(function(result) {
           if (result.outcome === 'accepted') {
-            showToast('🚀 Instalando FuelLog...');
+            showToast(' Instalando FuelLog...');
           }
           _installPrompt = null;
           var btn = document.getElementById('installBtn');
           if (btn) btn.classList.remove('visible');
         });
       } else if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-        showToast('✅ FuelLog ya está instalada como app');
+        showToast(' FuelLog ya está instalada como app');
       } else {
         // iOS Safari o navegador que no soporta beforeinstallprompt
-        showToast('📱 En iOS: pulsa Compartir → Añadir a pantalla de inicio');
+        showToast(' En iOS: pulsa Compartir → Añadir a pantalla de inicio');
       }
     }
 
-    // ─── FULL PERSISTENCE SAVE ───
+    //  FULL PERSISTENCE SAVE 
     function saveAll() {
       try {
         var key = state.currentDate.toDateString();
@@ -5403,11 +5370,11 @@
         saveAll._syncTimer = setTimeout(syncToCloud, 2000);
       }
     }
-    // ─── USUARIOS VIP — acceso premium por lista blanca ───
+    //  USUARIOS VIP — acceso premium por lista blanca 
     // Añade aquí los identificadores que quieras (email o nickname)
     // El usuario lo introduce en Perfil → campo "Email (opcional)"
     // o se puede usar un código de acceso
-    // ─────────────────────────────────────────────
+    // 
     // USUARIOS VIP — edita estas listas para dar
     // acceso premium a usuarios específicos.
     //
@@ -5415,7 +5382,7 @@
     //           en Perfil → campo Email)
     // Opción B: por CÓDIGO (lo introduce en el
     //           campo Código VIP del perfil)
-    // ─────────────────────────────────────────────
+    // 
     var VIP_EMAILS = [
       // ← pon aquí los emails de tus testers
       'manuel@fuellog.app',
@@ -5456,7 +5423,7 @@
         if (checkVipAccess(emailVal)) localStorage.setItem('fl_vip_id', emailVal.trim().toLowerCase());
         if (checkVipAccess(codeVal))  localStorage.setItem('fl_vip_id', codeVal.trim().toUpperCase());
         updatePremiumBadge();
-        showToast('⚡ Acceso VIP activado — escaneos ilimitados');
+        showToast(' Acceso VIP activado — escaneos ilimitados');
         return true;
       }
       return false;
@@ -5468,7 +5435,7 @@
       // Si hay sesión activa, el planBadge está oculto — no lo mostramos
       if (sbUser) return;
       if (state.isPremium) {
-        badge.textContent = '★ Premium';
+        badge.textContent = 'Premium';
         badge.classList.remove('free');
       } else {
         badge.textContent = 'Free · ' + state.maxScans + ' escaneos';
@@ -5555,7 +5522,7 @@
       } catch(e) {}
     }
 
-    // ─── SWIPE TO CLOSE ───
+    //  SWIPE TO CLOSE 
     function addSwipeToClose(panelId, overlayId, closeFn) {
       var panel = document.getElementById(panelId);
       var overlay = document.getElementById(overlayId);
@@ -5658,7 +5625,7 @@
       });
     }
   </script>
-  <!-- ── FULLSCREEN SCANNER OVERLAY ── -->
+  <!--  FULLSCREEN SCANNER OVERLAY  -->
   <div id="fullScanOverlay">
     <!-- Cámara -->
     <div id="quaggaModalTarget"></div>
