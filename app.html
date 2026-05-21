@@ -1606,6 +1606,16 @@
     .admin-stat { background:var(--white);border-radius:var(--radius-sm);padding:12px;text-align:center;box-shadow:var(--shadow); }
     .admin-stat .as-val { font-size:22px;font-weight:800;color:var(--accent); }
     .admin-stat .as-label { font-size:10px;color:var(--gray-400);margin-top:2px; }
+    .admin-tab { background:var(--gray-100);color:var(--gray-400);border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap; }
+    .admin-tab.active { background:var(--accent);color:white; }
+    .admin-user-card { background:var(--white);border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:10px; }
+    .admin-user-card .auc-email { font-size:13px;font-weight:600;color:var(--black); }
+    .admin-user-card .auc-meta { font-size:11px;color:var(--gray-400);margin-top:2px; }
+    .admin-user-card .auc-badge { font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px; }
+    .admin-user-card .auc-badge.banned { background:#fee2e2;color:var(--red); }
+    .admin-user-card .auc-badge.premium { background:var(--amber-bg);color:var(--amber); }
+    .admin-user-card .auc-badge.free { background:var(--gray-100);color:var(--gray-400); }
+    .admin-food-card { background:var(--white);border-radius:var(--radius-sm);padding:10px 14px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:10px; }
     /* AUTH SCREEN */
     #authScreen {
       position: fixed; inset: 0; z-index: 9999;
@@ -2010,13 +2020,64 @@
     <!-- ADMIN SCREEN -->
     <div class="screen" id="screen-admin">
       <div style="padding:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div style="font-size:17px;font-weight:700;letter-spacing:-.03em">Panel de Feedbacks</div>
-          <button onclick="loadFeedbacks()" style="background:var(--accent-bg);color:var(--accent);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">↻ Actualizar</button>
+        <!-- Admin nav tabs -->
+        <div style="display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px">
+          <button class="admin-tab active" onclick="switchAdminTab('feedbacks',this)">💬 Feedbacks</button>
+          <button class="admin-tab" onclick="switchAdminTab('users',this)">👥 Usuarios</button>
+          <button class="admin-tab" onclick="switchAdminTab('foods',this)">🍎 Alimentos</button>
         </div>
-        <div id="adminStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px"></div>
-        <div id="feedbacksList" style="display:flex;flex-direction:column;gap:10px">
-          <div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando feedbacks...</div>
+
+        <!-- TAB: Feedbacks -->
+        <div id="adminTabFeedbacks">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:15px;font-weight:700">Feedbacks</div>
+            <button onclick="loadFeedbacks()" style="background:var(--accent-bg);color:var(--accent);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">↻</button>
+          </div>
+          <div id="adminStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px"></div>
+          <div id="feedbacksList" style="display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando feedbacks...</div>
+          </div>
+        </div>
+
+        <!-- TAB: Usuarios -->
+        <div id="adminTabUsers" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:15px;font-weight:700">Usuarios</div>
+            <div style="display:flex;gap:6px">
+              <button onclick="exportUsersCSV()" style="background:var(--green-bg);color:#4ade80;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">⬇ CSV</button>
+              <button onclick="loadAdminUsers()" style="background:var(--accent-bg);color:var(--accent);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">↻</button>
+            </div>
+          </div>
+          <input id="adminUserSearch" type="text" placeholder="Buscar por email..." oninput="filterAdminUsers(this.value)"
+            style="width:100%;padding:10px 12px;border:1px solid var(--gray-100);border-radius:var(--radius-sm);font-size:13px;background:var(--bg);color:var(--black);font-family:var(--font);margin-bottom:12px;box-sizing:border-box">
+          <div id="adminUsersList" style="display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando usuarios...</div>
+          </div>
+        </div>
+
+        <!-- TAB: Alimentos escaneados -->
+        <div id="adminTabFoods" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:15px;font-weight:700">Alimentos escaneados</div>
+            <button onclick="loadAdminFoods()" style="background:var(--accent-bg);color:var(--accent);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">↻</button>
+          </div>
+          <div id="adminFoodsList" style="display:flex;flex-direction:column;gap:8px">
+            <div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando alimentos...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal acciones sobre usuario -->
+      <div id="adminUserModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeAdminUserModal()">
+        <div style="background:var(--white);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:480px;box-sizing:border-box">
+          <div style="font-size:15px;font-weight:700;margin-bottom:4px" id="adminUserModalEmail"></div>
+          <div style="font-size:12px;color:var(--gray-400);margin-bottom:16px" id="adminUserModalMeta"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button onclick="adminResetPassword()" style="padding:12px;background:var(--accent-bg);color:var(--accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);text-align:left">🔑 Enviar reset de contraseña</button>
+            <button id="adminBanBtn" onclick="adminToggleBan()" style="padding:12px;background:var(--amber-bg);color:var(--amber);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);text-align:left">🚫 Banear usuario</button>
+            <button onclick="adminDeleteUser()" style="padding:12px;background:#fee2e2;color:var(--red);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);text-align:left">🗑 Borrar cuenta</button>
+            <button onclick="closeAdminUserModal()" style="padding:11px;background:var(--gray-100);border:none;border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--font)">Cancelar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2772,7 +2833,31 @@
         state.scansUsed++;
         try { localStorage.setItem('fl_scans', JSON.stringify({ used: state.scansUsed, month: new Date().getMonth() })); } catch(e){}
         renderScanPips();
-        if (!FOODS.find(function(f){ return f.name === food.name; })) FOODS.unshift(food);
+        // Si el producto no existe en la BD local, guardarlo en Supabase my_foods
+        if (!FOODS.find(function(f){ return f.name === food.name; })) {
+          FOODS.unshift(food);
+          try {
+            await fetch(SUPA_URL + '/rest/v1/my_foods', {
+              method: 'POST',
+              headers: {
+                'apikey': SUPA_KEY,
+                'Authorization': 'Bearer ' + SUPA_KEY,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({
+                name: food.name,
+                emoji: food.emoji || '📦',
+                kcal: food.kcal,
+                p: food.p,
+                c: food.c,
+                f: food.f,
+                barcode: code,
+                source: 'openfoodfacts'
+              })
+            });
+          } catch(e2) { console.warn('No se pudo guardar en my_foods:', e2); }
+        }
 
         var nutriScore = p.nutriscore_grade ? p.nutriscore_grade.toUpperCase() : null;
         var nsColors = { A:'#1a9e3f', B:'#8cb84c', C:'#f5c518', D:'#e07b39', E:'#e63946' };
@@ -2803,9 +2888,12 @@
     function addScannedFood(id) {
       var food = FOODS.find(function(f){ return f.id === id; });
       if (!food) return;
-      openAddModal('almuerzo');
-      setTimeout(function(){ addFood(food.id); }, 100);
       document.getElementById('scanResultCard').style.display = 'none';
+      // Abrir modal directamente en el panel de gramos
+      state.currentMealTarget = state.currentMealTarget || 'almuerzo';
+      document.getElementById('modalTitle').textContent = 'Añadir a ' + state.currentMealTarget;
+      document.getElementById('addModal').classList.add('open');
+      openGramsPanel(food.id);
     }
 
     // ─── PROFILE ───
@@ -3367,6 +3455,171 @@
         list.innerHTML = '<div style="text-align:center;color:var(--red);padding:40px 0;font-size:14px">Error al cargar: ' + e.message + '</div>';
       }
     }
+
+    // ─── ADMIN PANEL ───────────────────────────────────────────────────────────
+
+    var _adminUsers = [];
+    var _adminUserTarget = null;
+
+    function switchAdminTab(tab, el) {
+      document.querySelectorAll('.admin-tab').forEach(function(b){ b.classList.remove('active'); });
+      if (el) el.classList.add('active');
+      document.getElementById('adminTabFeedbacks').style.display = tab === 'feedbacks' ? '' : 'none';
+      document.getElementById('adminTabUsers').style.display     = tab === 'users'     ? '' : 'none';
+      document.getElementById('adminTabFoods').style.display     = tab === 'foods'     ? '' : 'none';
+      if (tab === 'users')  loadAdminUsers();
+      if (tab === 'foods')  loadAdminFoods();
+    }
+
+    // ── Usuarios ──
+    async function loadAdminUsers() {
+      var list = document.getElementById('adminUsersList');
+      list.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando...</div>';
+      try {
+        // Cargamos usuarios + perfil (banned, plan, last_login)
+        var res = await fetch(SUPA_URL + '/rest/v1/profiles?select=*&order=created_at.desc&limit=200', {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+        });
+        var data = await res.json();
+        _adminUsers = Array.isArray(data) ? data : [];
+        renderAdminUsers(_adminUsers);
+      } catch(e) {
+        list.innerHTML = '<div style="text-align:center;color:var(--red);padding:40px 0;font-size:14px">Error: ' + e.message + '</div>';
+      }
+    }
+
+    function renderAdminUsers(users) {
+      var list = document.getElementById('adminUsersList');
+      if (!users.length) {
+        list.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">No hay usuarios</div>';
+        return;
+      }
+      list.innerHTML = users.map(function(u) {
+        var badge = u.banned ? '<span class="auc-badge banned">BANEADO</span>'
+                  : u.is_premium ? '<span class="auc-badge premium">PREMIUM</span>'
+                  : '<span class="auc-badge free">FREE</span>';
+        var lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : (u.updated_at ? new Date(u.updated_at).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' }) : 'Nunca');
+        return '<div class="admin-user-card" onclick="openAdminUserModal('' + (u.email||u.id) + '',' + JSON.stringify(u).replace(/"/g,'&quot;') + ')">' +
+          '<div style="min-width:0">' +
+            '<div class="auc-email" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (u.email || u.id) + '</div>' +
+            '<div class="auc-meta">Último login: ' + lastLogin + '</div>' +
+          '</div>' +
+          badge +
+        '</div>';
+      }).join('');
+    }
+
+    function filterAdminUsers(q) {
+      var filtered = q ? _adminUsers.filter(function(u){ return (u.email||'').toLowerCase().includes(q.toLowerCase()); }) : _adminUsers;
+      renderAdminUsers(filtered);
+    }
+
+    function openAdminUserModal(email, userData) {
+      _adminUserTarget = typeof userData === 'string' ? JSON.parse(userData.replace(/&quot;/g,'"')) : userData;
+      _adminUserTarget.email = _adminUserTarget.email || email;
+      document.getElementById('adminUserModalEmail').textContent = _adminUserTarget.email;
+      var lastLogin = _adminUserTarget.last_login ? new Date(_adminUserTarget.last_login).toLocaleString('es-ES') : 'Nunca';
+      var planLabel = _adminUserTarget.is_premium ? 'Premium' : 'Free';
+      document.getElementById('adminUserModalMeta').textContent = 'Plan: ' + planLabel + ' · Último login: ' + lastLogin;
+      var banBtn = document.getElementById('adminBanBtn');
+      banBtn.textContent = _adminUserTarget.banned ? '✅ Desbanear usuario' : '🚫 Banear usuario';
+      banBtn.style.background = _adminUserTarget.banned ? 'var(--green-bg)' : 'var(--amber-bg)';
+      banBtn.style.color = _adminUserTarget.banned ? '#4ade80' : 'var(--amber)';
+      document.getElementById('adminUserModal').style.display = 'flex';
+    }
+
+    function closeAdminUserModal() {
+      document.getElementById('adminUserModal').style.display = 'none';
+      _adminUserTarget = null;
+    }
+
+    async function adminResetPassword() {
+      if (!_adminUserTarget) return;
+      try {
+        var { error } = await _supa.auth.resetPasswordForEmail(_adminUserTarget.email, { redirectTo: window.location.origin });
+        if (error) throw error;
+        showToast('Email de reset enviado a ' + _adminUserTarget.email);
+        closeAdminUserModal();
+      } catch(e) { showToast('Error: ' + e.message); }
+    }
+
+    async function adminToggleBan() {
+      if (!_adminUserTarget) return;
+      var newBanned = !_adminUserTarget.banned;
+      try {
+        var res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + _adminUserTarget.id, {
+          method: 'PATCH',
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ banned: newBanned })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        showToast((newBanned ? 'Usuario baneado: ' : 'Usuario desbaneado: ') + _adminUserTarget.email);
+        closeAdminUserModal();
+        loadAdminUsers();
+      } catch(e) { showToast('Error: ' + e.message); }
+    }
+
+    async function adminDeleteUser() {
+      if (!_adminUserTarget) return;
+      if (!confirm('¿Borrar la cuenta de ' + _adminUserTarget.email + '? Esta acción no se puede deshacer.')) return;
+      try {
+        // Borrar perfil (la cuenta de auth requiere service_role, así que borramos el perfil)
+        var res = await fetch(SUPA_URL + '/rest/v1/profiles?id=eq.' + _adminUserTarget.id, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        showToast('Cuenta borrada: ' + _adminUserTarget.email);
+        closeAdminUserModal();
+        loadAdminUsers();
+      } catch(e) { showToast('Error: ' + e.message); }
+    }
+
+    function exportUsersCSV() {
+      if (!_adminUsers.length) { showToast('Carga usuarios primero'); return; }
+      var headers = ['id','email','plan','banned','last_login','created_at'];
+      var rows = _adminUsers.map(function(u){
+        return headers.map(function(h){ return '"' + (u[h] != null ? String(u[h]).replace(/"/g,'""') : '') + '"'; }).join(',');
+      });
+      var csv = headers.join(',') + '\n' + rows.join('\n');
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'fuellog_users_' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click(); URL.revokeObjectURL(url);
+    }
+
+    // ── Alimentos escaneados ──
+    async function loadAdminFoods() {
+      var list = document.getElementById('adminFoodsList');
+      list.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">Cargando...</div>';
+      try {
+        var res = await fetch(SUPA_URL + '/rest/v1/my_foods?select=*&order=created_at.desc&limit=100', {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+        });
+        var data = await res.json();
+        if (!data || !data.length) {
+          list.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:40px 0;font-size:14px">No hay alimentos aún</div>';
+          return;
+        }
+        list.innerHTML = data.map(function(f) {
+          var date = new Date(f.created_at).toLocaleDateString('es-ES', { day:'numeric', month:'short' });
+          return '<div class="admin-food-card">' +
+            '<div>' +
+              '<div style="font-size:13px;font-weight:600">' + (f.emoji||'📦') + ' ' + (f.name||'—') + '</div>' +
+              '<div style="font-size:11px;color:var(--gray-400)">P:' + (f.p||0) + 'g C:' + (f.c||0) + 'g G:' + (f.f||0) + 'g · ' + (f.barcode||'sin código') + '</div>' +
+            '</div>' +
+            '<div style="text-align:right">' +
+              '<div style="font-size:14px;font-weight:700;color:var(--accent)">' + (f.kcal||0) + ' kcal</div>' +
+              '<div style="font-size:10px;color:var(--gray-400)">' + date + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      } catch(e) {
+        list.innerHTML = '<div style="text-align:center;color:var(--red);padding:40px 0;font-size:14px">Error: ' + e.message + '</div>';
+      }
+    }
+
 
   </script>
 </body>
